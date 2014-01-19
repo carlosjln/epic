@@ -106,11 +106,4 @@ _UpgradeReport_Files/
 UpgradeLog*.XML
 
 # Epic specific ignores
-epic/**/*.js
-epic/**/*.d.ts
 epic/**/*.dll
-epic/**/*.js.map
-
-!epic/**/bin/epic.d.ts
-!epic/**/bin/epic.js
-!epic/**/bin/epic.js.map

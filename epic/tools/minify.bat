@@ -2,7 +2,7 @@
 
 SET current_dir=%CD%
 SET project_dir=%current_dir%\..
-SET files=%project_dir%\epic.js %project_dir%\tools.js
+SET files=%project_dir%\epic.js %project_dir%\tools.js %project_dir%\base64.js
 
 SET config=%1
 SET version=%2
