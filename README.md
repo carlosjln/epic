@@ -22,3 +22,4 @@ Only copies properties that are not defined in target object
 	var target = { b: 3};
 	epic.copy( { a: 1 }, { b: 2 } ).into_undefined( target );
 	console.log( target );
+
