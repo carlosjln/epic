@@ -94,7 +94,6 @@
 
 	// CLONE
 	tools.clone = ( function() {
-		
 		function clone( object, target, deep ) {
 			var object_type = epic.type( object );
 			var copy;
