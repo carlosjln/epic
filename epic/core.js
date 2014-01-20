@@ -2,6 +2,7 @@ var epic = (function () {
     function epic() {
     }
 	
+	// OBJECT TYPE VERIFICATION
 	epic.type = (function() {
 		var core_types = {
 			'[object Boolean]': 'boolean',
@@ -71,7 +72,69 @@ var epic = (function () {
 		
 		return type;
 	})();
+	
+	// DATA PARSING
+	epic.parse = {
+		currency: function( expression, symbol ) {
+			var numbers = expression + '';
+			var array = numbers.split('.');
 		
+			var digits = array[0];
+			var decimals = array.length ? '.' + array[1] : '';
+		
+			var pattern = /(\d+)(\d{3})/;
+		
+			while( pattern.test(digits) ){
+				digits = digits.replace( pattern, '$1' + ',' + '$2' );
+			}
+		
+			return ( symbol ? symbol + ' ' : '' ) + digits + decimals;
+		},
+		
+		url: function( url ){
+			var anchor = document.createElement("a");
+			var query = {};
+			
+			anchor.href = url;
+			
+			anchor.search.replace(/([^?=&]+)(=([^&]*))?/g,
+		 		function( $0, $1, $2, $3 ){
+		 	 		query[ $1 ] = $3;
+		 	 		return $0;
+		 		}
+			);
+			
+			var json = {
+				href: anchor.href,
+			
+				protocol: anchor.protocol,
+			
+				host: anchor.host,
+				hostname: anchor.hostname,
+			
+				port: anchor.port,
+			
+				path: anchor.pathname,
+ 	 	 	
+ 	 	 		query: query,
+				bookmark: anchor.hash
+			};
+		
+			return json;
+		}
+	};
+
+	// FAILING LIKE A NINJA
+	if( window['console'] === undefined ) {
+		window['console'] = {
+			log: function () { }
+		};
+	}
+	
+	epic.fail = function( message ) {
+		console.log( message );
+	};
+	
 	epic.start = function( callback ) {
 		callback();
 	};

@@ -9,7 +9,6 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <TypeScriptToolsVersion>0.9</TypeScriptToolsVersion>
     <UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -19,7 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="base64.js" />
-    <Content Include="epic.js" />
+    <Content Include="core.js" />
     <Content Include="tools.js" />
     <Content Include="web.config">
       <SubType>Designer</SubType>
@@ -54,24 +53,4 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
-    <TypeScriptSourceMap>true</TypeScriptSourceMap>
-    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptGeneratesDeclarations>true</TypeScriptGeneratesDeclarations>
-    <Prefer32Bit>false</Prefer32Bit>
-    <WarningLevel>0</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
-    <TypeScriptSourceMap>true</TypeScriptSourceMap>
-    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptGeneratesDeclarations>true</TypeScriptGeneratesDeclarations>
-    <TypeScriptOutFile>bin/epic.js</TypeScriptOutFile>
-    <Prefer32Bit>false</Prefer32Bit>
-    <WarningLevel>0</WarningLevel>
-  </PropertyGroup>
-  <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
 </Project>
