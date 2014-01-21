@@ -6,65 +6,65 @@
 
 	// [ USERAGENT, IDENTITY, IDENTITYSEARCH, VERSIONSEARCH ]
 	var browser_agent = [
-		[agent, "Chrome"],		
-		[agent, "OmniWeb", '', "OmniWeb/"],	
-		[vendor, "Safari", "Apple", "Version"],	
+		[agent, "Chrome"],
+		[agent, "OmniWeb", '', "OmniWeb/"],
+		[vendor, "Safari", "Apple", "Version"],
 		[window.opera, "Opera"],
 		[vendor, "iCab"],
 		[vendor, "Konqueror", "KDE"],
 		[agent, "Firefox"],
-		[vendor, "Camino"],
-		
+		[vendor, "Camino"],		
 		// FOR NEWER NETSCAPES (6+)
 		[agent, "Netscape"],
 		[agent, "Explorer", "MSIE"],
-		[agent, "Gecko", "Mozilla", "rv"],
-		
+		[agent, "Gecko", "Mozilla", "rv"],		
 		// FOR OLDER NETSCAPES (4-)
 		[agent, "Netscape", "Mozilla"]
 	];
-	
+
 	var browser_os = [
-		[platform, "Windows", "Win"],		
-		[platform, "Mac"],		
-		[agent, "iPhone", "iPhone/iPod"],		
+		[platform, "Windows", "Win"],
+		[platform, "Mac"],
+		[agent, "iPhone", "iPhone/iPod"],
 		[platform, "Linux"]
 	];
-	
+
 	// GETS THE BROWSER NAME AND VERSION
 	var browser_info = search( browser_agent );
-	
+
 	var browser = epic.browser = {
 		webkit: agent.indexOf( 'AppleWebKit/' ) > -1,
 		gecko: agent.indexOf( 'Gecko' ) > -1 && agent.indexOf( 'KHTML' ) === -1,
-		
+
 		name: browser_info[ 0 ],
 		os: search( browser_os )[ 0 ],
 		version: browser_info[ 1 ],
-		
+
 		load: function( url, type, callback ) {
 			setTimeout( function() {
 				request( url, type, callback );
 			}, 10 );
 		}
 	};
-	
+
 	var loaded_documents = [];
-	
+
 	// INTERNET EXPLORER
 	browser.ie = ( browser.name == 'explorer' );
 
 	// GET'S THE CURRENT URL PARTS
 	browser.get_current_url = get_current_url;
-	
+
 	// AVOID BACKGROUND IMAGE FLICKERING ON INTERNET EXPLORER
 	if( browser.ie ) {
 		try {
 			document.execCommand( "BackgroundImageCache", false, true );
-		} catch( er ) {}
+		} catch( er ) {
+		}
 	}
 
 	// SEARCH BROWSER DATA RETURNS AN ARRAY LIKE: [BROWSER/OS NAME, VERSION]
+
 	function search( array ) {
 		var len = array.length;
 		var index = 0;
@@ -89,7 +89,7 @@
 
 			// VERSION SEARCH
 			version_search = item[ 3 ];
-			
+
 			if( user_agent ) {
 				if( user_agent.indexOf( identity_search || identity ) > -1 ) {
 					new RegExp( ( version_search || identity_search || identity ) + "[\\/\\s](\\d+\\.\\d+)" ).test( user_agent );
@@ -102,15 +102,15 @@
 
 		return null;
 	}
-	
+
 	function get_current_url( relative ) {
 		var anchor = document.createElement( "a" );
 		var port;
 		var pathname = '';
-		
+
 		anchor.href = document.location;
 		port = anchor.port;
-		
+
 		if( relative ) {
 			pathname = anchor.pathname.replace( /^[/]/, '' );
 
@@ -119,14 +119,15 @@
 
 		return anchor.protocol + '//' + anchor.hostname + ( port && port != 0 ? ':' + port : '' ) + '/' + pathname;
 	}
-	
+
 	// ASYNC SCRIPTS/STYLESHEETS LOADING
+
 	function request( url, type, callback ) {
 		var tag;
 		var src = 'src';
 		var rel;
 		var typeof_script = typeof( type );
-		
+
 		// ADDING BASE URL
 		if( /^http/i.test( url ) == false ) {
 			url = browser.url + url;
@@ -137,7 +138,7 @@
 			if( callback ) callback.free();
 			return loaded_documents[ url ].element;
 		}
-		
+
 		if( typeof_script == 'function' ) {
 			callback = type;
 		}
@@ -153,7 +154,7 @@
 		} else {
 			tag = 'link';
 			src = 'href';
-			rel = 'stylesheet'
+			rel = 'stylesheet';
 		}
 
 		var element = document.createElement( tag );
@@ -172,7 +173,7 @@
 		if( callback ) {
 			element.onreadystatechange = function() {
 				var state = this.readyState;
-				
+
 				if( ( state === 'loaded' || state === 'complete' ) && data.loaded == false ) {
 					this.onreadystatechange = null;
 					data.loaded = true;
@@ -227,5 +228,5 @@
 
 		return element;
 	}
-	
+
 } )( epic, window, document, navigator );

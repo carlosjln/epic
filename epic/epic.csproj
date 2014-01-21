@@ -17,7 +17,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="base64.js" />
+    <Content Include="string.js" />
     <Content Include="browser.js" />
     <Content Include="collections.js" />
     <Content Include="object.js" />

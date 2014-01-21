@@ -3,7 +3,9 @@
 
 	// UNIQUE IDENTIFIER
 	tools.uid = ( function() {
-		function uid() {}
+
+		function uid() {
+		}
 
 		uid.seed = ( new Date() ).getTime();
 
@@ -16,6 +18,7 @@
 
 	// MERGE
 	tools.merge = ( function() {
+
 		function merge( obj ) {
 			return new dsl( obj );
 		}
@@ -94,6 +97,7 @@
 
 	// CLONE
 	tools.clone = ( function() {
+
 		function clone( object, target, deep ) {
 			var object_type = epic.type( object );
 			var copy;
@@ -103,7 +107,7 @@
 					copy = target || {};
 					
 					for( var attribute in object ) {
-						if( object.hasOwnProperty( attribute ) ){
+						if( object.hasOwnProperty( attribute ) ) {
 							copy[ attribute ] = clone( object[ attribute ], null, deep );
 						}
 					}
@@ -128,13 +132,11 @@
 				case "string":
 				case "function":
 					copy = object;
-
 					break;
 					
-				default:
-					epic.fail( "Unable to copy. Object type ["+ object_type +"] isn't supported." );
+				default: epic.fail( "Unable to copy. Object type [" + object_type + "] isn't supported." );
 			}
-			
+
 			return copy;
 		}
 
