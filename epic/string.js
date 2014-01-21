@@ -14,17 +14,24 @@
 		decode_base64: decode_base64,
 
 		encode_utf8: encode_utf8,
-		decode_utf8: decode_utf8
+		decode_utf8: decode_utf8,
+
+		encode_url: encode_url,
+		decode_url: decode_url,
+		
+		encode_html_entities: encode_html_entities,
+		decode_html_entities: decode_html_entities
 	};
 
 	epic.string = string;
 
-	var KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+	// ENCODE/DECODE BASE64
+	var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 	function encode_base64() {
 		var t = this;
 
-		var key = KEY;
+		var key = B64KEY;
 
 		var str = t.encode_utf8( t.input );
 		var length = str.length;
@@ -58,7 +65,7 @@
 	function decode_base64() {
 		var t = this;
 
-		var key = KEY;
+		var key = B64KEY;
 
 		var str = t.input.replace( /[^A-Za-z0-9\+\/\=]/g, "" );
 		var length = str.length;
@@ -93,7 +100,7 @@
 		return output;
 	}
 
-	function encode_utf8( ) {
+	function encode_utf8() {
 		var str = this.input.replace( /\r\n/g, "\n" );
 		var length = str.length;
 		var index = 0;
@@ -147,6 +154,48 @@
 		}
 
 		return output;
+	}
+
+	// ENCODE/DECODE URL
+	function encode_url() {
+		return encodeURIComponent( this.input );
+	}
+
+	function decode_url() {
+		return decodeURIComponent( this.input );
+	}
+
+	// ENCODE/DECODE HTML ENTITIES
+	function encode_html_entities( encode_reserved_chars ) {
+		return this.input.replace( /./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities );
+	}
+
+	function decode_html_entities() {
+		return this.input.replace( /&#(\d)+;/g, restore_html_entities );
+	}
+
+	function replace_default_html_entities( str ) {
+		var i = str.charCodeAt( 0 );
+
+		if( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) {
+			return str;
+		} else {
+			return '&#' + i + ';';
+		}
+	}
+
+	function replace_all_html_entities( str ) {
+		var i = str.charCodeAt( 0 );
+
+		if( ( i != 34 && i != 39 && i != 38 && i != 60 && i != 62 ) && ( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) ) {
+			return str;
+		} else {
+			return '&#' + i + ';';
+		}
+	}
+
+	function restore_html_entities( s, d, f ) {
+		return String.fromCharCode( s.replace( /[#&;]/g, '' ) );
 	}
 
 } )( epic );
