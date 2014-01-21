@@ -69,12 +69,12 @@
 			this.objects = objects;
 		}
 
-		// copies or overrides all properties
+		// COPIES OR OVERRIDES ALL PROPERTIES
 		dsl.prototype.into = function( target ) {
 			merge_objects( this.objects, target );
 		};
 
-		// only copies properties that are not defined in target object
+		// ONLY COPIES PROPERTIES THAT ARE NOT DEFINED IN TARGET OBJECT
 		dsl.prototype.into_undefined = function( target ) {
 			var objects = this.objects;
 			var length = objects.length;

@@ -107,3 +107,4 @@ UpgradeLog*.XML
 
 # Epic specific ignores
 epic/**/*.dll
+epic/**/*.cs

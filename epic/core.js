@@ -1,4 +1,11 @@
 var epic = (function () {
+	// FAIL LIKE A NINJA, SILENTLY :)
+	if( window['console'] === undefined ) {
+		window['console'] = {
+			log: function () { }
+		};
+	}
+	
     function epic() {
     }
 	
@@ -124,13 +131,6 @@ var epic = (function () {
 		}
 	};
 
-	// FAILING LIKE A NINJA
-	if( window['console'] === undefined ) {
-		window['console'] = {
-			log: function () { }
-		};
-	}
-	
 	epic.fail = function( message ) {
 		console.log( message );
 	};
