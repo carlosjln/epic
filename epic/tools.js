@@ -54,7 +54,7 @@
 			}
 
 			return merge_objects( objects, {} );
-		}
+		};
 
 		merge.objects = merge_objects;
 
@@ -87,7 +87,9 @@
 				source = objects[ i ];
 
 				for( var attribute in source ) {
-					if( target[ attribute ] === undefined ) target[ attribute ] = source[ attribute ];
+					if( target[ attribute ] === undefined ) {
+						target[ attribute ] = source[ attribute ];
+					}
 				}
 			}
 		};

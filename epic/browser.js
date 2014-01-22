@@ -114,7 +114,9 @@
 		if( relative ) {
 			pathname = anchor.pathname.replace( /^[/]/, '' );
 
-			if( pathname ) pathname = pathname.substring( 0, pathname.lastIndexOf( "/" ) ) + "/";
+			if( pathname ) {
+				pathname = pathname.substring( 0, pathname.lastIndexOf( "/" ) ) + "/";
+			}
 		}
 
 		return anchor.protocol + '//' + anchor.hostname + ( port && port != 0 ? ':' + port : '' ) + '/' + pathname;
@@ -135,7 +137,10 @@
 
 		// ENSURES THE SCRIPT IS REQUESTED ONLY ONCE
 		if( loaded_documents[ url ] != null ) {
-			if( callback ) callback.free();
+			if( callback ) {
+				callback.free();
+			}
+
 			return loaded_documents[ url ].element;
 		}
 
@@ -194,10 +199,13 @@
 
 					var foo = setInterval( function() {
 						try {
-							var css_rules = element.sheet.cssRules;
+							// var css_rules = element.sheet.cssRules;
 
 							clearInterval( foo );
-							if( callback ) callback();
+
+							if( callback ) {
+								callback();
+							}
 
 						} catch( e ) {
 						}

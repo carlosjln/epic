@@ -1,0 +1,14 @@
+<root>
+	<norename name="epic" />
+	
+	<output path="..\build\epic.ui.1.0.0.js" type="js">
+		<arguments>-clobber -term -esc -version -braces:same -line:M,4 -minify:false</arguments>
+		<input path="core.js"/>
+	</output>
+	
+	<output path="..\build\epic.ui.min.1.0.0.js" type="js">
+		<arguments>-clobber -term -esc</arguments>
+		<input path="core.js"/>
+	</output>
+	
+</root>

@@ -29,7 +29,9 @@ var epic = ( function() {
 		function type( object ) {
 			var typeof_object = typeof( object );
 
-			if( object == null ) return 'null';
+			if( object == null ) {
+				return 'null';
+			}
 
 			if( typeof_object === 'object' || typeof_object === 'function' ) {
 				return core_types[ to_string.call( object ) ] || 'object';

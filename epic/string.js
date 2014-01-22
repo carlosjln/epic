@@ -134,6 +134,7 @@
 		var output = "";
 		var charcode;
 		var c2;
+		var c3;
 
 		while( index < length ) {
 			charcode = str.charCodeAt( index );
@@ -194,8 +195,8 @@
 		}
 	}
 
-	function restore_html_entities( s, d, f ) {
-		return String.fromCharCode( s.replace( /[#&;]/g, '' ) );
+	function restore_html_entities( str ) {
+		return String.fromCharCode( str.replace( /[#&;]/g, '' ) );
 	}
 
 } )( epic );
