@@ -95,7 +95,7 @@
 					new RegExp( ( version_search || identity_search || identity ) + "[\\/\\s](\\d+\\.\\d+)" ).test( user_agent );
 
 					// BROWSER/OS NAME, VERSION
-					return [identity.lcase(), parseFloat( RegExp.$1 )];
+					return [ epic.string(identity).lcase(), parseFloat( RegExp.$1 )];
 				}
 			}
 		}
@@ -123,7 +123,6 @@
 	}
 
 	// ASYNC SCRIPTS/STYLESHEETS LOADING
-
 	function request( url, type, callback ) {
 		var tag;
 		var src = 'src';

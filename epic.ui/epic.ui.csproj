@@ -17,6 +17,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="alert.js" />
     <Content Include="core.js" />
   </ItemGroup>
   <ItemGroup>

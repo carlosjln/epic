@@ -198,7 +198,7 @@ var epic = (function() {
         this.input = input
     }
     dsl.prototype = {
-        encode_base64: encode_base64, decode_base64: decode_base64, encode_utf8: encode_utf8, decode_utf8: decode_utf8, encode_url: encode_url, decode_url: decode_url, encode_html_entities: encode_html_entities, decode_html_entities: decode_html_entities
+        encode_base64: encode_base64, decode_base64: decode_base64, encode_utf8: encode_utf8, decode_utf8: decode_utf8, encode_url: encode_url, decode_url: decode_url, encode_html_entities: encode_html_entities, decode_html_entities: decode_html_entities, ucase: ucase, lcase: lcase
     };
     epic.string = string;
     var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -351,50 +351,54 @@ var epic = (function() {
     function restore_html_entities(str) {
         return String.fromCharCode(str.replace(/[#&;]/g, ''))
     }
+    function ucase() {
+        return this.input.toUpperCase()
+    }
+    function lcase() {
+        return this.input.toLowerCase()
+    }
 })(epic);
-(function(epic) {
-    epic.collection = (function() {
-        function collection() {
-            this.collection = {}
-        }
-        collection.prototype = {
-            get: get, set: set, remove: remove, to_string: to_string
-        };
-        function get(key) {
-            var t = this;
-            var key_str = t.to_string(key);
-            var pair = t.collection[key_str];
-            if ((typeof pair) === 'undefined') {
-                return undefined
-            }
-            return pair.value
-        }
-        function set(key, value) {
-            if (key === undefined || value === undefined) {
-                return undefined
-            }
-            var previous_value = this.get(key);
-            this.collection[this.to_string(key)] = {
-                key: key, value: value
-            };
-            return previous_value
-        }
-        function remove(key) {
-            var t = this;
-            var k = t.to_string(key);
-            var previous_element = t.collection[k];
-            if (previous_element != undefined) {
-                delete this.collection[k];
-                return previous_element.value
-            }
+epic.collection = (function() {
+    function collection() {
+        this.collection = {}
+    }
+    collection.prototype = {
+        get: get, set: set, remove: remove, to_string: to_string
+    };
+    function get(key) {
+        var t = this;
+        var key_str = t.to_string(key);
+        var pair = t.collection[key_str];
+        if ((typeof pair) === 'undefined') {
             return undefined
         }
-        function to_string(key) {
-            return String(key)
+        return pair.value
+    }
+    function set(key, value) {
+        if (key === undefined || value === undefined) {
+            return undefined
         }
-        return collection
-    })()
-})(epic);
+        var previous_value = this.get(key);
+        this.collection[this.to_string(key)] = {
+            key: key, value: value
+        };
+        return previous_value
+    }
+    function remove(key) {
+        var t = this;
+        var k = t.to_string(key);
+        var previous_element = t.collection[k];
+        if (previous_element != undefined) {
+            delete this.collection[k];
+            return previous_element.value
+        }
+        return undefined
+    }
+    function to_string(key) {
+        return String(key)
+    }
+    return collection
+})();
 (function(epic, window, document, navigator) {
     var agent = navigator.userAgent;
     var vendor = navigator.vendor;
@@ -435,7 +439,7 @@ var epic = (function() {
             if (user_agent) {
                 if (user_agent.indexOf(identity_search || identity) > -1) {
                     new RegExp((version_search || identity_search || identity) + "[\\/\\s](\\d+\\.\\d+)").test(user_agent);
-                    return [identity.lcase(), parseFloat(RegExp.$1)]
+                    return [epic.string(identity).lcase(), parseFloat(RegExp.$1)]
                 }
             }
         }

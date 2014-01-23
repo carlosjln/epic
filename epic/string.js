@@ -20,7 +20,10 @@
 		decode_url: decode_url,
 		
 		encode_html_entities: encode_html_entities,
-		decode_html_entities: decode_html_entities
+		decode_html_entities: decode_html_entities,
+
+		ucase: ucase,
+		lcase: lcase
 	};
 
 	epic.string = string;
@@ -199,4 +202,12 @@
 		return String.fromCharCode( str.replace( /[#&;]/g, '' ) );
 	}
 
+	// LOWER/UPPER CASE
+	function ucase(){
+		return this.input.toUpperCase();
+	}
+		
+	function lcase(){
+		return this.input.toLowerCase();
+	}
 } )( epic );

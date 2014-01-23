@@ -7,7 +7,7 @@
 		<input path="tools.js"/>
 		<input path="object.js"/>
 		<input path="string.js"/>
-		<input path="collections.js"/>
+		<input path="collection.js"/>
 		<input path="browser.js"/>
 	</output>
 	
@@ -17,7 +17,7 @@
 		<input path="tools.js"/>
 		<input path="object.js"/>
 		<input path="string.js"/>
-		<input path="collections.js"/>
+		<input path="collection.js"/>
 		<input path="browser.js"/>
 	</output>
 	

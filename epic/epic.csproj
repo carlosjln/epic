@@ -19,7 +19,7 @@
   <ItemGroup>
     <Content Include="string.js" />
     <Content Include="browser.js" />
-    <Content Include="collections.js" />
+    <Content Include="collection.js" />
     <Content Include="object.js" />
     <Content Include="core.js" />
     <Content Include="tools.js" />
