@@ -5,12 +5,18 @@
 		<arguments>-clobber -term -esc -version -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
 		<input path="alert.js"/>
+		<input path="icon.js"/>
+		<input path="button.js"/>
+		<input path="viewport.js"/>
 	</output>
 	
 	<output path="..\build\epic.ui.min.1.0.0.js" type="js">
 		<arguments>-clobber -term -esc</arguments>
 		<input path="core.js"/>
 		<input path="alert.js"/>
+		<input path="icon.js"/>
+		<input path="button.js"/>
+		<input path="viewport.js"/>
 	</output>
 	
 </root>

@@ -18,7 +18,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="alert.js" />
+    <Content Include="button.js" />
     <Content Include="core.js" />
+    <Content Include="icon.js" />
+    <Content Include="viewport.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

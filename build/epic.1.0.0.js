@@ -87,14 +87,14 @@ var epic = (function() {
     tools.uid = (function() {
         function uid(){}
         uid.seed = (new Date).getTime();
-        uid.new = function() {
+        uid.next = function() {
             return ++uid.seed
         };
         return uid
     })();
     tools.merge = (function() {
-        function merge(obj) {
-            return new dsl(obj)
+        function merge() {
+            return new dsl(arguments)
         }
         function merge_objects(objects, target) {
             var length = objects.length;
@@ -108,11 +108,11 @@ var epic = (function() {
             }
             return target
         }
-        function dsl(source) {
-            this.objects = source
+        function dsl(objects) {
+            this.objects = objects
         }
         dsl.prototype.and = function() {
-            var objects = [this.objects];
+            var objects = this.objects;
             var args = arguments;
             var index = args.length;
             while (index--) {
@@ -185,10 +185,30 @@ var epic = (function() {
     })()
 })(epic.tools || (epic.tools = {}));
 (function(epic) {
-    var object = epic.object = {};
-    object.to_array = function(object) {
-        return Array.prototype.slice.call(object)
+    function object(){}
+    function merge() {
+        var objects = arguments;
+        var length = objects.length;
+        var target = {};
+        var source;
+        for (var i = 0; i < length; i++) {
+            source = objects[i];
+            for (var attribute in source) {
+                target[attribute] = source[attribute]
+            }
+        }
+        return target
     }
+    merge.deep = function(){};
+    object.merge = merge;
+    object.to_array = function(object) {
+        if (object == null) {
+            return null
+        }
+        var array = Array.prototype.slice.call(object);
+        return array.length > 0 ? array : [object]
+    };
+    epic.object = object
 })(epic);
 (function(epic) {
     function string(input) {
@@ -532,3 +552,91 @@ epic.collection = (function() {
         return element
     }
 })(epic, window, document, navigator);
+epic.html = (function(epic) {
+    function selector(elements) {
+        var t = this;
+        if ((t instanceof selector) == false) {
+            return new selector(elements)
+        }
+        t.elements = epic.type(elements) == 'array' ? elements : [elements]
+    }
+    function createDocumentFragment(content, callback) {
+        var document_fragment = document.createDocumentFragment();
+        var content_holder;
+        var index;
+        var nodes;
+        if (content) {
+            content_holder = document.createElement('div');
+            content_holder.innerHTML = content;
+            if (callback) {
+                (function() {
+                    if (content_holder.firstChild) {
+                        document_fragment.appendChild(content_holder.firstChild);
+                        setTimeout(arguments.callee, 0)
+                    }
+                    else {
+                        callback(document_fragment)
+                    }
+                })()
+            }
+            else {
+                nodes = content_holder.childNodes;
+                index = nodes.length;
+                while (index--) {
+                    document_fragment.insertBefore(nodes[index], document_fragment.firstChild)
+                }
+            }
+        }
+        return document_fragment
+    }
+    selector.prototype = {
+        empty: function() {
+            var t = this;
+            var elements = t.elements;
+            var index = elements.length;
+            var element;
+            while (index--) {
+                element = elements[index];
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild)
+                }
+            }
+            return t
+        }, insert: function(elements, position) {
+                elements = (elements instanceof selector ? elements.elements : elements instanceof Array ? elements : [elements]);
+                var i = elements.length;
+                var t = this;
+                var target = t.elements[0];
+                var reference = null;
+                var element;
+                var valid_nodes = [];
+                if (position !== undefined) {
+                    var child_nodes = target.childNodes;
+                    var j = child_nodes.length;
+                    var trim = epic.string.trim;
+                    var index = 0;
+                    var node;
+                    while (j--) {
+                        node = child_nodes[index++];
+                        if (node.nodeType == 1 || (node.nodeType == 3 && trim(node.textContent) != '')) {
+                            valid_nodes[valid_nodes.length] = node
+                        }
+                    }
+                    if (position > -1 && position < valid_nodes.length) {
+                        reference = valid_nodes[position]
+                    }
+                }
+                while (i--) {
+                    element = elements[i];
+                    if (!element) {
+                        continue
+                    }
+                    if (!element.nodeType) {
+                        element = document.createTextNode(element)
+                    }
+                    target.insertBefore(element, reference)
+                }
+            }
+    };
+    return selector
+})(epic);

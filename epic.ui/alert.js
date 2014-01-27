@@ -1,4 +1,4 @@
-﻿epic.alert = ( function( epic ) {
+﻿( function( epic ) {
 
 	function alert( settings ) {
 		settings = this.settings = epic.tools.merge( alert.default_settings, settings );
@@ -11,10 +11,16 @@
 
 		element.insertBefore( inner, null );
 		inner.className = 'message';
-
+		
 		element.className = "alert alert-" + (type ? type : "default");
-		if( message ) inner.innerHTML = message;
-		if( target ) target.insertBefore( element, null );
+		
+		if( message ) {
+			inner.innerHTML = message;
+		}
+		
+		if( target ){
+			target.insertBefore( element, null );
+		}
 	}
 
 	alert.prototype = {
@@ -55,7 +61,6 @@
 	};
 	
 	alert.default_settings = {
-		title: null,
 		message: "",
 		type: "",
 		target: null,
@@ -70,5 +75,5 @@
 		danger: 'danger'
 	};
 
-	return alert;
+	epic.alert = alert;
 } )( epic );

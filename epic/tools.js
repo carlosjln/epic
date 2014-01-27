@@ -9,7 +9,7 @@
 
 		uid.seed = ( new Date() ).getTime();
 
-		uid.new = function() {
+		uid.next = function() {
 			return ++uid.seed;
 		};
 
@@ -19,8 +19,8 @@
 	// MERGE
 	tools.merge = ( function() {
 
-		function merge( obj ) {
-			return new dsl( obj );
+		function merge( ) {
+			return new dsl( arguments );
 		}
 
 		function merge_objects( objects, target ) {
@@ -40,12 +40,12 @@
 			return target;
 		}
 
-		function dsl( source ) {
-			this.objects = source;
+		function dsl( objects ) {
+			this.objects = objects;
 		}
 
 		dsl.prototype.and = function() {
-			var objects = [this.objects];
+			var objects = this.objects;
 			var args = arguments;
 			var index = args.length;
 
