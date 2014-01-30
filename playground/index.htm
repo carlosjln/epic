@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Epic test B-)</title>
+		<script src="app.js"></script>
+		<script src="epic/epic.1.0.0.js"></script>
+	</head>
+	<body>
+		
+		<script type="text/javascript">
+			var items = {
+				a: "a",
+				b: 1,
+				c: true,
+				d: ["d", 2, false]
+			};
+			var merge = epic.object.merge( items, {z:null} );
+			var clone = epic.object.clone( items );
+
+			epic.log( merge );
+			epic.log( clone );
+
+			epic.log( items.d === merge.d );
+			epic.log("");
+			epic.log( items.d === clone.d );
+		</script>
+	</body>
+</html>

@@ -1,8 +1,11 @@
 <root>
 	<norename name="epic" />
-	
+	<!--
+	IGNORE
+	Performance warning JS1272: Function defined but not referenced
+	-->
 	<output path="..\build\epic.1.0.0.js" type="js">
-		<arguments>-clobber -term -esc -version -braces:same -line:M,4 -minify:false</arguments>
+		<arguments>-clobber -term -esc -braces:same -line:M,4 -minify:false -ignore:JS1272</arguments>
 		<input path="core.js"/>
 		<input path="tools.js"/>
 		<input path="object.js"/>
@@ -13,7 +16,7 @@
 	</output>
 	
 	<output path="..\build\epic.min.1.0.0.js" type="js">
-		<arguments>-clobber -term -esc</arguments>
+		<arguments>-clobber -term -esc -ignore:JS1272</arguments>
 		<input path="core.js"/>
 		<input path="tools.js"/>
 		<input path="object.js"/>
@@ -23,4 +26,14 @@
 		<input path="html.js"/>
 	</output>
 	
+	<output path="..\playground\epic\epic.1.0.0.js" type="js">
+		<arguments>-clobber -term -esc -braces:same -line:M,4 -minify:false -ignore:JS1272</arguments>
+		<input path="core.js"/>
+		<input path="tools.js"/>
+		<input path="object.js"/>
+		<input path="string.js"/>
+		<input path="collection.js"/>
+		<input path="browser.js"/>
+		<input path="html.js"/>
+	</output>
 </root>

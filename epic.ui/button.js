@@ -15,9 +15,10 @@
 		var attributes = btn.attributes = settings.attributes || "";
 
 		var icon = btn.icon = settings.icon || new epic.icon();
+		var align = epic.ui.align;
 
-		if( icon.align == epic.ui.align.none ){
-			icon.set_align( Align.left );
+		if( icon.align == align.none ){
+			icon.set_align( align.left );
 		}
 		
 		if( caption == "" ) {
@@ -25,7 +26,7 @@
 				classes += " btn-icon-only";
 			}
 			
-			icon.set_align( Align.none );
+			icon.set_align( align.none );
 		}
 
 		var html_tag = '<' + tag + ' id="' + id + '"' + role + ' class="' + classes + ' btn-size-' + size + ' btn-' + style + '" ' + attributes + '></' + tag + '>';

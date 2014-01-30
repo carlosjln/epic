@@ -1,7 +1,8 @@
 ﻿( function( epic ) {
 
 	function alert( settings ) {
-		settings = this.settings = epic.tools.merge( alert.default_settings, settings );
+		settings = this.settings = epic.object.merge( alert.default_settings, settings );
+
 		var element = this.element = document.createElement( 'div' );
 		var inner = this.inner = document.createElement( 'span' );
 

@@ -134,7 +134,7 @@ var epic = ( function() {
 		}
 	};
 
-	epic.fail = function( message ) {
+	epic.log = epic.fail = function( message ) {
 		console.log( message );
 	};
 
