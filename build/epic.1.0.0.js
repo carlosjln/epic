@@ -145,20 +145,13 @@ var epic = (function() {
 })(epic);
 (function(epic) {
     function string(input) {
-        return new dsl(input)
+        this.input = input;
+        this.arguments = epic.object.to_array(arguments)
     }
-    function dsl(input) {
-        this.input = input
-    }
-    dsl.prototype = {
-        encode_base64: encode_base64, decode_base64: decode_base64, encode_utf8: encode_utf8, decode_utf8: decode_utf8, encode_url: encode_url, decode_url: decode_url, encode_html_entities: encode_html_entities, decode_html_entities: decode_html_entities, ucase: ucase, lcase: lcase
-    };
-    epic.string = string;
     var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    function encode_base64() {
-        var t = this;
+    string.encode_base64 = function(input) {
         var key = B64KEY;
-        var str = t.encode_utf8(t.input);
+        var str = string.encode_utf8(input);
         var length = str.length;
         var index = 0;
         var output = "";
@@ -186,11 +179,10 @@ var epic = (function() {
             output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4)
         }
         return output
-    }
-    function decode_base64() {
-        var t = this;
+    };
+    string.decode_base64 = function(input) {
         var key = B64KEY;
-        var str = t.input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+        var str = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
         var length = str.length;
         var index = 0;
         var output = "";
@@ -217,11 +209,11 @@ var epic = (function() {
                 output = output + String.fromCharCode(chr3)
             }
         }
-        output = t.decode_utf8(output);
+        output = string.decode_utf8(output);
         return output
-    }
-    function encode_utf8() {
-        var str = this.input.replace(/\r\n/g, "\n");
+    };
+    string.encode_utf8 = function(input) {
+        var str = input.replace(/\r\n/g, "\n");
         var length = str.length;
         var index = 0;
         var output = "";
@@ -242,47 +234,60 @@ var epic = (function() {
             }
         }
         return output
-    }
-    function decode_utf8() {
-        var str = this.input;
-        var length = str.length;
+    };
+    string.decode_utf8 = function(input) {
+        var length = input.length;
         var index = 0;
         var output = "";
         var charcode;
         var c2;
         var c3;
         while (index < length) {
-            charcode = str.charCodeAt(index);
+            charcode = input.charCodeAt(index);
             if (charcode < 128) {
                 output += String.fromCharCode(charcode);
                 index++
             }
             else if ((charcode > 191) && (charcode < 224)) {
-                c2 = str.charCodeAt(index + 1);
+                c2 = input.charCodeAt(index + 1);
                 output += String.fromCharCode(((charcode & 31) << 6) | (c2 & 63));
                 index += 2
             }
             else {
-                c2 = str.charCodeAt(index + 1);
-                c3 = str.charCodeAt(index + 2);
+                c2 = input.charCodeAt(index + 1);
+                c3 = input.charCodeAt(index + 2);
                 output += String.fromCharCode(((charcode & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
                 index += 3
             }
         }
         return output
-    }
-    function encode_url() {
-        return encodeURIComponent(this.input)
-    }
-    function decode_url() {
-        return decodeURIComponent(this.input)
-    }
-    function encode_html_entities(encode_reserved_chars) {
-        return this.input.replace(/./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities)
-    }
-    function decode_html_entities() {
-        return this.input.replace(/&#(\d)+;/g, restore_html_entities)
-    }
+    };
+    string.encode_url = function(input) {
+        return encodeURIComponent(input)
+    };
+    string.decode_url = function(input) {
+        return decodeURIComponent(input)
+    };
+    string.encode_html_entities = function(input, encode_reserved_chars) {
+        return input.replace(/./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities)
+    };
+    string.decode_html_entities = function(input) {
+        return input.replace(/&#(\d)+;/g, restore_html_entities)
+    };
+    string.uppercase = function(str) {
+        return str.toUpperCase()
+    };
+    string.lowercase = function(str) {
+        return str.toLowerCase()
+    };
+    string.is_html = function(str) {
+        return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test(str)
+    };
+    string.to_dom = function(str) {
+        var container = document.createElement("div");
+        container.innerHTML = element;
+        return new epic.html.selector(Array.prototype.slice.call(container.childNodes))
+    };
     function replace_default_html_entities(str) {
         var i = str.charCodeAt(0);
         if ((i > 31 && i < 96) || (i > 96 && i < 127)) {
@@ -304,12 +309,7 @@ var epic = (function() {
     function restore_html_entities(str) {
         return String.fromCharCode(str.replace(/[#&;]/g, ''))
     }
-    function ucase() {
-        return this.input.toUpperCase()
-    }
-    function lcase() {
-        return this.input.toLowerCase()
-    }
+    epic.string = string
 })(epic);
 epic.collection = (function() {
     function collection() {
@@ -485,42 +485,32 @@ epic.collection = (function() {
         return element
     }
 })(epic, window, document, navigator);
-epic.html = (function(epic) {
-    function selector(elements) {
-        var t = this;
-        if ((t instanceof selector) == false) {
-            return new selector(elements)
-        }
-        t.elements = epic.type(elements) == 'array' ? elements : [elements]
+(function(epic, widnow, document) {
+    var is_html = epic.string.is_html;
+    function html(input) {
+        this.input = input;
+        this.arguments = epic.object.to_array(arguments)
     }
-    function create_document_fragment(content, callback) {
-        var document_fragment = document.createDocumentFragment();
-        var content_holder;
-        var index;
-        var nodes;
-        if (content) {
-            content_holder = document.createElement('div');
-            content_holder.innerHTML = content;
-            if (callback) {
-                (function() {
-                    if (content_holder.firstChild) {
-                        document_fragment.appendChild(content_holder.firstChild);
-                        setTimeout(arguments.callee, 0)
-                    }
-                    else {
-                        callback(document_fragment)
-                    }
-                })()
-            }
-            else {
-                nodes = content_holder.childNodes;
-                index = nodes.length;
-                while (index--) {
-                    document_fragment.insertBefore(nodes[index], document_fragment.firstChild)
-                }
-            }
+    function selector(query) {
+        query = query != null ? query : [];
+        this.elements = epic.type(query) == 'array' ? query : [query]
+    }
+    function create(element) {
+        var params = Array.prototype.slice.call(arguments);
+        var node;
+        if (is_html(element)) {
+            return epic.string.to_dom(element)
         }
-        return document_fragment
+        if (element == 'option') {
+            return create.option(params[0], params[1], params[2])
+        }
+        if (element == "textnode") {
+            node = document.createTextNode(element)
+        }
+        else {
+            node = document.createElement(element)
+        }
+        return new epic.html.selector(node)
     }
     selector.prototype = {
         empty: function() {
@@ -571,5 +561,77 @@ epic.html = (function(epic) {
                 }
             }
     };
-    return selector
-})(epic);
+    create.document_fragment = function(content, callback) {
+        var document_fragment = document.createDocumentFragment();
+        var content_holder;
+        var index;
+        var nodes;
+        if (content) {
+            content_holder = document.createElement('div');
+            content_holder.innerHTML = content;
+            if (callback) {
+                (function() {
+                    if (content_holder.firstChild) {
+                        document_fragment.appendChild(content_holder.firstChild);
+                        setTimeout(arguments.callee, 0)
+                    }
+                    else {
+                        callback(document_fragment)
+                    }
+                })()
+            }
+            else {
+                nodes = content_holder.childNodes;
+                index = nodes.length;
+                while (index--) {
+                    document_fragment.insertBefore(nodes[index], document_fragment.firstChild)
+                }
+            }
+        }
+        return document_fragment
+    };
+    create.option = function(caption, value, selected) {
+        var node = document.createElement(element);
+        if (selected == undefined && value === true) {
+            selected = true;
+            value == null
+        }
+        value = value == null ? caption : value;
+        node.insertBefore(document.createTextNode(caption), null);
+        node.setAttribute('value', value);
+        if (selected)
+            node.setAttribute('selected', 'selected');
+        return new epic.html.selector(node)
+    };
+    create.script = function(code) {
+        var script = document.createElement("script");
+        var property = ('innerText' in script) ? 'innerText' : 'textContent';
+        script.setAttribute("type", "text/javascript");
+        setTimeout(function() {
+            document.getElementsByTagName('head')[0].insertBefore(script, null);
+            script[property] = code
+        }, 10);
+        return new epic.html.selector(script)
+    };
+    create.style = function(css) {
+        var style = document.createElement("style");
+        style.setAttribute("type", "text/css");
+        if (style.styleSheet) {
+            style.styleSheet.cssText = css
+        }
+        else {
+            style.insertBefore(document.createTextNode(css), null)
+        }
+        document.getElementsByTagName('head')[0].insertBefore(style, null);
+        return new epic.html.selector(style)
+    };
+    html.select = function(query) {
+        if (query instanceof query) {
+            return query
+        }
+        return new query(query)
+    };
+    html.selector = selector;
+    html.create = create;
+    epic.html = html
+})(epic, window, document);

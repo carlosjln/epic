@@ -2,41 +2,17 @@
 ( function( epic ) {
 
 	function string( input ) {
-		return new dsl( input );
-	}
-
-	function dsl( input ) {
 		this.input = input;
+		this.arguments = epic.object.to_array( arguments );
 	}
-
-	dsl.prototype = {
-		encode_base64: encode_base64,
-		decode_base64: decode_base64,
-
-		encode_utf8: encode_utf8,
-		decode_utf8: decode_utf8,
-
-		encode_url: encode_url,
-		decode_url: decode_url,
-		
-		encode_html_entities: encode_html_entities,
-		decode_html_entities: decode_html_entities,
-
-		ucase: ucase,
-		lcase: lcase
-	};
-
-	epic.string = string;
 
 	// ENCODE/DECODE BASE64
 	var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-	function encode_base64() {
-		var t = this;
-
+	string.encode_base64 = function ( input ) {
 		var key = B64KEY;
 
-		var str = t.encode_utf8( t.input );
+		var str = string.encode_utf8( input );
 		var length = str.length;
 		var index = 0;
 
@@ -63,14 +39,12 @@
 		}
 
 		return output;
-	}
+	};
 
-	function decode_base64() {
-		var t = this;
-
+	string.decode_base64 = function ( input ) {
 		var key = B64KEY;
 
-		var str = t.input.replace( /[^A-Za-z0-9\+\/\=]/g, "" );
+		var str = input.replace( /[^A-Za-z0-9\+\/\=]/g, "" );
 		var length = str.length;
 		var index = 0;
 
@@ -98,13 +72,13 @@
 			}
 		}
 
-		output = t.decode_utf8( output );
+		output = string.decode_utf8( output );
 
 		return output;
-	}
+	};
 
-	function encode_utf8() {
-		var str = this.input.replace( /\r\n/g, "\n" );
+	string.encode_utf8 = function ( input ) {
+		var str = input.replace( /\r\n/g, "\n" );
 		var length = str.length;
 		var index = 0;
 
@@ -127,11 +101,10 @@
 		}
 
 		return output;
-	}
+	};
 
-	function decode_utf8() {
-		var str = this.input;
-		var length = str.length;
+	string.decode_utf8 = function ( input ) {
+		var length = input.length;
 		var index = 0;
 
 		var output = "";
@@ -140,44 +113,67 @@
 		var c3;
 
 		while( index < length ) {
-			charcode = str.charCodeAt( index );
+			charcode = input.charCodeAt( index );
 
 			if( charcode < 128 ) {
 				output += String.fromCharCode( charcode );
 				index++;
 			} else if( ( charcode > 191 ) && ( charcode < 224 ) ) {
-				c2 = str.charCodeAt( index + 1 );
+				c2 = input.charCodeAt( index + 1 );
 				output += String.fromCharCode( ( ( charcode & 31 ) << 6 ) | ( c2 & 63 ) );
 				index += 2;
 			} else {
-				c2 = str.charCodeAt( index + 1 );
-				c3 = str.charCodeAt( index + 2 );
+				c2 = input.charCodeAt( index + 1 );
+				c3 = input.charCodeAt( index + 2 );
 				output += String.fromCharCode( ( ( charcode & 15 ) << 12 ) | ( ( c2 & 63 ) << 6 ) | ( c3 & 63 ) );
 				index += 3;
 			}
 		}
 
 		return output;
-	}
+	};
 
 	// ENCODE/DECODE URL
-	function encode_url() {
-		return encodeURIComponent( this.input );
-	}
+	string.encode_url = function ( input ) {
+		return encodeURIComponent( input );
+	};
 
-	function decode_url() {
-		return decodeURIComponent( this.input );
-	}
+	string.decode_url = function ( input ) {
+		return decodeURIComponent( input );
+	};
 
 	// ENCODE/DECODE HTML ENTITIES
-	function encode_html_entities( encode_reserved_chars ) {
-		return this.input.replace( /./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities );
-	}
+	string.encode_html_entities = function ( input, encode_reserved_chars ) {
+		return input.replace( /./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities );
+	};
 
-	function decode_html_entities() {
-		return this.input.replace( /&#(\d)+;/g, restore_html_entities );
-	}
+	string.decode_html_entities = function( input ) {
+		return input.replace( /&#(\d)+;/g, restore_html_entities );
+	};
 
+	// LOWER/UPPER CASE
+	string.uppercase = function( str ) {
+		return str.toUpperCase();
+	};
+
+	string.lowercase = function( str ) {
+		return str.toLowerCase();
+	};
+
+	// MISC
+	string.is_html = function( str ) {
+		return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test( str );
+	};
+	
+	string.to_dom = function( str ) {
+		var container = document.createElement("div");
+		container.innerHTML = element;
+
+		return new epic.html.selector( Array.prototype.slice.call( container.childNodes ));
+	};
+
+
+	// PRIVATE USE ONLY
 	function replace_default_html_entities( str ) {
 		var i = str.charCodeAt( 0 );
 
@@ -202,12 +198,5 @@
 		return String.fromCharCode( str.replace( /[#&;]/g, '' ) );
 	}
 
-	// LOWER/UPPER CASE
-	function ucase(){
-		return this.input.toUpperCase();
-	}
-		
-	function lcase(){
-		return this.input.toLowerCase();
-	}
+	epic.string = string;
 } )( epic );

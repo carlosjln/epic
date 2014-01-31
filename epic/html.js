@@ -1,48 +1,36 @@
-﻿epic.html = ( function( epic ) {
+﻿( function( epic, widnow, document ) {
+	var is_html = epic.string.is_html;
 
-	function selector( elements ) {
-		var t = this;
-
-		if( ( t instanceof selector ) == false ) {
-			return new selector( elements );
-		}
-
-		t.elements = epic.type( elements ) == 'array' ? elements : [elements];
+	function html( input ) {
+		this.input = input;
+		this.arguments = epic.object.to_array( arguments );
 	}
 
-	function create_document_fragment( content, callback ) {
-		var document_fragment = document.createDocumentFragment();
-		var content_holder;
-		var index;
-		var nodes;
+	function selector( query ) {
+		query = query != null ? query : [];
 
-		if( content ) {
-			content_holder = document.createElement( 'div' );
-			content_holder.innerHTML = content;
+		this.elements = epic.type( query ) == 'array' ? query : [query];
+	}
 
-			// USE NON-BLOCKING APPEND IF CALL BACK IS SPECIFIED
-			if( callback ) {
-				( function() {
-					if( content_holder.firstChild ) {
-						document_fragment.appendChild( content_holder.firstChild );
-						setTimeout( arguments.callee, 0 );
-					} else {
-						callback( document_fragment );
-					}
-				} )();
+	function create( element ) {
+		var params = Array.prototype.slice.call( arguments );
+		var node;
 
-			} else {
-				nodes = content_holder.childNodes;
-				index = nodes.length;
-
-				while( index-- ) {
-					document_fragment.insertBefore( nodes[ index ], document_fragment.firstChild );
-				}
-			}
-
+		if( is_html( element ) ) {
+			return epic.string.to_dom( element );
 		}
 
-		return document_fragment;
+		if( element == 'option' ) {
+			return create.option( params[ 0 ], params[ 1 ], params[ 2 ] );
+		}
+
+		if( element == "textnode" ) {
+			node = document.createTextNode( element );
+		} else {
+			node = document.createElement( element );
+		}
+
+		return new epic.html.selector( node );
 	}
 
 	selector.prototype = {
@@ -119,5 +107,104 @@
 		}
 	};
 
-	return selector;
-} )( epic );
+	create.document_fragment = function( content, callback ) {
+		var document_fragment = document.createDocumentFragment();
+		var content_holder;
+		var index;
+		var nodes;
+
+		if( content ) {
+			content_holder = document.createElement( 'div' );
+			content_holder.innerHTML = content;
+
+			// USE NON-BLOCKING APPEND IF CALL BACK IS SPECIFIED
+			if( callback ) {
+				( function() {
+					if( content_holder.firstChild ) {
+						document_fragment.appendChild( content_holder.firstChild );
+						setTimeout( arguments.callee, 0 );
+					} else {
+						callback( document_fragment );
+					}
+				} )();
+
+			} else {
+				nodes = content_holder.childNodes;
+				index = nodes.length;
+
+				while( index-- ) {
+					document_fragment.insertBefore( nodes[ index ], document_fragment.firstChild );
+				}
+			}
+
+		}
+
+		return document_fragment;
+	};
+
+	create.option = function( caption, value, selected ) {
+		var node = document.createElement( element );
+
+		if( selected == undefined && value === true ) {
+			selected = true;
+			value = null;
+		}
+
+		value = value == null ? caption : value;
+
+		// SET THE CAPTION
+		node.insertBefore( document.createTextNode( caption ), null );
+
+		// SET THE OPTION VALUE
+		node.setAttribute( 'value', value );
+
+		if( selected ) {
+			node.setAttribute( 'selected', 'selected' );
+		}
+
+		return new epic.html.selector( node );
+	};
+
+	create.script = function( code ) {
+		var script = document.createElement( "script" );
+		var property = ( 'innerText' in script ) ? 'innerText' : 'textContent';
+		script.setAttribute( "type", "text/javascript" );
+		
+		setTimeout( function () {
+			document.getElementsByTagName( 'head' )[0].insertBefore( script, null );
+			script[ property ] = code;
+		}, 10 );
+		
+		return new epic.html.selector( script );
+	};
+
+	create.style = function( css ) {
+		var style = document.createElement( "style" );
+		style.setAttribute( "type", "text/css" );
+		
+		if ( style.styleSheet ) { // IE
+			style.styleSheet.cssText = css;
+
+		} else { // the world
+			style.insertBefore( document.createTextNode( css ), null );
+		}
+		
+		document.getElementsByTagName( 'head' )[0].insertBefore( style, null );
+
+		return new epic.html.selector( style );
+	};
+
+	html.select = function( query ) {
+		if( query instanceof query ) {
+			return query;
+		}
+
+		return new query( query );
+	};
+
+	html.selector = selector;
+
+	html.create = create;
+
+	epic.html = html;
+} )( epic, window, document );
