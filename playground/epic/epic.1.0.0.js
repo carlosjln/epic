@@ -94,7 +94,42 @@ var epic = (function() {
     })()
 })(epic.tools || (epic.tools = {}));
 (function(epic) {
-    function object(){}
+    function _object(object) {
+        return new dsl(object, to_array(arguments))
+    }
+    function dsl(object, arguments) {
+        this.object = object;
+        this.arguments = arguments
+    }
+    dsl.prototype = {extends_from: function(base_class) {
+            var target = this.object;
+            for (var property_name in base_class) {
+                if (base_class.hasOwnProperty(property_name)) {
+                    target[property_name] = base_class[property_name]
+                }
+            }
+            function object() {
+                this.constructor = target;
+                this.base_class = base_class;
+                this.base = function() {
+                    this.base_class.apply(this, arguments)
+                }
+            }
+            object.prototype = base_class.prototype;
+            target.prototype = new object
+        }};
+    function __extends(d, b) {
+        for (var p in b) {
+            if (b.hasOwnProperty(p)) {
+                d[p] = b[p]
+            }
+        }
+        function __() {
+            this.constructor = d
+        }
+        __.prototype = b.prototype;
+        d.prototype = new __
+    }
     function copy(object, target) {
         var object_type = epic.type(object);
         var clone;
@@ -132,21 +167,25 @@ var epic = (function() {
         }
         return target
     }
-    object.merge = merge;
-    object.clone = copy;
-    object.to_array = function(object) {
+    function to_array(object) {
         if (object == null) {
             return null
         }
         var array = Array.prototype.slice.call(object);
         return array.length > 0 ? array : [object]
-    };
-    epic.object = object
+    }
+    _object.merge = merge;
+    _object.clone = copy;
+    _object.to_array = to_array;
+    epic.object = _object
 })(epic);
 (function(epic) {
     function string(input) {
+        return new dsl(input, epic.object.to_array(arguments))
+    }
+    function dsl(input, arguments) {
         this.input = input;
-        this.arguments = epic.object.to_array(arguments)
+        this.arguments = arguments
     }
     var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
     string.encode_base64 = function(input) {
@@ -285,7 +324,7 @@ var epic = (function() {
     };
     string.to_dom = function(str) {
         var container = document.createElement("div");
-        container.innerHTML = element;
+        container.innerHTML = str;
         return new epic.html.selector(Array.prototype.slice.call(container.childNodes))
     };
     function replace_default_html_entities(str) {
@@ -311,6 +350,23 @@ var epic = (function() {
     }
     epic.string = string
 })(epic);
+(function(tools) {
+    function array(){}
+    array.flatten = function(items) {
+        var a = [];
+        return a.concat.apply(a, items)
+    };
+    array.each = Array.prototype.forEach || function(list, callback) {
+        var i = 0;
+        var length = list.length;
+        for (; i < length; i++) {
+            if (callback(list[i], i, list) === false) {
+                break
+            }
+        }
+    };
+    tools.array = array
+})(epic.tools || (epic.tools = {}));
 epic.collection = (function() {
     function collection() {
         this.collection = {}
@@ -392,7 +448,7 @@ epic.collection = (function() {
             if (user_agent) {
                 if (user_agent.indexOf(identity_search || identity) > -1) {
                     new RegExp((version_search || identity_search || identity) + "[\\/\\s](\\d+\\.\\d+)").test(user_agent);
-                    return [epic.string(identity).lcase(), parseFloat(RegExp.$1)]
+                    return [epic.string.lowercase(identity), parseFloat(RegExp.$1)]
                 }
             }
         }
@@ -526,7 +582,15 @@ epic.collection = (function() {
             }
             return t
         }, insert: function(elements, position) {
-                elements = (elements instanceof selector ? elements.elements : elements instanceof Array ? elements : [elements]);
+                var array = epic.array;
+                elements = array.flatten(array.each(arguments, function(element, index, list) {
+                    if (element instanceof selector) {
+                        list[i] = element.elements
+                    }
+                    else if (typeof element == "string") {
+                        list[i] = epic.html.create(element)
+                    }
+                }));
                 var i = elements.length;
                 var t = this;
                 var target = t.elements[0];
@@ -559,6 +623,18 @@ epic.collection = (function() {
                     }
                     target.insertBefore(element, reference)
                 }
+            }, append: function() {
+                return this.insert(arguments, undefined)
+            }, get: function(index) {
+                var elements = this.elements;
+                var upper_limit = elements.length - 1;
+                if (index < 0) {
+                    index = 0
+                }
+                else if (index > upper_limit) {
+                    index = upper_limit
+                }
+                return elements[index]
             }
     };
     create.document_fragment = function(content, callback) {
@@ -591,16 +667,17 @@ epic.collection = (function() {
         return document_fragment
     };
     create.option = function(caption, value, selected) {
-        var node = document.createElement(element);
+        var node = document.createElement("option");
         if (selected == undefined && value === true) {
             selected = true;
-            value == null
+            value = null
         }
         value = value == null ? caption : value;
         node.insertBefore(document.createTextNode(caption), null);
         node.setAttribute('value', value);
-        if (selected)
-            node.setAttribute('selected', 'selected');
+        if (selected) {
+            node.setAttribute('selected', 'selected')
+        }
         return new epic.html.selector(node)
     };
     create.script = function(code) {

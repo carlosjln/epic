@@ -1,0 +1,113 @@
+#epic-notification-rail {
+  position: fixed;
+  width: 300px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2000;
+}
+.notice {
+  width: 300px;
+  overflow: hidden;
+  margin: 0 0 10px 0;
+  position: relative;
+  font-size: 13px;
+  line-height: 25px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.notice .notice-title {
+  display: block;
+  margin: 10px 10px -5px;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 25px;
+  text-align: left;
+}
+.notice .notice-content {
+  overflow: hidden;
+  text-align: left;
+  margin: 10px;
+  padding: 0;
+  -ms-word-wrap: break-word;
+  word-wrap: break-word;
+}
+.notice .notice-close {
+  float: right;
+  width: 25px;
+  margin: 4px 5px 0 0;
+  color: #000;
+  font-size: 24px;
+  -webkit-opacity: 0.2;
+  -moz-opacity: 0.2;
+  opacity: 0.2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20);
+}
+.notice .notice-close:hover,
+.notice .notice-close:focus {
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-opacity: 0.5;
+  -moz-opacity: 0.5;
+  opacity: 0.5;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+}
+.notice-success {
+  color: #468847;
+  background-color: #dff0d8;
+  border-color: #c9e2b3;
+}
+.notice-info {
+  color: #3a87ad;
+  background-color: #d9edf7;
+  border-color: #afe4ee;
+}
+.notice-warning {
+  color: #c09853;
+  background-color: #fcf8e3;
+  border-color: #f7e1b5;
+}
+.notice-danger {
+  color: #b94a48;
+  background-color: #f2dede;
+  border-color: #e4b9c0;
+}
+.notice-default {
+  color: #ffffff;
+  background-color: #2d323d;
+  border-color: #171b20;
+}
+/*
+.notice-success {
+	.notice-variant( @state-success-text, @state-success-bg );
+}
+
+.notice-info {
+	.notice-variant( @state-info-text, @state-info-bg );
+}
+
+.notice-warning {
+	.notice-variant( @state-warning-text, @state-warning-bg );
+}
+
+.notice-danger {
+	.notice-variant( @state-danger-text, @state-danger-bg );
+}
+
+.notice-default {
+	.notice-variant( #FFF, @charade );
+}
+
+// VARIANTS
+// ===================================================================
+.notice-variant( @color, @background ) {
+	@border: darken( spin(@background, -10), 10% );
+
+	color: @color;
+	background-color: @background;
+	border-color: @border;
+}
+
+*/

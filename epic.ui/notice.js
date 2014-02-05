@@ -1,80 +1,147 @@
-﻿( function( epic ) {
+﻿( function( epic, document ) {
 
-	function notice( settings ) {
-		settings = this.settings = epic.object.merge( notice.default_settings, settings );
+	function get_notification_rail() {
+		var id = "epic-notification-rail";
+		var rail = document.getElementById( id );
 
-		var element = this.element = document.createElement( 'div' );
-//		var inner = this.inner = document.createElement( 'span' );
-//		
-//		var type = settings.type;
-//		var message = settings.message;
-//		var target = settings.target;
-//		
-//		element.insertBefore( inner, null );
-//		inner.className = 'message';
-//		
-//		element.className = "notice notice-" + (type ? type : "default");
-//		
-//		if( message ) {
-//			inner.innerHTML = message;
-//		}
-//		
-//		if( target ){
-//			target.insertBefore( element, null );
-//		}
+		if( rail == null ) {
+			rail = document.createElement( "div" );
+			rail.id = id;
+//			rail.style.cssText = "position: fixed; right: 20px; bottom: 20px; width: 301px; z-index: 9999;";
+		}
+
+		if( rail.parentNode == null ) {
+			document.body.insertBefore( rail, null );
+		}
+
+		return rail;
 	}
 
+	function notice( settings ) {
+		settings = epic.object.merge( notice.default_settings, settings );
+
+		var t = this;
+
+		var element = t.element = document.createElement( 'div' );
+		var title = t.message = document.createElement( 'span' );
+		var message = t.message = document.createElement( 'div' );
+
+		var type = settings.type;
+		var header = settings.title || type == notice.type.default ? "Information!" : ( type.charAt( 0 ).toUpperCase() + type.slice( 1 ) ) + "!";
+
+		t.settings = settings;
+		t.set_type( type );
+
+		title.innerHTML = header;
+		title.className = "notice-title";
+
+		message.innerHTML = settings.message;
+		message.className = "notice-content";
+
+		element.insertBefore( title, null );
+		element.insertBefore( message, null );
+
+		get_notification_rail().insertBefore( element, null );
+	}
+
+	function notify( settings ) {
+		return new notice( settings );
+	}
+
+	// NOTICE PROPERTIES
 	notice.prototype = {
-		message: function( message ) {
-			this.inner.innerHTML = message;
-			return this;
+		set_content: function( content ) {
+			var t = this;
+			t.message.innerHTML = content;
+			return t;
 		},
 
-		show: function (){
-			this.element.style.display = 'block';
-			return this;
+		show: function() {
+			var t = this;
+			t.element.style.display = 'block';
+			return t;
 		},
 
-		hide: function (){
-			this.element.style.display = 'none';
-			return this;
+		hide: function() {
+			var t = this;
+			t.element.style.display = 'none';
+			return t;
 		},
-		
+
 		as_success: function() {
-			this.element.className = "notice-success";
-			return this;
+			return this.set_type( alert.type.success );
 		},
-		
+
 		as_info: function() {
-			this.element.className = "notice-info";
-			return this;
+			return this.set_type( alert.type.info );
 		},
-		
+
 		as_warning: function() {
-			this.element.className = "notice-warning";
-			return this;
+			return this.set_type( alert.type.warning );
 		},
-		
+
 		as_danger: function() {
-			this.element.className = "notice-danger";
-			return this;
+			return this.set_type( alert.type.danger );
+		},
+
+		set_type: function( type ) {
+			var t = this;
+			t.element.className = "notice notice-" + type;
+			return t;
 		}
-	};
-	
-	notice.default_settings = {
-		message: "",
-		type: "",
-		target: null,
-		
-		closable: false
 	};
 
 	notice.type = {
+		'default': 'default',
 		success: 'success',
 		info: 'info',
 		warning: 'warning',
 		danger: 'danger'
 	};
 
+	notice.default_settings = {
+		type: notice.type.default,
+		message: "",
+		closable: false,
+
+		// AMOUNT OF TIME THE NOTICE WILL REMAIN VISIBLE (IN SECONDS)
+		timeout: 5
+	};
+
+	// NOTIFY PROPERTIES
+	notify.success = function( message, closable ) {
+		return new notice( {
+			type: notice.type.success,
+			message: message,
+			closable: closable
+		} );
+	};
+
+	notify.danger = function( message, closable ) {
+		return new notice( {
+			type: notice.type.danger,
+			message: message,
+			closable: closable
+		} );
+	};
+
+	notify.warning = function( message, closable ) {
+		return new notice( {
+			type: notice.type.warning,
+			message: message,
+			closable: closable
+		} );
+	};
+
+	notify.info = function( message, closable ) {
+		return new notice( {
+			type: notice.type.info,
+			message: message,
+			closable: closable
+		} );
+	};
+
 	epic.notice = notice;
-} )( epic );
+	epic.notify = notify;
+
+} )( epic, document );

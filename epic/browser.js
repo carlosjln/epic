@@ -13,11 +13,11 @@
 		[vendor, "iCab"],
 		[vendor, "Konqueror", "KDE"],
 		[agent, "Firefox"],
-		[vendor, "Camino"],		
+		[vendor, "Camino"],
 		// FOR NEWER NETSCAPES (6+)
 		[agent, "Netscape"],
 		[agent, "Explorer", "MSIE"],
-		[agent, "Gecko", "Mozilla", "rv"],		
+		[agent, "Gecko", "Mozilla", "rv"],
 		// FOR OLDER NETSCAPES (4-)
 		[agent, "Netscape", "Mozilla"]
 	];
@@ -95,7 +95,7 @@
 					new RegExp( ( version_search || identity_search || identity ) + "[\\/\\s](\\d+\\.\\d+)" ).test( user_agent );
 
 					// BROWSER/OS NAME, VERSION
-					return [ epic.string(identity).lcase(), parseFloat( RegExp.$1 )];
+					return [ epic.string.lowercase( identity ), parseFloat( RegExp.$1 )];
 				}
 			}
 		}

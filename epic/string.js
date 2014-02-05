@@ -2,8 +2,12 @@
 ( function( epic ) {
 
 	function string( input ) {
+		return new dsl( input, epic.object.to_array( arguments ) );
+	}
+
+	function dsl( input, arguments ) {
 		this.input = input;
-		this.arguments = epic.object.to_array( arguments );
+		this.arguments = arguments;
 	}
 
 	// ENCODE/DECODE BASE64
@@ -167,7 +171,7 @@
 	
 	string.to_dom = function( str ) {
 		var container = document.createElement("div");
-		container.innerHTML = element;
+		container.innerHTML = str;
 
 		return new epic.html.selector( Array.prototype.slice.call( container.childNodes ));
 	};

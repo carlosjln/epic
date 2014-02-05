@@ -17,6 +17,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="array.js" />
     <Content Include="html.js" />
     <Content Include="string.js" />
     <Content Include="browser.js" />
@@ -25,9 +26,7 @@
     <Content Include="core.js" />
     <Content Include="tools.js" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="bin\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
@@ -40,6 +39,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>epic</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
@@ -63,4 +65,10 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <DeleteAfterBuild Include="$(ProjectDir)bin\*.dll" />
+    </ItemGroup>
+    <Delete Files="@(DeleteAfterBuild)" />
+  </Target>
 </Project>

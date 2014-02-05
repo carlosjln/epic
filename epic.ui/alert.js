@@ -4,7 +4,7 @@
 		settings = this.settings = epic.object.merge( alert.default_settings, settings );
 
 		var element = this.element = document.createElement( 'div' );
-		var inner = this.inner = document.createElement( 'span' );
+		var inner = this.message = document.createElement( 'span' );
 
 		var type = settings.type;
 		var message = settings.message;
@@ -26,7 +26,7 @@
 
 	alert.prototype = {
 		message: function( message ) {
-			this.inner.innerHTML = message;
+			this.message.innerHTML = message;
 			return this;
 		},
 
@@ -41,40 +41,44 @@
 		},
 
 		as_success: function() {
-			this.element.className = "alert-success";
-			return this;
+			return this.set_type( alert.type.success );
 		},
-	
-		as_info: function() {
-			this.element.className = "alert-info";
-			return this;
-		},
-
-		as_warning: function() {
-			this.element.className = "alert-warning";
-			return this;
-		},
-
-		as_danger: function() {
-			this.element.className = "alert-danger";
-			return this;
-		}
-	};
-	
-	alert.default_settings = {
-		message: "",
-		type: "",
-		target: null,
 		
-		closable: false
+		as_info: function() {
+			return this.set_type( alert.type.info );
+		},
+		
+		as_warning: function() {
+			return this.set_type( alert.type.warning );
+		},
+		
+		as_danger: function() {
+			return this.set_type( alert.type.danger );
+		},
+		
+		set_type: function ( type ) {
+			var t = this;
+			t.element.className = "alert alert-" + type;
+			return t;
+		}
 	};
 
 	alert.type = {
+		'default': 'default',
 		success: 'success',
 		info: 'info',
 		warning: 'warning',
 		danger: 'danger'
 	};
-
+	
+	alert.default_settings = {
+		type: alert.type.default,
+		message: "",
+		target: null,
+		
+		closable: false
+	};
+	
 	epic.alert = alert;
+
 } )( epic );

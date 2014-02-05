@@ -9,7 +9,7 @@
     function alert(settings) {
         settings = this.settings = epic.object.merge(alert.default_settings, settings);
         var element = this.element = document.createElement('div');
-        var inner = this.inner = document.createElement('span');
+        var inner = this.message = document.createElement('span');
         var type = settings.type;
         var message = settings.message;
         var target = settings.target;
@@ -25,7 +25,7 @@
     }
     alert.prototype = {
         message: function(message) {
-            this.inner.innerHTML = message;
+            this.message.innerHTML = message;
             return this
         }, show: function() {
                 this.element.style.display = 'block';
@@ -34,24 +34,24 @@
                 this.element.style.display = 'none';
                 return this
             }, as_success: function() {
-                this.element.className = "alert-success";
-                return this
+                return this.set_type(alert.type.success)
             }, as_info: function() {
-                this.element.className = "alert-info";
-                return this
+                return this.set_type(alert.type.info)
             }, as_warning: function() {
-                this.element.className = "alert-warning";
-                return this
+                return this.set_type(alert.type.warning)
             }, as_danger: function() {
-                this.element.className = "alert-danger";
-                return this
+                return this.set_type(alert.type.danger)
+            }, set_type: function(type) {
+                var t = this;
+                t.element.className = "alert alert-" + type;
+                return t
             }
     };
-    alert.default_settings = {
-        message: "", type: "", target: null, closable: false
-    };
     alert.type = {
-        success: 'success', info: 'info', warning: 'warning', danger: 'danger'
+        'default': 'default', success: 'success', info: 'info', warning: 'warning', danger: 'danger'
+    };
+    alert.default_settings = {
+        type: alert.type.default, message: "", target: null, closable: false
     };
     epic.alert = alert
 })(epic);
@@ -120,7 +120,7 @@
             icon.set_align(align.none)
         }
         var html_tag = '<' + tag + ' id="' + id + '"' + role + ' class="' + classes + ' btn-size-' + size + ' btn-' + style + '" ' + attributes + '></' + tag + '>';
-        var element = $(html_tag).append(icon.element, caption);
+        var element = epic.html.create(html_tag).append(icon.element, caption);
         btn.element = element.get(0)
     }
     button.size = {
@@ -194,3 +194,93 @@
     epic.viewport = viewport;
     epic.view = view
 })(epic);
+(function(epic, document) {
+    function get_notification_rail() {
+        var id = "epic-notification-rail";
+        var rail = document.getElementById(id);
+        if (rail == null) {
+            rail = document.createElement("div");
+            rail.id = id
+        }
+        if (rail.parentNode == null) {
+            document.body.insertBefore(rail, null)
+        }
+        return rail
+    }
+    function notice(settings) {
+        settings = epic.object.merge(notice.default_settings, settings);
+        var t = this;
+        var element = t.element = document.createElement('div');
+        var title = t.message = document.createElement('span');
+        var message = t.message = document.createElement('div');
+        var type = settings.type;
+        var header = settings.title || type == notice.type.default ? "Information!" : (type.charAt(0).toUpperCase() + type.slice(1)) + "!";
+        t.settings = settings;
+        t.set_type(type);
+        title.innerHTML = header;
+        title.className = "notice-title";
+        message.innerHTML = settings.message;
+        message.className = "notice-content";
+        element.insertBefore(title, null);
+        element.insertBefore(message, null);
+        get_notification_rail().insertBefore(element, null)
+    }
+    function notify(settings) {
+        return new notice(settings)
+    }
+    notice.prototype = {
+        set_content: function(content) {
+            var t = this;
+            t.message.innerHTML = content;
+            return t
+        }, show: function() {
+                var t = this;
+                t.element.style.display = 'block';
+                return t
+            }, hide: function() {
+                var t = this;
+                t.element.style.display = 'none';
+                return t
+            }, as_success: function() {
+                return this.set_type(alert.type.success)
+            }, as_info: function() {
+                return this.set_type(alert.type.info)
+            }, as_warning: function() {
+                return this.set_type(alert.type.warning)
+            }, as_danger: function() {
+                return this.set_type(alert.type.danger)
+            }, set_type: function(type) {
+                var t = this;
+                t.element.className = "notice notice-" + type;
+                return t
+            }
+    };
+    notice.type = {
+        'default': 'default', success: 'success', info: 'info', warning: 'warning', danger: 'danger'
+    };
+    notice.default_settings = {
+        type: notice.type.default, message: "", closable: false, timeout: 5
+    };
+    notify.success = function(message, closable) {
+        return new notice({
+                type: notice.type.success, message: message, closable: closable
+            })
+    };
+    notify.danger = function(message, closable) {
+        return new notice({
+                type: notice.type.danger, message: message, closable: closable
+            })
+    };
+    notify.warning = function(message, closable) {
+        return new notice({
+                type: notice.type.warning, message: message, closable: closable
+            })
+    };
+    notify.info = function(message, closable) {
+        return new notice({
+                type: notice.type.info, message: message, closable: closable
+            })
+    };
+    epic.notice = notice;
+    epic.notify = notify
+})(epic, document);

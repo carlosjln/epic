@@ -30,7 +30,7 @@
 		}
 
 		var html_tag = '<' + tag + ' id="' + id + '"' + role + ' class="' + classes + ' btn-size-' + size + ' btn-' + style + '" ' + attributes + '></' + tag + '>';
-		var element = $( html_tag ).append( icon.element, caption );
+		var element = epic.html.create( html_tag ).append( icon.element, caption );
 
 		btn.element = element.get( 0 );
 	}

@@ -21,13 +21,13 @@
 
     <!-- target to clean output for all ajaxmin manifest files in the project -->
     <Target Name="CleanAjaxMinManifests" AfterTargets="Clean" Inputs="@AjaxMinManifests" Outputs="@(AjaxMinManifests->'%(FullPath).cleantrigger')">
-        <Message Text="Cleaning AjaxMin Manifests" Importance="high" />
+        <!--  <Message Text="Cleaning AjaxMin Manifests" Importance="high" />  -->
         <AjaxMinManifestCleanTask OutputFolder="$(AjaxMinOutputFolder)" Manifests="@(AjaxMinManifests)" />
     </Target>
 
     <!-- target to build all ajaxmin manifest files in the project -->
     <Target Name="BuildAjaxMinManifests" AfterTargets="Build" Inputs="@AjaxMinManifests" Outputs="@(AjaxMinManifests->'%(FullPath).buildtrigger')">
-        <Message Text="Processing AjaxMin Manifests" Importance="high" />
+        <!-- <Message Text="Processing AjaxMin Manifests" Importance="high" /> -->
         <AjaxMinManifestTask ProjectDefaultSwitches="-define:$(DefineConstants) $(AjaxMinProjectDefaultSwitches)"
                              Configuration="$(Configuration)"
                              TreatWarningsAsErrors="$(AjaxMinTreatWarningsAsErrors)"

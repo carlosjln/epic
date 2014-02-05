@@ -52,10 +52,22 @@
 		},
 
 		insert: function( elements, position ) {
-			elements = (
-				elements instanceof selector ? elements.elements :
-					elements instanceof Array ? elements : [elements]
+			var array = epic.array;
+
+			elements = array.flatten(
+				array.each( arguments, function( element, index, list ) {
+					if( element instanceof selector ) {
+						list[i] = element.elements;
+					}else if( typeof element == "string" ) {
+						list[i] = epic.html.create( element );
+					}
+				} )
 			);
+			
+//			var position = elements[ elements.length -1 ];
+//			if( typeof position == "number" ) {
+//				elements.pop();
+//			}
 
 			var i = elements.length;
 
@@ -104,6 +116,23 @@
 			}
 
 			// t.insertBefore( doc, reference );
+		},
+
+		append: function() {
+			return this.insert( arguments, undefined );
+		},
+
+		get: function( index ) {
+			var elements = this.elements;
+			var upper_limit = elements.length - 1;
+
+			if( index < 0 ) {
+				index = 0;
+			}else if( index > upper_limit ) {
+				index = upper_limit;
+			}
+
+			return elements[ index ];
 		}
 	};
 
@@ -143,7 +172,7 @@
 	};
 
 	create.option = function( caption, value, selected ) {
-		var node = document.createElement( element );
+		var node = document.createElement( "option" );
 
 		if( selected == undefined && value === true ) {
 			selected = true;

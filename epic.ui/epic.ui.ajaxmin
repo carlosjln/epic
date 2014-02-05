@@ -1,25 +1,48 @@
 <root>
 	<norename name="epic" />
-	<!--
-	IGNORE
+	<!-- IGNORE 
 	Performance warning JS1272: Function defined but not referenced
+	Code warning JS1137: Reserved words and should not be used as an identifier; cross-browser differences: default
 	-->
 	<output path="..\build\epic.ui.1.0.0.js" type="js">
-		<arguments>-clobber -term -esc -ignore:JS1272 -global:epic -braces:same -line:M,4 -minify:false</arguments>
+		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -global:epic -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
 		<input path="alert.js"/>
 		<input path="icon.js"/>
 		<input path="button.js"/>
 		<input path="viewport.js"/>
+		<input path="notice.js"/>
 	</output>
 	
 	<output path="..\build\epic.ui.min.1.0.0.js" type="js">
-		<arguments>-clobber -term -esc -ignore:JS1272 -global:epic</arguments>
+		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -global:epic</arguments>
 		<input path="core.js"/>
 		<input path="alert.js"/>
 		<input path="icon.js"/>
 		<input path="button.js"/>
 		<input path="viewport.js"/>
+		<input path="notice.js"/>
+	</output>
+	
+	<output path="..\build\epic.ui.1.0.0.css" type="css">
+		<arguments>-expr:raw -braces:same -line:M,4 -minify:false</arguments>
+		<input path="less\epic.ui.css"/>
+	</output>
+	
+	<!-- DEPLOY CURRENT BUILD TO PLAYGROUND -->
+	<output path="..\playground\epic\epic.ui.1.0.0.js" type="js">
+		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -global:epic -braces:same -line:M,4 -minify:false</arguments>
+		<input path="core.js"/>
+		<input path="alert.js"/>
+		<input path="icon.js"/>
+		<input path="button.js"/>
+		<input path="viewport.js"/>
+		<input path="notice.js"/>
+	</output>
+	
+	<output path="..\playground\epic\epic.ui.1.0.0.css" type="css">
+		<arguments>-expr:raw -braces:same -line:M,4 -minify:false</arguments>
+		<input path="less\epic.ui.css"/>
 	</output>
 	
 </root>

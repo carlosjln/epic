@@ -25,13 +25,20 @@
     <Content Include="viewport.js" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="bin\" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="less\notice.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="less\partials\mixins.less" />
+    <Content Include="less\partials\variables.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="less\epic.ui.less" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -39,6 +46,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>epic</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
@@ -62,4 +73,14 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <DeleteAfterBuild Include="$(ProjectDir)bin\*.dll" />
+    </ItemGroup>
+    <Delete Files="@(DeleteAfterBuild)" />
+  </Target>
+  <PropertyGroup>
+    <PreBuildEvent>CD "$(SolutionDir)tools\WinLess.lessc*\tools"
+CALL lessc "$(ProjectDir)less\epic.ui.less" "$(ProjectDir)less\epic.ui.css"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

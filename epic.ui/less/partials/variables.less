@@ -1,0 +1,124 @@
+// COLORS
+// -------------------------
+
+@brand-primary:			#36A9E1;
+@brand-success:			#5cb85c;
+@brand-warning:			#f0ad4e;
+@brand-danger:			#d9534f;
+@brand-info:			#5bc0de;
+
+@brand-primary-darker:	darken(@brand-primary, 10%); // #1e8fc6
+
+@gray-darker:			lighten(#000, 13.5%); // #222
+@gray-dark:				lighten(#000, 20%);   // #333
+@gray:					lighten(#000, 33.5%); // #555
+@gray-light:			lighten(#000, 60%);   // #999
+@gray-lighter:			lighten(#000, 93.5%); // #eee
+
+@charade:				#2D323D;
+@charade-light:			#383E4B;
+
+@body-bg:				#fff;
+@text-color:			@gray-dark;
+
+// STATES AND ALERTS
+@state-warning-text:			#c09853;
+@state-warning-bg:				#fcf8e3;
+@state-warning-border:			darken(spin(@state-warning-bg, -10), 3%);
+
+@state-danger-text:				#b94a48;
+@state-danger-bg:				#f2dede;
+@state-danger-border:			darken(spin(@state-danger-bg, -10), 3%);
+
+@state-success-text:			#468847;
+@state-success-bg:				#dff0d8;
+@state-success-border:			darken(spin(@state-success-bg, -10), 5%);
+
+@state-info-text:				#3a87ad;
+@state-info-bg:					#d9edf7;
+@state-info-border:				darken(spin(@state-info-bg, -10), 7%);
+
+
+// BUTTONS
+// -------------------------
+@btn-font-weight: normal;
+
+@btn-default-color:		#565656;
+@btn-default-bg:		#fff;
+@btn-default-border:	#ccc;
+
+@btn-primary-color:		#fff;
+@btn-primary-bg:		@brand-primary;
+@btn-primary-border:	darken(@btn-primary-bg, 5%);
+
+@btn-success-color:		#fff;
+@btn-success-bg:		@brand-success;
+@btn-success-border:	darken(@btn-success-bg, 5%);
+
+@btn-warning-color:		#fff;
+@btn-warning-bg:		@brand-warning;
+@btn-warning-border:	darken(@btn-warning-bg, 5%);
+
+@btn-danger-color:		#fff;
+@btn-danger-bg:			@brand-danger;
+@btn-danger-border:		darken(@btn-danger-bg, 5%);
+
+@btn-info-color:		#fff;
+@btn-info-bg:			@brand-info;
+@btn-info-border:		darken(@btn-info-bg, 5%);
+
+@btn-link-disabled-color:	@gray-light;
+
+
+// TABLES
+// -------------------------
+@table-cell-padding:				8px;
+@table-condensed-cell-padding:		5px;
+
+@table-bg:							transparent; // overall background-color
+@table-bg-accent:					#f9f9f9; // for striping
+@table-bg-hover:					#f5f5f5;
+@table-bg-active:					@table-bg-hover;
+
+@table-border-color:				#ddd; // table and cell border
+
+
+// TYPOGRAPHY
+// -------------------------
+@font-size-base:          14px;
+@font-size-large:         ceil(@font-size-base * 1.25); // ~18px
+@font-size-small:         ceil(@font-size-base * 0.85); // ~12px
+
+@line-height-base:        1.428571429; // 20/14
+@line-height-computed:    floor(@font-size-base * @line-height-base); // ~20px
+
+@headings-font-weight:    500;
+@headings-line-height:    1.1;
+
+
+// DROPDOWNS
+// -------------------------
+@dropdown-bg:                    #fff;
+@dropdown-border:                rgba(0,0,0,.15);
+@dropdown-fallback-border:       #ccc;
+@dropdown-divider-bg:            #e5e5e5;
+
+@dropdown-link-active-color:     #fff;
+@dropdown-link-active-bg:        @brand-primary;
+
+@dropdown-link-color:            @charade;
+@dropdown-link-hover-color:      #fff;
+@dropdown-link-hover-bg:         @dropdown-link-active-bg;
+
+@dropdown-link-disabled-color:   @gray-light;
+
+@dropdown-header-color:          @gray-light;
+
+@dropdown-caret-color:           #000;
+
+
+// Z-INDEX
+// -------------------------
+
+@zindex-dropdown:			1000;
+@zindex-notification-rail:	2000;

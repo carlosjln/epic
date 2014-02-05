@@ -19,6 +19,8 @@
   <ItemGroup>
     <Content Include="app.js" />
     <Content Include="epic\epic.1.0.0.js" />
+    <Content Include="epic\epic.ui.1.0.0.css" />
+    <Content Include="epic\epic.ui.1.0.0.js" />
     <Content Include="index.htm" />
     <Content Include="web.config" />
   </ItemGroup>
@@ -71,4 +73,10 @@
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <DeleteAfterBuild Include="$(ProjectDir)bin\*.dll" />
+    </ItemGroup>
+    <Delete Files="@(DeleteAfterBuild)" />
+  </Target>
 </Project>
