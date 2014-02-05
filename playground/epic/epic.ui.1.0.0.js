@@ -146,7 +146,7 @@
         var t = this;
         var views = t.views;
         view = view || new epic.view(t);
-        t.target.insertBefore(view.container);
+        t.target.insertBefore(view.container, null);
         views[views.length] = view;
         return view
     };
@@ -171,13 +171,12 @@
             }
         }, activate: function() {
                 var t = this;
-                var container = $(t.container);
                 var viewport = t.viewport;
                 var current_view = viewport.current_view;
                 if (current_view) {
                     $(current_view.container).css('display', 'none')
                 }
-                container.css('display', 'block');
+                t.container.style.display = 'block';
                 viewport.current_view = t;
                 return t
             }, empty: function() {
@@ -187,7 +186,7 @@
                 epic.html(container).empty().append(t.loader);
                 return t
             }, append: function(html) {
-                $(this.container).append(html);
+                epic.html(this.container).append(html);
                 return this
             }
     };
