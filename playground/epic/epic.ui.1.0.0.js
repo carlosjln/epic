@@ -24,14 +24,14 @@
         }
     }
     alert.prototype = {
-        message: function(message) {
-            this.message.innerHTML = message;
+        show: function() {
+            this.element.style.display = 'block';
             return this
-        }, show: function() {
-                this.element.style.display = 'block';
-                return this
-            }, hide: function() {
+        }, hide: function() {
                 this.element.style.display = 'none';
+                return this
+            }, set_message: function(message) {
+                this.message.innerHTML = message;
                 return this
             }, as_success: function() {
                 return this.set_type(alert.type.success)

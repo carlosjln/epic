@@ -25,11 +25,6 @@
 	}
 
 	alert.prototype = {
-		message: function( message ) {
-			this.message.innerHTML = message;
-			return this;
-		},
-
 		show: function (){
 			this.element.style.display = 'block';
 			return this;
@@ -40,6 +35,11 @@
 			return this;
 		},
 
+		set_message: function( message ) {
+			this.message.innerHTML = message;
+			return this;
+		},
+		
 		as_success: function() {
 			return this.set_type( alert.type.success );
 		},
