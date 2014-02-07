@@ -18,6 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="array.js" />
+    <Content Include="event.js" />
     <Content Include="html.js" />
     <Content Include="string.js" />
     <Content Include="browser.js" />

@@ -1,5 +1,5 @@
 ﻿
-( function( tools ) {
+( function( epic ) {
 
 	function array() {
 		
@@ -10,17 +10,18 @@
 		return a.concat.apply( a, items );
 	};
 
-	array.each = Array.prototype.forEach || function( list, callback ) {
+	array.each = Array.prototype.forEach || function( list, callback, self ) {
 		var i = 0;
 		var length = list.length;
-		
+		self = self || list;
+
 		for(; i < length; i++ ) {
-			if( callback( list[i], i, list ) === false ) {
+			if( callback.call( self,  list[i], i, list ) === false ) {
 				break;
 			}
 		}
 	};
 
-	tools.array = array;
+	epic.array = array;
 
-} )( epic.tools || ( epic.tools = {} ) );
+} )( epic );

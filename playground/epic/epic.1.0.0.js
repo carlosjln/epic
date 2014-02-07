@@ -46,7 +46,8 @@ var epic = (function() {
                 return type(object) == 'regexp'
             };
             type.is_element = function(object) {
-                return object && object.nodeName != null
+                var html_element = typeof HTMLElement === "object";
+                return html_element ? object instanceof HTMLElement : object && typeof object === "object" && object.nodeType === 1 && typeof object.nodeName === "string"
             };
             return type
         })();
@@ -83,8 +84,8 @@ var epic = (function() {
         };
         return epic
     })();
-(function(tools) {
-    tools.uid = (function() {
+(function(epic) {
+    epic.uid = (function() {
         function uid(){}
         uid.seed = (new Date).getTime();
         uid.next = function() {
@@ -92,7 +93,7 @@ var epic = (function() {
         };
         return uid
     })()
-})(epic.tools || (epic.tools = {}));
+})(epic);
 (function(epic) {
     function _object(object) {
         return new dsl(object, to_array(arguments))
@@ -319,6 +320,13 @@ var epic = (function() {
     string.lowercase = function(str) {
         return str.toLowerCase()
     };
+    string.trim = function(str, collapse_spaces) {
+        str = str.replace(/^\s+|\s+$/gm, '');
+        if (collapse_spaces) {
+            str = str.replace(/\s+/g, ' ')
+        }
+        return str
+    };
     string.is_html = function(str) {
         return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test(str)
     };
@@ -350,23 +358,24 @@ var epic = (function() {
     }
     epic.string = string
 })(epic);
-(function(tools) {
+(function(epic) {
     function array(){}
     array.flatten = function(items) {
         var a = [];
         return a.concat.apply(a, items)
     };
-    array.each = Array.prototype.forEach || function(list, callback) {
+    array.each = Array.prototype.forEach || function(list, callback, self) {
         var i = 0;
         var length = list.length;
+        self = self || list;
         for (; i < length; i++) {
-            if (callback(list[i], i, list) === false) {
+            if (callback.call(self, list[i], i, list) === false) {
                 break
             }
         }
     };
-    tools.array = array
-})(epic.tools || (epic.tools = {}));
+    epic.array = array
+})(epic);
 epic.collection = (function() {
     function collection() {
         this.collection = {}
@@ -543,9 +552,10 @@ epic.collection = (function() {
 })(epic, window, document, navigator);
 (function(epic, widnow, document) {
     var is_html = epic.string.is_html;
-    function html(input) {
-        this.input = input;
-        this.arguments = epic.object.to_array(arguments)
+    var array = epic.array;
+    function html(element) {
+        this.element = element;
+        this.elements = flatten(arguments)
     }
     function selector(query) {
         query = query != null ? query : [];
@@ -568,6 +578,17 @@ epic.collection = (function() {
         }
         return new epic.html.selector(node)
     }
+    function flatten(list) {
+        return array.flatten(array.each(list, html_element_parser))
+    }
+    function html_element_parser(element, index, list) {
+        if (element instanceof selector) {
+            list[index] = element.elements
+        }
+        else if (typeof element == "string") {
+            list[index] = epic.html.create(element)
+        }
+    }
     selector.prototype = {
         empty: function() {
             var t = this;
@@ -582,17 +603,9 @@ epic.collection = (function() {
             }
             return t
         }, insert: function(elements, position) {
-                var array = epic.array;
-                elements = array.flatten(array.each(arguments, function(element, index, list) {
-                    if (element instanceof selector) {
-                        list[i] = element.elements
-                    }
-                    else if (typeof element == "string") {
-                        list[i] = epic.html.create(element)
-                    }
-                }));
-                var i = elements.length;
+                elements = flatten(elements);
                 var t = this;
+                var i = elements.length;
                 var target = t.elements[0];
                 var reference = null;
                 var element;
@@ -711,4 +724,160 @@ epic.collection = (function() {
     html.selector = selector;
     html.create = create;
     epic.html = html
+})(epic, window, document);
+(function(epic, window, document) {
+    var REGISTRY = {};
+    var REGISTRY_POLICE = {};
+    var HANDLERS = {};
+    var next_uid = epic.uid.next;
+    var set_event_handler = document.addEventListener ? add_event_listener : attach_event;
+    function event(){}
+    function add(element, event_name, method, parameters) {
+        if (typeof event_name != "string") {
+            return epic.fail("[event_name] must be a valid event name.")
+        }
+        var element_uid = element.uid || (element.uid = next_uid());
+        var element_events = REGISTRY[element_uid] || (REGISTRY[element_uid] = {});
+        var method_uid = method.uid || (method.uid = next_uid());
+        var police_key = element_uid + "_" + event_name + "_" + method_uid;
+        if (REGISTRY_POLICE[police_key]) {
+            return false
+        }
+        var handler = {
+                method: method, parameters: parameters || {}
+            };
+        (element_events[event_name] || (element_events[event_name] = [])).push(handler);
+        set_event_handler(element, event_name, element_uid);
+        REGISTRY_POLICE[police_key] = true;
+        return true
+    }
+    function remove(element, event_name, handler, data){}
+    function trigger(element, event_name, handler, data){}
+    function add_event_listener(element, event_name, element_uid) {
+        var element_event = element_uid + "_" + event_name;
+        if (!HANDLERS[element_event]) {
+            HANDLERS[element_event] = true;
+            element.addEventListener(event_name, epic_event_handler, false)
+        }
+    }
+    function attach_event(element, event_name, element_uid) {
+        var element_event = element_uid + "_" + event_name;
+        if (!HANDLERS[element_event]) {
+            HANDLERS[element_event] = true;
+            element.attachEvent('on' + event_name, epic_event_handler)
+        }
+    }
+    function epic_event_handler(e) {
+        var evt = new epic_event(e);
+        var element = evt.target;
+        var events = REGISTRY[element.uid];
+        var handlers;
+        var handler;
+        var len;
+        var index = 0;
+        if (events) {
+            handlers = events[evt.type];
+            len = handlers.length;
+            while (len--) {
+                handler = handlers[index++];
+                handler.method.call(element, evt, handler.parameters)
+            }
+        }
+        return this
+    }
+    function epic_event(e) {
+        var target = (e.target || e.srcElement) || document;
+        var which = e.which;
+        var charcode = e.charCode;
+        var keycode = e.keyCode;
+        var event_name = e.type;
+        var delta = 0;
+        var page_x;
+        var page_y;
+        var key_map = {
+                8: 'BACKSPACE', 9: 'TAB', 10: 'ENTER', 13: 'ENTER', 20: 'CAPSLOCK', 27: 'ESC', 33: 'PAGEUP', 34: 'PAGEDOWN', 35: 'END', 36: 'HOME', 37: 'LEFT', 38: 'UP', 39: 'RIGHT', 40: 'DOWN', 45: 'INSERT', 46: 'DELETE'
+            };
+        var capslock = false;
+        var key_code = which ? which : keycode;
+        var key_value = '';
+        var meta_key;
+        if (event_name == 'DOMMouseScroll') {
+            event_name = 'mousewheel'
+        }
+        if (e.altKey) {
+            meta_key = 'ALT'
+        }
+        else if (e.ctrlKey || e.metaKey) {
+            meta_key = 'CTRL'
+        }
+        else if (e.shiftKey || charcode == 16) {
+            meta_key = 'SHIFT'
+        }
+        else if (key_code == 20) {
+            meta_key = 'CAPSLOCK'
+        }
+        if (which === undefined && charcode === undefined) {
+            key_code = keycode
+        }
+        else {
+            key_code = which != 0 && charcode != 0 ? which : keycode
+        }
+        key_value = key_code > 31 ? String.fromCharCode(key_code) : '';
+        if (key_code > 96 && key_code < 123 && meta_key == 'SHIFT' || key_code > 64 && key_code < 91 && meta_key != 'SHIFT') {
+            capslock = true
+        }
+        if (event_name == 'keydown' || event_name == 'keyup') {
+            if (key_value == 'CAPSLOCK') {
+                capslock = !capslock
+            }
+            if (key_code > 64 && key_code < 91 && meta_key != 'SHIFT') {
+                key_code = key_code + 32;
+                key_value = String.fromCharCode(key_code)
+            }
+        }
+        if (key_map[key_code]) {
+            key_value = key_map[key_code]
+        }
+        if (event_name == 'mousewheel') {
+            delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
+            ;
+            delta = delta > 0 ? 1 : -1
+        }
+        if (e.pageX == null && e.clientX != null) {
+            var document_element = document.documentElement;
+            var body = document.body;
+            page_x = e.clientX + (document_element && document_element.scrollLeft || body && body.scrollLeft || 0) - (document_element && document_element.clientLeft || body && body.clientLeft || 0);
+            page_y = e.clientY + (document_element && document_element.scrollTop || body && body.scrollTop || 0) - (document_element && document_element.clientTop || body && body.clientTop || 0)
+        }
+        this.target = target.nodeType === 3 ? target.parentNode : target;
+        ;
+        this.from_element = (e.fromElement || e.originalTarget);
+        this.to_element = e.toElement || target;
+        this.type = event_name;
+        this.page_x = page_x;
+        this.page_y = page_y;
+        this.key_code = key_code;
+        this.key_value = key_value;
+        this.metaKey = meta_key;
+        this.delta = delta;
+        this.capslock = capslock;
+        this.button = e.button;
+        this.relatedTarget = e.relatedTarget || event_name == 'mouseover' ? e.fromElement : event_name == 'mouseout' ? e.toElement : null
+    }
+    epic_event.prototype = {
+        preventDefault: function() {
+            this.original.preventDefault()
+        }, stopPropagation: function() {
+                var original_event = this.original;
+                original_event.cancelBubble = true;
+                original_event.stopPropagation();
+                original_event.preventDefault();
+                return false
+            }
+    };
+    event.add = add;
+    event.remove = remove;
+    event.trigger = trigger;
+    event.registry = REGISTRY;
+    epic.event = event
 })(epic, window, document);

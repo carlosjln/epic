@@ -15,6 +15,7 @@
 		<input path="collection.js"/>
 		<input path="browser.js"/>
 		<input path="html.js"/>
+		<input path="event.js"/>
 	</output>
 	
 	<output path="..\build\epic.min.1.0.0.js" type="js">
@@ -27,6 +28,7 @@
 		<input path="collection.js"/>
 		<input path="browser.js"/>
 		<input path="html.js"/>
+		<input path="event.js"/>
 	</output>
 
 	<!--
@@ -42,5 +44,6 @@
 		<input path="collection.js"/>
 		<input path="browser.js"/>
 		<input path="html.js"/>
+		<input path="event.js"/>
 	</output>
 </root>

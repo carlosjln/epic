@@ -1,8 +1,8 @@
 ﻿
-( function( tools ) {
+( function( epic ) {
 
 	// UNIQUE IDENTIFIER
-	tools.uid = ( function() {
+	epic.uid = ( function() {
 
 		function uid() {
 		}
@@ -16,4 +16,4 @@
 		return uid;
 	} )();
 
-} )( epic.tools || ( epic.tools = {} ) );
+} )( epic );

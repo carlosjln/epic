@@ -77,7 +77,8 @@ var epic = ( function() {
 		};
 
 		type.is_element = function( object ) {
-			return object && object.nodeName != null;
+			var html_element = typeof HTMLElement === "object";
+			return html_element ? object instanceof HTMLElement : object && typeof object === "object" && object.nodeType === 1 && typeof object.nodeName==="string";
 		};
 
 		return type;

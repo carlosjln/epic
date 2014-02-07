@@ -1,9 +1,10 @@
 ﻿( function( epic, widnow, document ) {
 	var is_html = epic.string.is_html;
+	var array = epic.array;
 
-	function html( input ) {
-		this.input = input;
-		this.arguments = epic.object.to_array( arguments );
+	function html( element ) {
+		this.element = element;
+		this.elements = flatten( arguments );
 	}
 
 	function selector( query ) {
@@ -33,6 +34,21 @@
 		return new epic.html.selector( node );
 	}
 
+	function flatten( list ) {
+		return array.flatten(
+			array.each( list, html_element_parser )
+		);
+	}
+
+	// IDENTIFIES THE ELEMENT TYPE AND "FIXES" IT BEFORE THE LIST IS FLATTENED
+	function html_element_parser( element, index, list ) {
+		if( element instanceof selector ) {
+			list[ index ] = element.elements;
+		} else if( typeof element == "string" ) {
+			list[ index ] = epic.html.create( element );
+		}
+	}
+
 	selector.prototype = {
 		empty: function() {
 			var t = this;
@@ -52,27 +68,11 @@
 		},
 
 		insert: function( elements, position ) {
-			var array = epic.array;
-
-			elements = array.flatten(
-				array.each( arguments, function( element, index, list ) {
-					if( element instanceof selector ) {
-						list[i] = element.elements;
-					}else if( typeof element == "string" ) {
-						list[i] = epic.html.create( element );
-					}
-				} )
-			);
-			
-//			var position = elements[ elements.length -1 ];
-//			if( typeof position == "number" ) {
-//				elements.pop();
-//			}
-
-			var i = elements.length;
+			elements = flatten( elements );
 
 			var t = this;
-			// var doc = create_document_fragment();
+
+			var i = elements.length;
 			var target = t.elements[ 0 ];
 			var reference = null;
 
@@ -128,7 +128,7 @@
 
 			if( index < 0 ) {
 				index = 0;
-			}else if( index > upper_limit ) {
+			} else if( index > upper_limit ) {
 				index = upper_limit;
 			}
 
@@ -198,27 +198,27 @@
 		var script = document.createElement( "script" );
 		var property = ( 'innerText' in script ) ? 'innerText' : 'textContent';
 		script.setAttribute( "type", "text/javascript" );
-		
-		setTimeout( function () {
-			document.getElementsByTagName( 'head' )[0].insertBefore( script, null );
+
+		setTimeout( function() {
+			document.getElementsByTagName( 'head' )[ 0 ].insertBefore( script, null );
 			script[ property ] = code;
 		}, 10 );
-		
+
 		return new epic.html.selector( script );
 	};
 
 	create.style = function( css ) {
 		var style = document.createElement( "style" );
 		style.setAttribute( "type", "text/css" );
-		
-		if ( style.styleSheet ) { // IE
+
+		if( style.styleSheet ) { // IE
 			style.styleSheet.cssText = css;
 
 		} else { // the world
 			style.insertBefore( document.createTextNode( css ), null );
 		}
-		
-		document.getElementsByTagName( 'head' )[0].insertBefore( style, null );
+
+		document.getElementsByTagName( 'head' )[ 0 ].insertBefore( style, null );
 
 		return new epic.html.selector( style );
 	};

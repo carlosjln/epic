@@ -22,8 +22,9 @@
 
 		var t = this;
 
-		var element = t.element = document.createElement( 'div' );
+		var container = t.element = document.createElement( 'div' );
 		var title = t.message = document.createElement( 'span' );
+		var close_btn = t.message = document.createElement( 'span' );
 		var message = t.message = document.createElement( 'div' );
 
 		var type = settings.type;
@@ -32,16 +33,21 @@
 		t.settings = settings;
 		t.set_type( type );
 
+		close_btn.innerHTML = "";
+		close_btn.className = "notice-close";
+		epic.event.add( close_btn, "click", notice.event.close, container );
+		
 		title.innerHTML = header;
 		title.className = "notice-title";
 
 		message.innerHTML = settings.message;
 		message.className = "notice-content";
 
-		element.insertBefore( title, null );
-		element.insertBefore( message, null );
+		container.insertBefore( close_btn, null );
+		container.insertBefore( title, null );
+		container.insertBefore( message, null );
 
-		get_notification_rail().insertBefore( element, null );
+		get_notification_rail().insertBefore( container, null );
 	}
 
 	function notify( settings ) {
@@ -106,6 +112,13 @@
 
 		// AMOUNT OF TIME THE NOTICE WILL REMAIN VISIBLE (IN SECONDS)
 		timeout: 5
+	};
+
+	notice.event = {
+		close: function( e, container ) {
+			var parent = container.parentNode;
+			parent.removeChild( container);
+		}
 	};
 
 	// NOTIFY PROPERTIES

@@ -13,7 +13,7 @@
 	// ENCODE/DECODE BASE64
 	var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-	string.encode_base64 = function ( input ) {
+	string.encode_base64 = function( input ) {
 		var key = B64KEY;
 
 		var str = string.encode_utf8( input );
@@ -45,7 +45,7 @@
 		return output;
 	};
 
-	string.decode_base64 = function ( input ) {
+	string.decode_base64 = function( input ) {
 		var key = B64KEY;
 
 		var str = input.replace( /[^A-Za-z0-9\+\/\=]/g, "" );
@@ -81,7 +81,7 @@
 		return output;
 	};
 
-	string.encode_utf8 = function ( input ) {
+	string.encode_utf8 = function( input ) {
 		var str = input.replace( /\r\n/g, "\n" );
 		var length = str.length;
 		var index = 0;
@@ -107,7 +107,7 @@
 		return output;
 	};
 
-	string.decode_utf8 = function ( input ) {
+	string.decode_utf8 = function( input ) {
 		var length = input.length;
 		var index = 0;
 
@@ -138,16 +138,16 @@
 	};
 
 	// ENCODE/DECODE URL
-	string.encode_url = function ( input ) {
+	string.encode_url = function( input ) {
 		return encodeURIComponent( input );
 	};
 
-	string.decode_url = function ( input ) {
+	string.decode_url = function( input ) {
 		return decodeURIComponent( input );
 	};
 
 	// ENCODE/DECODE HTML ENTITIES
-	string.encode_html_entities = function ( input, encode_reserved_chars ) {
+	string.encode_html_entities = function( input, encode_reserved_chars ) {
 		return input.replace( /./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities );
 	};
 
@@ -164,16 +164,27 @@
 		return str.toLowerCase();
 	};
 
+	// TRIMMING
+	string.trim = function( str, collapse_spaces ) {
+		str = str.replace(/^\s+|\s+$/gm,'');
+		
+		if( collapse_spaces ) {
+			str = str.replace( /\s+/g, ' ' );
+		}
+		
+		return str;
+	};
+
 	// MISC
 	string.is_html = function( str ) {
 		return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test( str );
 	};
-	
+
 	string.to_dom = function( str ) {
-		var container = document.createElement("div");
+		var container = document.createElement( "div" );
 		container.innerHTML = str;
 
-		return new epic.html.selector( Array.prototype.slice.call( container.childNodes ));
+		return new epic.html.selector( Array.prototype.slice.call( container.childNodes ) );
 	};
 
 
