@@ -11,7 +11,7 @@ This JavaScript library aims at being:
 
 On the following commits the code will be imported from my previous JavaScript libraries and then some unit test should be added.
 
-Feedback, suggestions, ideas, bug-fix & constructive critics are always welcome :)
+Feedback, suggestions, ideas, bug-fixes & constructive criticisms are always welcome :)
 
 ----------
 
