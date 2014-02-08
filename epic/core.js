@@ -1,15 +1,25 @@
 var epic = ( function() {
-	// FAIL LIKE A NINJA, SILENTLY :)
-	if( window[ 'console' ] === undefined ) {
-		window[ 'console' ] = {
-			log: function() {
-			}
-		};
-	}
-
+	
 	function epic() {
 	}
 
+	// FAIL LIKE A NINJA, SILENTLY :)
+	function log( message ) {
+		if( window[ 'console' ] != undefined ) {
+			console.log( epic.object.to_array(arguments) );
+		}
+	}
+	
+	function fail( message, number ) {
+		var error = new Error( message, number );
+		
+		if ( this instanceof fail ) {
+			return error;
+		}
+		
+		log( error );
+	}
+	
 	// OBJECT TYPE VERIFICATION
 	epic.type = ( function() {
 		var core_types = {
@@ -86,12 +96,17 @@ var epic = ( function() {
 
 	// DATA PARSING
 	epic.parse = {
-		currency: function( expression, symbol ) {
+		currency: function( symbol, expression ) {
+			if( arguments.length == 1 ) {
+				expression = symbol;
+				symbol = null;
+			}
+
 			var numbers = expression + '';
 			var array = numbers.split( '.' );
 
 			var digits = array[ 0 ];
-			var decimals = array.length ? '.' + array[ 1 ] : '';
+			var decimals = array.length > 1 ? '.' + array[ 1 ] : '';
 
 			var pattern = /(\d+)(\d{3})/;
 
@@ -135,12 +150,25 @@ var epic = ( function() {
 		}
 	};
 
-	epic.log = epic.fail = function( message ) {
-		console.log( message );
-	};
+	epic.log = log;
+	epic.fail = fail;
+	
+	// UNIQUE IDENTIFIER
+	epic.uid = ( function() {
+		function uid() {
+		}
+
+		uid.seed = ( new Date() ).getTime();
+
+		uid.next = function() {
+			return ++uid.seed;
+		};
+
+		return uid;
+	} )();
 
 	epic.start = function( callback ) {
-		callback();
+		this.fail( "Oops! :$ The [onready] feature isn't ready yet." );
 	};
 
 	return epic;

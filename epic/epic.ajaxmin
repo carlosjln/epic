@@ -8,7 +8,6 @@
 	<output path="..\build\epic.1.0.0.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
-		<input path="tools.js"/>
 		<input path="object.js"/>
 		<input path="string.js"/>
 		<input path="array.js"/>
@@ -21,7 +20,6 @@
 	<output path="..\build\epic.min.1.0.0.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137</arguments>
 		<input path="core.js"/>
-		<input path="tools.js"/>
 		<input path="object.js"/>
 		<input path="string.js"/>
 		<input path="array.js"/>
@@ -37,7 +35,6 @@
 	<output path="..\playground\epic\epic.1.0.0.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
-		<input path="tools.js"/>
 		<input path="object.js"/>
 		<input path="string.js"/>
 		<input path="array.js"/>

@@ -1,13 +1,13 @@
 ﻿
 ( function( epic ) {
 
-	function _object( object ) {
-		return new dsl( object, to_array( arguments ) );
+	function object( obj ) {
+		return new dsl( obj, to_array( arguments ) );
 	}
 
-	function dsl( object, arguments ) {
-		this.object = object;
-		this.arguments = arguments;
+	function dsl( obj, parameters ) {
+		this.object = obj;
+		this.parameters = parameters;
 	}
 
 	dsl.prototype = {
@@ -34,22 +34,6 @@
 		}
 
 	};
-
-	function __extends( d, b ) {
-		for( var p in b ) {
-			if( b.hasOwnProperty( p ) ) {
-				d[ p ] = b[ p ];
-			}
-		}
-
-		function __() {
-			this.constructor = d;
-		}
-
-		__.prototype = b.prototype;
-
-		d.prototype = new __();
-	}
 
 	// COPYCAT ENGINE B-)
 	function copy( object, target ) {
@@ -114,10 +98,14 @@
 		return array.length > 0 ? array : [object];
 	}
 
-	_object.merge = merge;
-	_object.clone = copy;
-	_object.to_array = to_array;
+	// STATIC METHODS
+	object.merge = merge;
+	object.clone = copy;
+	object.to_array = to_array;
 
-	epic.object = _object;
+	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
+	object.dsl = dsl;
+
+	epic.object = object;
 
 } )( epic );

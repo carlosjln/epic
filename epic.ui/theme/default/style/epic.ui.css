@@ -33,9 +33,9 @@
   word-wrap: break-word;
 }
 .notice .notice-close {
-  display: block;
-  width: 20px;
-  height: 20px;
+  display: none;
+  width: 25px;
+  height: 25px;
   position: absolute;
   margin: 0;
   right: 0;
@@ -60,24 +60,24 @@
   filter: alpha(opacity=50);
 }
 .notice-success {
-  color: #468847;
-  background-color: #dff0d8;
-  border-color: #c9e2b3;
+  color: #3C763D;
+  border-color: #D6E9C6;
+  background-color: #DFF0D8;
 }
 .notice-info {
-  color: #3a87ad;
-  background-color: #d9edf7;
-  border-color: #afe4ee;
+  color: #31708F;
+  border-color: #BCE8F1;
+  background-color: #D9EDF7;
 }
 .notice-warning {
-  color: #c09853;
-  background-color: #fcf8e3;
-  border-color: #f7e1b5;
+  color: #8A6D3B;
+  border-color: #FAEBCC;
+  background-color: #FCF8E3;
 }
 .notice-danger {
-  color: #b94a48;
-  background-color: #f2dede;
-  border-color: #e4b9c0;
+  color: #A94442;
+  border-color: #EBCCD1;
+  background-color: #F2DEDE;
 }
 .notice-default {
   color: #ffffff;

@@ -25,7 +25,6 @@
     <Content Include="collection.js" />
     <Content Include="object.js" />
     <Content Include="core.js" />
-    <Content Include="tools.js" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

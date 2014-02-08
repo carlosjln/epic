@@ -22,6 +22,7 @@
     <Content Include="notice.js" />
     <Content Include="core.js" />
     <Content Include="icon.js" />
+    <Content Include="theme\default\style\epic.ui.css" />
     <Content Include="viewport.js" />
   </ItemGroup>
   <ItemGroup>
@@ -31,14 +32,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="less\notice.less" />
+    <Content Include="theme\default\less\notice.less" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="less\partials\mixins.less" />
-    <Content Include="less\partials\variables.less" />
+    <Content Include="theme\default\less\partials\mixins.less" />
+    <Content Include="theme\default\less\partials\variables.less" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="less\epic.ui.less" />
+    <Content Include="theme\default\less\epic.ui.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="theme\default\images\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -81,6 +85,6 @@
   </Target>
   <PropertyGroup>
     <PreBuildEvent>CD "$(SolutionDir)tools\WinLess.lessc*\tools"
-CALL lessc "$(ProjectDir)less\epic.ui.less" "$(ProjectDir)less\epic.ui.css"</PreBuildEvent>
+CALL lessc "$(ProjectDir)theme\default\less\epic.ui.less" "$(ProjectDir)theme\default\style\epic.ui.css"</PreBuildEvent>
   </PropertyGroup>
 </Project>

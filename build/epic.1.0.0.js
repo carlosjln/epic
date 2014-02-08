@@ -1,8 +1,17 @@
 var epic = (function() {
-        if (window['console'] === undefined) {
-            window['console'] = {log: function(){}}
-        }
         function epic(){}
+        function log(message) {
+            if (window['console'] != undefined) {
+                console.log(epic.object.to_array(arguments))
+            }
+        }
+        function fail(message, number) {
+            var error = new Error(message, number);
+            if (this instanceof fail) {
+                return error
+            }
+            log(error)
+        }
         epic.type = (function() {
             var core_types = {
                     '[object Boolean]': 'boolean', '[object Number]': 'number', '[object String]': 'string', '[object Function]': 'function', '[object Array]': 'array', '[object Date]': 'date', '[object RegExp]': 'regexp', '[object Object]': 'object', '[object Error]': 'error'
@@ -52,11 +61,15 @@ var epic = (function() {
             return type
         })();
         epic.parse = {
-            currency: function(expression, symbol) {
+            currency: function(symbol, expression) {
+                if (arguments.length == 1) {
+                    expression = symbol;
+                    symbol = null
+                }
                 var numbers = expression + '';
                 var array = numbers.split('.');
                 var digits = array[0];
-                var decimals = array.length ? '.' + array[1] : '';
+                var decimals = array.length > 1 ? '.' + array[1] : '';
                 var pattern = /(\d+)(\d{3})/;
                 while (pattern.test(digits)) {
                     digits = digits.replace(pattern, '$1' + ',' + '$2')
@@ -76,31 +89,28 @@ var epic = (function() {
                     return json
                 }
         };
-        epic.log = epic.fail = function(message) {
-            console.log(message)
-        };
+        epic.log = log;
+        epic.fail = fail;
+        epic.uid = (function() {
+            function uid(){}
+            uid.seed = (new Date).getTime();
+            uid.next = function() {
+                return ++uid.seed
+            };
+            return uid
+        })();
         epic.start = function(callback) {
-            callback()
+            this.fail("Oops! :$ The [onready] feature isn't ready yet.")
         };
         return epic
     })();
 (function(epic) {
-    epic.uid = (function() {
-        function uid(){}
-        uid.seed = (new Date).getTime();
-        uid.next = function() {
-            return ++uid.seed
-        };
-        return uid
-    })()
-})(epic);
-(function(epic) {
-    function _object(object) {
-        return new dsl(object, to_array(arguments))
+    function object(obj) {
+        return new dsl(obj, to_array(arguments))
     }
-    function dsl(object, arguments) {
-        this.object = object;
-        this.arguments = arguments
+    function dsl(obj, parameters) {
+        this.object = obj;
+        this.parameters = parameters
     }
     dsl.prototype = {extends_from: function(base_class) {
             var target = this.object;
@@ -119,18 +129,6 @@ var epic = (function() {
             object.prototype = base_class.prototype;
             target.prototype = new object
         }};
-    function __extends(d, b) {
-        for (var p in b) {
-            if (b.hasOwnProperty(p)) {
-                d[p] = b[p]
-            }
-        }
-        function __() {
-            this.constructor = d
-        }
-        __.prototype = b.prototype;
-        d.prototype = new __
-    }
     function copy(object, target) {
         var object_type = epic.type(object);
         var clone;
@@ -175,21 +173,43 @@ var epic = (function() {
         var array = Array.prototype.slice.call(object);
         return array.length > 0 ? array : [object]
     }
-    _object.merge = merge;
-    _object.clone = copy;
-    _object.to_array = to_array;
-    epic.object = _object
+    object.merge = merge;
+    object.clone = copy;
+    object.to_array = to_array;
+    object.dsl = dsl;
+    epic.object = object
 })(epic);
 (function(epic) {
     function string(input) {
         return new dsl(input, epic.object.to_array(arguments))
     }
-    function dsl(input, arguments) {
+    function dsl(input, parameters) {
         this.input = input;
-        this.arguments = arguments
+        this.parameters = parameters
+    }
+    function replace_default_html_entities(str) {
+        var i = str.charCodeAt(0);
+        if ((i > 31 && i < 96) || (i > 96 && i < 127)) {
+            return str
+        }
+        else {
+            return '&#' + i + ';'
+        }
+    }
+    function replace_all_html_entities(str) {
+        var i = str.charCodeAt(0);
+        if ((i != 34 && i != 39 && i != 38 && i != 60 && i != 62) && ((i > 31 && i < 96) || (i > 96 && i < 127))) {
+            return str
+        }
+        else {
+            return '&#' + i + ';'
+        }
+    }
+    function restore_html_entities(str) {
+        return String.fromCharCode(str.replace(/[#&;]/g, ''))
     }
     var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    string.encode_base64 = function(input) {
+    function encode_base64(input) {
         var key = B64KEY;
         var str = string.encode_utf8(input);
         var length = str.length;
@@ -219,8 +239,8 @@ var epic = (function() {
             output = output + key.charAt(enc1) + key.charAt(enc2) + key.charAt(enc3) + key.charAt(enc4)
         }
         return output
-    };
-    string.decode_base64 = function(input) {
+    }
+    function decode_base64(input) {
         var key = B64KEY;
         var str = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
         var length = str.length;
@@ -251,8 +271,8 @@ var epic = (function() {
         }
         output = string.decode_utf8(output);
         return output
-    };
-    string.encode_utf8 = function(input) {
+    }
+    function encode_utf8(input) {
         var str = input.replace(/\r\n/g, "\n");
         var length = str.length;
         var index = 0;
@@ -274,8 +294,8 @@ var epic = (function() {
             }
         }
         return output
-    };
-    string.decode_utf8 = function(input) {
+    }
+    function decode_utf8(input) {
         var length = input.length;
         var index = 0;
         var output = "";
@@ -301,65 +321,64 @@ var epic = (function() {
             }
         }
         return output
-    };
-    string.encode_url = function(input) {
+    }
+    function encode_url(input) {
         return encodeURIComponent(input)
-    };
-    string.decode_url = function(input) {
+    }
+    function decode_url(input) {
         return decodeURIComponent(input)
-    };
-    string.encode_html_entities = function(input, encode_reserved_chars) {
+    }
+    function encode_html_entities(input, encode_reserved_chars) {
         return input.replace(/./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities)
-    };
-    string.decode_html_entities = function(input) {
+    }
+    function decode_html_entities(input) {
         return input.replace(/&#(\d)+;/g, restore_html_entities)
-    };
-    string.uppercase = function(str) {
+    }
+    function uppercase(str) {
         return str.toUpperCase()
-    };
-    string.lowercase = function(str) {
+    }
+    function lowercase(str) {
         return str.toLowerCase()
-    };
-    string.trim = function(str, collapse_spaces) {
+    }
+    function trim(str, collapse_spaces) {
         str = str.replace(/^\s+|\s+$/gm, '');
         if (collapse_spaces) {
             str = str.replace(/\s+/g, ' ')
         }
         return str
-    };
-    string.is_html = function(str) {
+    }
+    function is_html(str) {
         return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test(str)
-    };
-    string.to_dom = function(str) {
+    }
+    function to_dom(str) {
         var container = document.createElement("div");
         container.innerHTML = str;
-        return new epic.html.selector(Array.prototype.slice.call(container.childNodes))
-    };
-    function replace_default_html_entities(str) {
-        var i = str.charCodeAt(0);
-        if ((i > 31 && i < 96) || (i > 96 && i < 127)) {
-            return str
-        }
-        else {
-            return '&#' + i + ';'
-        }
+        return new epic.html(epic.object.to_array(container.childNodes))
     }
-    function replace_all_html_entities(str) {
-        var i = str.charCodeAt(0);
-        if ((i != 34 && i != 39 && i != 38 && i != 60 && i != 62) && ((i > 31 && i < 96) || (i > 96 && i < 127))) {
-            return str
-        }
-        else {
-            return '&#' + i + ';'
-        }
-    }
-    function restore_html_entities(str) {
-        return String.fromCharCode(str.replace(/[#&;]/g, ''))
-    }
+    string.encode_base64 = encode_base64;
+    string.decode_base64 = decode_base64;
+    string.encode_utf8 = encode_utf8;
+    string.decode_utf8 = decode_utf8;
+    string.encode_url = encode_url;
+    string.decode_url = decode_url;
+    string.encode_html_entities = encode_html_entities;
+    string.decode_html_entities = decode_html_entities;
+    string.uppercase = uppercase;
+    string.lowercase = lowercase;
+    string.trim = trim;
+    string.is_html = is_html;
+    string.to_dom = to_dom;
+    string.dsl = dsl;
     epic.string = string
 })(epic);
 (function(epic) {
-    function array(){}
+    function array(list) {
+        return new dsl(list, epic.object.to_array(arguments))
+    }
+    function dsl(list, parameters) {
+        this.object = list;
+        this.parameters = parameters
+    }
     array.flatten = function(items) {
         var a = [];
         return a.concat.apply(a, items)
@@ -374,6 +393,7 @@ var epic = (function() {
             }
         }
     };
+    array.dsl = dsl;
     epic.array = array
 })(epic);
 epic.collection = (function() {
@@ -553,13 +573,29 @@ epic.collection = (function() {
 (function(epic, widnow, document) {
     var is_html = epic.string.is_html;
     var array = epic.array;
-    function html(element) {
-        this.element = element;
-        this.elements = flatten(arguments)
+    function html(query, context) {
+        return new selector(query, context)
     }
-    function selector(query) {
-        query = query != null ? query : [];
-        this.elements = epic.type(query) == 'array' ? query : [query]
+    function selector(query, context) {
+        if (!query) {
+            return this
+        }
+        if (query instanceof selector) {
+            return query
+        }
+        this.query = query;
+        this.elements = []
+    }
+    function flatten(list) {
+        return array.flatten(array.each(list, html_element_parser))
+    }
+    function html_element_parser(element, index, list) {
+        if (element instanceof selector) {
+            list[index] = element.elements
+        }
+        else if (typeof element == "string") {
+            list[index] = epic.html.create(element)
+        }
     }
     function create(element) {
         var params = Array.prototype.slice.call(arguments);
@@ -577,17 +613,6 @@ epic.collection = (function() {
             node = document.createElement(element)
         }
         return new epic.html.selector(node)
-    }
-    function flatten(list) {
-        return array.flatten(array.each(list, html_element_parser))
-    }
-    function html_element_parser(element, index, list) {
-        if (element instanceof selector) {
-            list[index] = element.elements
-        }
-        else if (typeof element == "string") {
-            list[index] = epic.html.create(element)
-        }
     }
     selector.prototype = {
         empty: function() {
@@ -648,6 +673,8 @@ epic.collection = (function() {
                     index = upper_limit
                 }
                 return elements[index]
+            }, contains: function(element) {
+                return html.contains(this.elements[0], element)
             }
     };
     create.document_fragment = function(content, callback) {
@@ -715,11 +742,8 @@ epic.collection = (function() {
         document.getElementsByTagName('head')[0].insertBefore(style, null);
         return new epic.html.selector(style)
     };
-    html.select = function(query) {
-        if (query instanceof query) {
-            return query
-        }
-        return new query(query)
+    html.contains = function(container, element) {
+        return container.contains ? container.contains(element) : !!(container.compareDocumentPosition(element) & 16)
     };
     html.selector = selector;
     html.create = create;
@@ -730,7 +754,14 @@ epic.collection = (function() {
     var REGISTRY_POLICE = {};
     var HANDLERS = {};
     var next_uid = epic.uid.next;
+    var contains = epic.html.contains;
     var set_event_handler = document.addEventListener ? add_event_listener : attach_event;
+    var event_name_map = {
+            mouseenter: "mouseover", mouseleave: "mouseout", DOMMouseScroll: "mousewheel"
+        };
+    var keycode_map = {
+            8: 'BACKSPACE', 9: 'TAB', 10: 'ENTER', 13: 'ENTER', 20: 'CAPSLOCK', 27: 'ESC', 33: 'PAGEUP', 34: 'PAGEDOWN', 35: 'END', 36: 'HOME', 37: 'LEFT', 38: 'UP', 39: 'RIGHT', 40: 'DOWN', 45: 'INSERT', 46: 'DELETE'
+        };
     function event(){}
     function add(element, event_name, method, parameters) {
         if (typeof event_name != "string") {
@@ -744,8 +775,20 @@ epic.collection = (function() {
             return false
         }
         var handler = {
-                method: method, parameters: parameters || {}
+                context: element, method: method, parameters: parameters || {}
             };
+        if (event_name == "mouseover" || event_name == "mouseout") {
+            handler.context = {
+                element: element, method: method
+            };
+            handler.method = function(e, params) {
+                var t = this;
+                var elem = t.element;
+                if (!contains(elem, e.related_target)) {
+                    t.method.call(elem, e, params)
+                }
+            }
+        }
         (element_events[event_name] || (element_events[event_name] = [])).push(handler);
         set_event_handler(element, event_name, element_uid);
         REGISTRY_POLICE[police_key] = true;
@@ -768,42 +811,44 @@ epic.collection = (function() {
         }
     }
     function epic_event_handler(e) {
-        var evt = new epic_event(e);
+        var evt = e instanceof epic_event ? e : new epic_event(e);
         var element = evt.target;
+        var type = evt.type;
         var events = REGISTRY[element.uid];
         var handlers;
         var handler;
         var len;
         var index = 0;
-        if (events) {
-            handlers = events[evt.type];
+        if (events && (handlers = events[type])) {
             len = handlers.length;
             while (len--) {
                 handler = handlers[index++];
-                handler.method.call(element, evt, handler.parameters)
+                handler.method.call(handler.context, evt, handler.parameters)
+            }
+        }
+        if (!evt.propagation_stopped) {
+            var parent = element.parentNode;
+            if (parent) {
+                evt.target = parent;
+                epic_event_handler(evt)
             }
         }
         return this
     }
     function epic_event(e) {
         var target = (e.target || e.srcElement) || document;
+        var event_name = event_name_map[e.type] || e.type;
+        var from_element = e.fromElement;
+        var related_target = from_element == target ? e.toElement : e.relatedTarget || from_element;
         var which = e.which;
+        var keycode = which ? which : keycode;
         var charcode = e.charCode;
-        var keycode = e.keyCode;
-        var event_name = e.type;
+        var keyvalue = '';
+        var meta_key;
         var delta = 0;
         var page_x;
         var page_y;
-        var key_map = {
-                8: 'BACKSPACE', 9: 'TAB', 10: 'ENTER', 13: 'ENTER', 20: 'CAPSLOCK', 27: 'ESC', 33: 'PAGEUP', 34: 'PAGEDOWN', 35: 'END', 36: 'HOME', 37: 'LEFT', 38: 'UP', 39: 'RIGHT', 40: 'DOWN', 45: 'INSERT', 46: 'DELETE'
-            };
         var capslock = false;
-        var key_code = which ? which : keycode;
-        var key_value = '';
-        var meta_key;
-        if (event_name == 'DOMMouseScroll') {
-            event_name = 'mousewheel'
-        }
         if (e.altKey) {
             meta_key = 'ALT'
         }
@@ -813,30 +858,30 @@ epic.collection = (function() {
         else if (e.shiftKey || charcode == 16) {
             meta_key = 'SHIFT'
         }
-        else if (key_code == 20) {
+        else if (keycode == 20) {
             meta_key = 'CAPSLOCK'
         }
         if (which === undefined && charcode === undefined) {
-            key_code = keycode
+            keycode = keycode
         }
         else {
-            key_code = which != 0 && charcode != 0 ? which : keycode
+            keycode = which != 0 && charcode != 0 ? which : keycode
         }
-        key_value = key_code > 31 ? String.fromCharCode(key_code) : '';
-        if (key_code > 96 && key_code < 123 && meta_key == 'SHIFT' || key_code > 64 && key_code < 91 && meta_key != 'SHIFT') {
+        keyvalue = keycode > 31 ? String.fromCharCode(keycode) : '';
+        if (keycode > 96 && keycode < 123 && meta_key == 'SHIFT' || keycode > 64 && keycode < 91 && meta_key != 'SHIFT') {
             capslock = true
         }
         if (event_name == 'keydown' || event_name == 'keyup') {
-            if (key_value == 'CAPSLOCK') {
+            if (keyvalue == 'CAPSLOCK') {
                 capslock = !capslock
             }
-            if (key_code > 64 && key_code < 91 && meta_key != 'SHIFT') {
-                key_code = key_code + 32;
-                key_value = String.fromCharCode(key_code)
+            if (keycode > 64 && keycode < 91 && meta_key != 'SHIFT') {
+                keycode = keycode + 32;
+                keyvalue = String.fromCharCode(keycode)
             }
         }
-        if (key_map[key_code]) {
-            key_value = key_map[key_code]
+        if (keycode_map[keycode]) {
+            keyvalue = keycode_map[keycode]
         }
         if (event_name == 'mousewheel') {
             delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
@@ -849,30 +894,31 @@ epic.collection = (function() {
             page_x = e.clientX + (document_element && document_element.scrollLeft || body && body.scrollLeft || 0) - (document_element && document_element.clientLeft || body && body.clientLeft || 0);
             page_y = e.clientY + (document_element && document_element.scrollTop || body && body.scrollTop || 0) - (document_element && document_element.clientTop || body && body.clientTop || 0)
         }
+        this.original = e;
         this.target = target.nodeType === 3 ? target.parentNode : target;
-        ;
-        this.from_element = (e.fromElement || e.originalTarget);
-        this.to_element = e.toElement || target;
         this.type = event_name;
-        this.page_x = page_x;
-        this.page_y = page_y;
-        this.key_code = key_code;
-        this.key_value = key_value;
+        this.from_element = from_element;
+        this.to_element = e.toElement || target;
+        this.pagex = page_x;
+        this.pagey = page_y;
+        this.keycode = keycode;
+        this.keyvalue = keyvalue;
         this.metaKey = meta_key;
         this.delta = delta;
         this.capslock = capslock;
         this.button = e.button;
-        this.relatedTarget = e.relatedTarget || event_name == 'mouseover' ? e.fromElement : event_name == 'mouseout' ? e.toElement : null
+        this.related_target = related_target;
+        this.propagation_stopped = false
     }
     epic_event.prototype = {
-        preventDefault: function() {
-            this.original.preventDefault()
-        }, stopPropagation: function() {
-                var original_event = this.original;
-                original_event.cancelBubble = true;
-                original_event.stopPropagation();
-                original_event.preventDefault();
-                return false
+        prevent_default: function() {
+            this.original.preventDefault();
+            this.result = false
+        }, stop_propagation: function() {
+                var original = this.original;
+                original.cancelBubble = true;
+                original.stopPropagation();
+                this.propagation_stopped = true
             }
     };
     event.add = add;

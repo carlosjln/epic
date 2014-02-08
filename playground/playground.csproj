@@ -17,10 +17,9 @@
     <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.js" />
     <Content Include="epic\epic.1.0.0.js" />
-    <Content Include="epic\epic.ui.1.0.0.css" />
     <Content Include="epic\epic.ui.1.0.0.js" />
+    <Content Include="epic\theme\default\style\epic.ui.css" />
     <Content Include="index.htm" />
     <Content Include="web.config" />
   </ItemGroup>

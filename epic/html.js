@@ -2,15 +2,38 @@
 	var is_html = epic.string.is_html;
 	var array = epic.array;
 
-	function html( element ) {
-		this.element = element;
-		this.elements = flatten( arguments );
+	function html( query, context ) {
+		return new selector( query, context );
 	}
 
-	function selector( query ) {
-		query = query != null ? query : [];
+	function selector( query, context ) {
+		// RETURN AN EMPTY SELECTOR WHEN QUERY IS DARK MATTER (NULL, FALSE, UNDEFINED, "")
+		if( !query ) {
+			return this;
+		}
 
-		this.elements = epic.type( query ) == 'array' ? query : [query];
+		if( query instanceof selector ) {
+			return query;
+		}
+
+		this.query = query;
+		this.elements = [];
+	}
+
+	function flatten( list ) {
+		return array.flatten(
+			array.each( list, html_element_parser )
+		);
+	}
+
+	function html_element_parser( element, index, list ) {
+		// IDENTIFIES THE ELEMENT TYPE AND "FIXES" IT BEFORE THE LIST IS FLATTENED
+
+		if( element instanceof selector ) {
+			list[ index ] = element.elements;
+		} else if( typeof element == "string" ) {
+			list[ index ] = epic.html.create( element );
+		}
 	}
 
 	function create( element ) {
@@ -32,21 +55,6 @@
 		}
 
 		return new epic.html.selector( node );
-	}
-
-	function flatten( list ) {
-		return array.flatten(
-			array.each( list, html_element_parser )
-		);
-	}
-
-	// IDENTIFIES THE ELEMENT TYPE AND "FIXES" IT BEFORE THE LIST IS FLATTENED
-	function html_element_parser( element, index, list ) {
-		if( element instanceof selector ) {
-			list[ index ] = element.elements;
-		} else if( typeof element == "string" ) {
-			list[ index ] = epic.html.create( element );
-		}
 	}
 
 	selector.prototype = {
@@ -133,6 +141,10 @@
 			}
 
 			return elements[ index ];
+		},
+
+		contains: function( element ) {
+			return html.contains( this.elements[0], element );
 		}
 	};
 
@@ -223,17 +235,14 @@
 		return new epic.html.selector( style );
 	};
 
-	html.select = function( query ) {
-		if( query instanceof query ) {
-			return query;
-		}
-
-		return new query( query );
+	html.contains = function( container, element ) {
+		return container.contains ? container.contains( element ) : !!( container.compareDocumentPosition( element ) & 16 );
 	};
 
 	html.selector = selector;
-
+	
 	html.create = create;
 
 	epic.html = html;
+
 } )( epic, window, document );

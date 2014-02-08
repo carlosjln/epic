@@ -22,8 +22,10 @@
 
 	// VIEW 
 	function view( viewport ) {
-		var container = $( '<div class="container stretch" style="display: none;"></div>' );
-		var loader = $( '<span class="view-status" style="display: none;">Working...</span>' );
+		var create = epic.html.create;
+		
+		var container = create( '<div class="container stretch" style="display: none;"></div>' );
+		var loader = create( '<span class="view-status" style="display: none;">Working...</span>' );
 
 		this.container = container[ 0 ];
 		this.loader = loader[ 0 ];
@@ -54,7 +56,7 @@
 			var current_view = viewport.current_view;
 
 			if( current_view ) {
-				$( current_view.container ).css( 'display', 'none' );
+				epic.html( current_view.container ).css( 'display: none' );
 			}
 
 			t.container.style.display = 'block';

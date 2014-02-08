@@ -24,9 +24,9 @@
 		<input path="notice.js"/>
 	</output>
 	
-	<output path="..\build\epic.ui.1.0.0.css" type="css">
+	<output path="..\build\theme\default\style\epic.ui.css" type="css">
 		<arguments>-expr:raw -braces:same -line:M,4 -minify:false</arguments>
-		<input path="less\epic.ui.css"/>
+		<input path="theme\default\style\epic.ui.css"/>
 	</output>
 	
 	<!-- DEPLOY CURRENT BUILD TO PLAYGROUND -->
@@ -40,9 +40,9 @@
 		<input path="notice.js"/>
 	</output>
 	
-	<output path="..\playground\epic\epic.ui.1.0.0.css" type="css">
+	<output path="..\playground\epic\theme\default\style\epic.ui.css" type="css">
 		<arguments>-expr:raw -braces:same -line:M,4 -minify:false</arguments>
-		<input path="less\epic.ui.css"/>
+		<input path="theme\default\style\epic.ui.css"/>
 	</output>
 	
 </root>

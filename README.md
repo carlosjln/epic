@@ -1,10 +1,11 @@
-About epic.js
+ABOUT EPIC.JS (v 1.0.0)
 ====
 
 This JavaScript library aims at being:
 
 1. Readable - No matter how much code you write, things should always make sense.
-2. Fast - Every method, variable declaration, closure, etc... will be written taking into account JavaScript best practices to keep it running as fast as possible.
+2. Simple - No complicated options or crazy argument swapping.
+3. Fast - Everything is written taking into account JavaScript best practices to keep it running as fast as possible.
 
 **This is still work on progress.**
 
@@ -14,28 +15,70 @@ Feedback, suggestions, ideas, bug-fix & constructive critics are always welcome 
 
 ----------
 
-# Usage sample #
+# SAMPLES #
 
-## Merging properties ##
 
-Returns a new object containing all the properties of the supplied objects
+**Identify object types**
 
-    epic.merge( { a: 1 } ).and( { b: 2} );
-	epic.merge( { a: 1 } ).and( { b: 2}, ... );
+	var foo = function(){}
+	var date = new Date();
+	var error = new Error();
+	var match = /./;
+	
+    epic.type( "" ) == "string";	// true 
+	epic.type( 10 ) == "number";	// true
+	epic.type( {} ) == "object";	// true
+	epic.type( [] ) == "array";		// true
+	
+	epic.type( date ) == "date";	// true
+	epic.type( foo ) == "function";	// true
+	epic.type( error ) == "error";	// true
+	epic.type( match ) == "regexp";	// true
+	
+	epic.type( true ) == "boolean";		// true
+	epic.type( false ) == "boolean";	// true
 
-	epic.merge.objects( { a: 1 }, ... );
+**Data parsing**
 
-## Copying properties ##
+	epic.parse.url( "http://www.foo.com:9999/virtual/path/?name=foo" );
+	
+	// returns 
+	{
+	   "href":"http://www.foo.com:9999/virtual/path/?name=foo",
+	   "protocol":"http:",
+	   "host":"www.foo.com:9999",
+	   "hostname":"www.foo.com",
+	   "port":"9999",
+	   "path":"/virtual/path/",
+	   "query":{
+	      "name":"foo"
+	   },
+	   "bookmark":""
+	}
 
-Copies and/or overrides all properties in the target object
+**Logging**
+	
+The stylish way of saying "console.log" ;)
+	
+	epic.log( "something" ); 
 
-	var target = { c: 3};
-	epic.copy( { a: 1 }, { b: 2 } ).into( target );
-	console.log( target );
+Logs an *new Error(...)* with the specified message
 
-Only copies properties that are not defined in target object
+	epic.fail( "Oops!" );
 
-	var target = { b: 3};
-	epic.copy( { a: 1 }, { b: 2 } ).into_undefined( target );
-	console.log( target );
+Logs an *new Error(...)* with the specified message & error number/id
 
+	epic.fail( "Wrong!", 99 ); 
+
+When *epic.fail(...)* is preceded with the keyword *new* then it returns the error object instead of logging it
+ 
+	throw new epic.fail( "Oops!" );		// returns the error so it can be thrown as an exception 
+
+
+**Executing code when the page loads**
+
+	epic.start( function(){
+		// conquer the world!
+	} );
+
+A better approach is to place your JavaScript tags at the end of the document right before the closing body tag: *</body\>*

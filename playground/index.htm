@@ -5,7 +5,7 @@
 		<meta charset="utf-8" />
 		<title>Epic test B-)</title>
 		
-		<link href="epic/epic.ui.1.0.0.css" rel="stylesheet" />
+		<link href="epic/theme/default/style/epic.ui.css" rel="stylesheet" />
 
 		<script src="epic/epic.1.0.0.js"></script>
 		<script src="epic/epic.ui.1.0.0.js"></script>
@@ -13,11 +13,13 @@
 	<body>
 		<script type="text/javascript">
 			epic.notify( {
-				title: "Meh",
-				message: "Nothing new :P"
+				title: "Hello ^_^",
+				message: "Can you see me? :P"
 			});
 
-			epic.notify.success( "New environment was created successfully!" );
+			epic.notify.success( "We made it! ^_^ " );
+			epic.notify.warning( "Be careful!" );
+			epic.notify.danger( "RUN!!!" );
 		</script>
 	</body>
 </html>

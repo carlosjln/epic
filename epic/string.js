@@ -5,15 +5,39 @@
 		return new dsl( input, epic.object.to_array( arguments ) );
 	}
 
-	function dsl( input, arguments ) {
+	function dsl( input, parameters ) {
 		this.input = input;
-		this.arguments = arguments;
+		this.parameters = parameters;
+	}
+
+	function replace_default_html_entities( str ) {
+		var i = str.charCodeAt( 0 );
+
+		if( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) {
+			return str;
+		} else {
+			return '&#' + i + ';';
+		}
+	}
+
+	function replace_all_html_entities( str ) {
+		var i = str.charCodeAt( 0 );
+
+		if( ( i != 34 && i != 39 && i != 38 && i != 60 && i != 62 ) && ( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) ) {
+			return str;
+		} else {
+			return '&#' + i + ';';
+		}
+	}
+
+	function restore_html_entities( str ) {
+		return String.fromCharCode( str.replace( /[#&;]/g, '' ) );
 	}
 
 	// ENCODE/DECODE BASE64
 	var B64KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-	string.encode_base64 = function( input ) {
+	function encode_base64( input ) {
 		var key = B64KEY;
 
 		var str = string.encode_utf8( input );
@@ -43,9 +67,9 @@
 		}
 
 		return output;
-	};
-
-	string.decode_base64 = function( input ) {
+	}
+	
+	function decode_base64( input ) {
 		var key = B64KEY;
 
 		var str = input.replace( /[^A-Za-z0-9\+\/\=]/g, "" );
@@ -79,9 +103,9 @@
 		output = string.decode_utf8( output );
 
 		return output;
-	};
-
-	string.encode_utf8 = function( input ) {
+	}
+	
+	function encode_utf8( input ) {
 		var str = input.replace( /\r\n/g, "\n" );
 		var length = str.length;
 		var index = 0;
@@ -105,9 +129,9 @@
 		}
 
 		return output;
-	};
-
-	string.decode_utf8 = function( input ) {
+	}
+	
+	function decode_utf8( input ) {
 		var length = input.length;
 		var index = 0;
 
@@ -135,37 +159,37 @@
 		}
 
 		return output;
-	};
-
+	}
+	
 	// ENCODE/DECODE URL
-	string.encode_url = function( input ) {
+	function encode_url( input ) {
 		return encodeURIComponent( input );
-	};
-
-	string.decode_url = function( input ) {
+	}
+	
+	function decode_url( input ) {
 		return decodeURIComponent( input );
-	};
-
+	}
+	
 	// ENCODE/DECODE HTML ENTITIES
-	string.encode_html_entities = function( input, encode_reserved_chars ) {
+	function encode_html_entities( input, encode_reserved_chars ) {
 		return input.replace( /./g, encode_reserved_chars ? replace_all_html_entities : replace_default_html_entities );
-	};
-
-	string.decode_html_entities = function( input ) {
+	}
+	
+	function decode_html_entities( input ) {
 		return input.replace( /&#(\d)+;/g, restore_html_entities );
-	};
-
+	}
+	
 	// LOWER/UPPER CASE
-	string.uppercase = function( str ) {
+	function uppercase( str ) {
 		return str.toUpperCase();
-	};
-
-	string.lowercase = function( str ) {
+	}
+	
+	function lowercase( str ) {
 		return str.toLowerCase();
-	};
-
-	// TRIMMING
-	string.trim = function( str, collapse_spaces ) {
+	}
+	
+	// MISC
+	function trim( str, collapse_spaces ) {
 		str = str.replace(/^\s+|\s+$/gm,'');
 		
 		if( collapse_spaces ) {
@@ -173,45 +197,42 @@
 		}
 		
 		return str;
-	};
-
-	// MISC
-	string.is_html = function( str ) {
+	}
+	
+	function is_html( str ) {
 		return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test( str );
-	};
-
-	string.to_dom = function( str ) {
+	}
+	
+	function to_dom( str ) {
 		var container = document.createElement( "div" );
 		container.innerHTML = str;
 
-		return new epic.html.selector( Array.prototype.slice.call( container.childNodes ) );
-	};
-
-
-	// PRIVATE USE ONLY
-	function replace_default_html_entities( str ) {
-		var i = str.charCodeAt( 0 );
-
-		if( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) {
-			return str;
-		} else {
-			return '&#' + i + ';';
-		}
+		return new epic.html( epic.object.to_array( container.childNodes ) );
 	}
+	
+	// STATIC METHODS
+	string.encode_base64 = encode_base64;
+	string.decode_base64 = decode_base64;
 
-	function replace_all_html_entities( str ) {
-		var i = str.charCodeAt( 0 );
+	string.encode_utf8 = encode_utf8;
+	string.decode_utf8 = decode_utf8;
 
-		if( ( i != 34 && i != 39 && i != 38 && i != 60 && i != 62 ) && ( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) ) {
-			return str;
-		} else {
-			return '&#' + i + ';';
-		}
-	}
+	string.encode_url = encode_url;
+	string.decode_url = decode_url;
 
-	function restore_html_entities( str ) {
-		return String.fromCharCode( str.replace( /[#&;]/g, '' ) );
-	}
+	string.encode_html_entities = encode_html_entities;
+	string.decode_html_entities = decode_html_entities;
+	
+	string.uppercase = uppercase;
+	string.lowercase = lowercase;
 
+	string.trim = trim;
+	string.is_html = is_html;
+
+	string.to_dom = to_dom;
+
+	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
+	string.dsl = dsl;
+	
 	epic.string = string;
 } )( epic );

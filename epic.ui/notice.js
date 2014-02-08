@@ -22,30 +22,35 @@
 
 		var t = this;
 
-		var container = t.element = document.createElement( 'div' );
-		var title = t.message = document.createElement( 'span' );
-		var close_btn = t.message = document.createElement( 'span' );
+		var container = t.container = document.createElement( 'div' );
+		var title_bar = t.title = document.createElement( 'span' );
+		var close_button = t.close_button = document.createElement( 'span' );
 		var message = t.message = document.createElement( 'div' );
 
-		var type = settings.type;
-		var header = settings.title || type == notice.type.default ? "Information!" : ( type.charAt( 0 ).toUpperCase() + type.slice( 1 ) ) + "!";
-
-		t.settings = settings;
-		t.set_type( type );
-
-		close_btn.innerHTML = "";
-		close_btn.className = "notice-close";
-		epic.event.add( close_btn, "click", notice.event.close, container );
+		var notice_type = settings.type;
+		var title = settings.title;
 		
-		title.innerHTML = header;
-		title.className = "notice-title";
+		title = title || ( notice_type == notice.type.default ? "Information!" : ( notice_type.charAt( 0 ).toUpperCase() + notice_type.slice( 1 ) ) + "!" );
+		
+		t.settings = settings;
+		t.set_type( notice_type );
+
+		close_button.innerHTML = "";
+		close_button.className = "notice-close";
+		epic.event.add( close_button, "click", notice.event.close, container );
+		
+		title_bar.innerHTML = title;
+		title_bar.className = "notice-title";
 
 		message.innerHTML = settings.message;
 		message.className = "notice-content";
 
-		container.insertBefore( close_btn, null );
-		container.insertBefore( title, null );
+		container.insertBefore( close_button, null );
+		container.insertBefore( title_bar, null );
 		container.insertBefore( message, null );
+		
+		epic.event.add( container, "mouseover", notice.event.mouseover, close_button );
+		epic.event.add( container, "mouseout", notice.event.mouseout, close_button );
 
 		get_notification_rail().insertBefore( container, null );
 	}
@@ -64,13 +69,20 @@
 
 		show: function() {
 			var t = this;
-			t.element.style.display = 'block';
+			var container = t.container;
+
+			container.style.display = 'block';
+
+			if( t.parentNode == null ) {
+				get_notification_rail().insertBefore( container, null )
+			}
+
 			return t;
 		},
 
 		hide: function() {
 			var t = this;
-			t.element.style.display = 'none';
+			t.container.style.display = 'none';
 			return t;
 		},
 
@@ -92,7 +104,7 @@
 
 		set_type: function( type ) {
 			var t = this;
-			t.element.className = "notice notice-" + type;
+			t.container.className = "notice notice-" + type;
 			return t;
 		}
 	};
@@ -118,6 +130,14 @@
 		close: function( e, container ) {
 			var parent = container.parentNode;
 			parent.removeChild( container);
+		},
+
+		mouseover: function( e, close_button ) {
+			close_button.style.display = "block";
+		},
+
+		mouseout: function( e, close_button ) {
+			close_button.style.display = "none";
 		}
 	};
 

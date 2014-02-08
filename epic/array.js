@@ -1,10 +1,15 @@
 ﻿
 ( function( epic ) {
 
-	function array() {
-		
+	function array( list ) {
+		return new dsl( list, epic.object.to_array( arguments ) );
 	}
 
+	function dsl( list, parameters ) {
+		this.object = list;
+		this.parameters = parameters;
+	}
+	
 	array.flatten = function( items ) {
 		var a = [];
 		return a.concat.apply( a, items );
@@ -21,6 +26,9 @@
 			}
 		}
 	};
+
+	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
+	array.dsl = dsl;
 
 	epic.array = array;
 

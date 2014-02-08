@@ -79,3 +79,5 @@ sql
 
 #Exceptions
 !tools/**/*.*
+
+git-commit.bat

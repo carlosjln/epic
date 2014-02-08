@@ -56,6 +56,6 @@ epic.collection = ( function() {
 	function to_string( key ) {
 		return String( key );
 	}
-		
+	
 	return collection;
 } )();
