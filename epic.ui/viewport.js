@@ -43,7 +43,7 @@
 			if( state ) {
 				loader.style.display = 'inline';
 				
-				if( typeof state == "string" ) {
+				if( typeof state === "string" ) {
 					loader.innerHTML = state;
 				}
 			}

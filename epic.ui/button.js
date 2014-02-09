@@ -8,7 +8,7 @@
 
 		var tag = btn.tag = settings.tag || button.tag.button;
 		var size = btn.size = settings.size || button.size.normal;
-		var role = tag == button.size.button ? 'type="' + ( btn.role = settings.role || button.role.button ) + '"' : "";
+		var role = tag === button.size.button ? 'type="' + ( btn.role = settings.role || button.role.button ) + '"' : "";
 		var style = btn.style = settings.style || button.style.none;
 
 		var classes = btn.classes = 'btn ' + ( settings.classes || "" );
@@ -17,12 +17,12 @@
 		var icon = btn.icon = settings.icon || new epic.icon();
 		var align = epic.ui.align;
 
-		if( icon.align == align.none ){
+		if( icon.align === align.none ){
 			icon.set_align( align.left );
 		}
 		
-		if( caption == "" ) {
-			if( icon.name != "" ) {
+		if( caption === "" ) {
+			if( icon.name !== "" ) {
 				classes += " btn-icon-only";
 			}
 			

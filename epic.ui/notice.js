@@ -4,13 +4,13 @@
 		var id = "epic-notification-rail";
 		var rail = document.getElementById( id );
 
-		if( rail == null ) {
+		if( rail === null ) {
 			rail = document.createElement( "div" );
 			rail.id = id;
 //			rail.style.cssText = "position: fixed; right: 20px; bottom: 20px; width: 301px; z-index: 9999;";
 		}
 
-		if( rail.parentNode == null ) {
+		if( rail.parentNode === null ) {
 			document.body.insertBefore( rail, null );
 		}
 
@@ -30,7 +30,7 @@
 		var notice_type = settings.type;
 		var title = settings.title;
 		
-		title = title || ( notice_type == notice.type.default ? "Information!" : ( notice_type.charAt( 0 ).toUpperCase() + notice_type.slice( 1 ) ) + "!" );
+		title = title || ( notice_type === notice.type.default ? "Information!" : ( notice_type.charAt( 0 ).toUpperCase() + notice_type.slice( 1 ) ) + "!" );
 		
 		t.settings = settings;
 		t.set_type( notice_type );
@@ -73,7 +73,7 @@
 
 			container.style.display = 'block';
 
-			if( t.parentNode == null ) {
+			if( t.parentNode === null ) {
 				get_notification_rail().insertBefore( container, null )
 			}
 

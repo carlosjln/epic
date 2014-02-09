@@ -4,7 +4,7 @@
 		settings = settings || {};
 
 		var t = this;
-		var icon = t.element = document.createElement( 'i' );
+		var i = t.element = document.createElement( 'i' );
 
 		t.name = settings.name || "";
 		t.align = settings.align || epic.ui.align.none;
@@ -12,7 +12,7 @@
 
 		t.set_caption( settings.caption );
 
-		icon.addClass( t.name ).addClass( t.align.toString() ).addClass( t.classes );
+		i.addClass( t.name ).addClass( t.align.toString() ).addClass( t.classes );
 	}
 
 	function get_class( t ) {
