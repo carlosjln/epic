@@ -1,7 +1,7 @@
 var epic = (function() {
         function epic(){}
         function log(message) {
-            if (window['console'] != undefined) {
+            if (typeof window.console !== "undefined") {
                 console.log(epic.object.to_array(arguments))
             }
         }
@@ -19,7 +19,7 @@ var epic = (function() {
             var to_string = core_types.toString;
             function type(object) {
                 var typeof_object = typeof(object);
-                if (object == null) {
+                if (object === null) {
                     return 'null'
                 }
                 if (typeof_object === 'object' || typeof_object === 'function') {
@@ -28,7 +28,7 @@ var epic = (function() {
                 return typeof_object
             }
             type.is_window = function(object) {
-                return object != null && object == object.window
+                return object !== null && object == object.window
             };
             type.is_numeric = function(object) {
                 return !isNaN(parseFloat(object)) && isFinite(object)
@@ -167,7 +167,7 @@ var epic = (function() {
         return target
     }
     function to_array(object) {
-        if (object == null) {
+        if (typeof object == "undefined") {
             return null
         }
         var array = Array.prototype.slice.call(object);
@@ -348,7 +348,7 @@ var epic = (function() {
         return str
     }
     function is_html(str) {
-        return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test(str)
+        return (/^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i).test(str)
     }
     function to_dom(str) {
         var container = document.createElement("div");
@@ -426,7 +426,7 @@ epic.collection = (function() {
         var t = this;
         var k = t.to_string(key);
         var previous_element = t.collection[k];
-        if (previous_element != undefined) {
+        if (previous_element !== undefined) {
             delete this.collection[k];
             return previous_element.value
         }
@@ -488,24 +488,24 @@ epic.collection = (function() {
         var port;
         var pathname = '';
         anchor.href = document.location;
-        port = anchor.port;
+        port = parseInt(anchor.port, 10);
         if (relative) {
-            pathname = anchor.pathname.replace(/^[/]/, '');
+            pathname = anchor.pathname.replace(/^[\/]/, '');
             if (pathname) {
                 pathname = pathname.substring(0, pathname.lastIndexOf("/")) + "/"
             }
         }
-        return anchor.protocol + '//' + anchor.hostname + (port && port != 0 ? ':' + port : '') + '/' + pathname
+        return anchor.protocol + '//' + anchor.hostname + (port && port !== 0 ? ':' + port : '') + '/' + pathname
     }
     function request(url, type, callback) {
         var tag;
         var src = 'src';
         var rel;
         var typeof_script = typeof(type);
-        if (/^http/i.test(url) == false) {
+        if (/^http/i.test(url) === false) {
             url = browser.url + url
         }
-        if (loaded_documents[url] != null) {
+        if (loaded_documents[url] !== null) {
             if (callback) {
                 callback.free()
             }
@@ -536,14 +536,14 @@ epic.collection = (function() {
         if (callback) {
             element.onreadystatechange = function() {
                 var state = this.readyState;
-                if ((state === 'loaded' || state === 'complete') && data.loaded == false) {
+                if ((state === 'loaded' || state === 'complete') && data.loaded === false) {
                     this.onreadystatechange = null;
                     data.loaded = true;
                     data.callback()
                 }
             };
             element.onload = function() {
-                if (data.loaded == false) {
+                if (data.loaded === false) {
                     data.loaded = true;
                     data.callback()
                 }
@@ -643,7 +643,7 @@ epic.collection = (function() {
                     var node;
                     while (j--) {
                         node = child_nodes[index++];
-                        if (node.nodeType == 1 || (node.nodeType == 3 && trim(node.textContent) != '')) {
+                        if (node.nodeType == 1 || (node.nodeType == 3 && trim(node.textContent) !== '')) {
                             valid_nodes[valid_nodes.length] = node
                         }
                     }
@@ -708,11 +708,11 @@ epic.collection = (function() {
     };
     create.option = function(caption, value, selected) {
         var node = document.createElement("option");
-        if (selected == undefined && value === true) {
+        if (selected === undefined && value === true) {
             selected = true;
-            value = null
+            value = undefined
         }
-        value = value == null ? caption : value;
+        value = typeof value == "undefined" ? caption : value;
         node.insertBefore(document.createTextNode(caption), null);
         node.setAttribute('value', value);
         if (selected) {
@@ -865,7 +865,7 @@ epic.collection = (function() {
             keycode = keycode
         }
         else {
-            keycode = which != 0 && charcode != 0 ? which : keycode
+            keycode = which !== 0 && charcode !== 0 ? which : keycode
         }
         keyvalue = keycode > 31 ? String.fromCharCode(keycode) : '';
         if (keycode > 96 && keycode < 123 && meta_key == 'SHIFT' || keycode > 64 && keycode < 91 && meta_key != 'SHIFT') {
@@ -885,10 +885,9 @@ epic.collection = (function() {
         }
         if (event_name == 'mousewheel') {
             delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
-            ;
             delta = delta > 0 ? 1 : -1
         }
-        if (e.pageX == null && e.clientX != null) {
+        if (typeof e.pageX == "undefined" && e.clientX !== null) {
             var document_element = document.documentElement;
             var body = document.body;
             page_x = e.clientX + (document_element && document_element.scrollLeft || body && body.scrollLeft || 0) - (document_element && document_element.clientLeft || body && body.clientLeft || 0);

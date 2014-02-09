@@ -5,7 +5,7 @@ var epic = ( function() {
 
 	// FAIL LIKE A NINJA, SILENTLY :)
 	function log( message ) {
-		if( window[ 'console' ] != undefined ) {
+		if( typeof window.console !== "undefined" ) {
 			console.log( epic.object.to_array(arguments) );
 		}
 	}
@@ -39,7 +39,7 @@ var epic = ( function() {
 		function type( object ) {
 			var typeof_object = typeof( object );
 
-			if( object == null ) {
+			if( object === null ) {
 				return 'null';
 			}
 
@@ -51,7 +51,7 @@ var epic = ( function() {
 		}
 
 		type.is_window = function( object ) {
-			return object != null && object == object.window;
+			return object !== null && object == object.window;
 		};
 
 		type.is_numeric = function( object ) {

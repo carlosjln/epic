@@ -98,7 +98,7 @@
 					node = child_nodes[ index++ ];
 
 					// ENSURE ONLY ELEMENTS OR TEXT NODES WITH CONTENT ARE CONSIDERED ON THE INDEX
-					if( node.nodeType == 1 || ( node.nodeType == 3 && trim( node.textContent ) != '' ) ) {
+					if( node.nodeType == 1 || ( node.nodeType == 3 && trim( node.textContent ) !== '' ) ) {
 						valid_nodes[ valid_nodes.length ] = node;
 					}
 				}
@@ -186,12 +186,12 @@
 	create.option = function( caption, value, selected ) {
 		var node = document.createElement( "option" );
 
-		if( selected == undefined && value === true ) {
+		if( selected === undefined && value === true ) {
 			selected = true;
-			value = null;
+			value = undefined;
 		}
 
-		value = value == null ? caption : value;
+		value = typeof value == "undefined" ? caption : value;
 
 		// SET THE CAPTION
 		node.insertBefore( document.createTextNode( caption ), null );

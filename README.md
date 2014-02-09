@@ -7,7 +7,7 @@ This JavaScript library aims at being:
 2. Simple - No complicated options or crazy argument swapping.
 3. Fast - Everything is written taking into account JavaScript best practices to keep it running as fast as possible.
 
-**This is still work on progress.**
+**This is still work on progress, expect bugs and missing features. Please be patient :)**
 
 On the following commits the code will be imported from my previous JavaScript libraries and then some unit test should be added.
 

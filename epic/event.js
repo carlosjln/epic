@@ -196,7 +196,7 @@
 		} else {
 
 			// IF wich IS DIFFERENT FROM ZERO, IT IS A LETTER, OTHERWISE IS AN SPECIAL CHARACTER
-			keycode = which != 0 && charcode != 0 ? which : keycode;
+			keycode = which !== 0 && charcode !== 0 ? which : keycode;
 		}
 
 		keyvalue = keycode > 31 ? String.fromCharCode( keycode ) : '';
@@ -226,11 +226,11 @@
 
 		// CORRECT WHEEL SCROLL DIRECTION 
 		if( event_name == 'mousewheel' ) {
-			delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;;
+			delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
 			delta = delta > 0 ? 1 : -1;
 		}
 
-		if( e.pageX == null && e.clientX != null ) {
+		if( typeof e.pageX == "undefined" && e.clientX !== null ) {
 			var document_element = document.documentElement;
 			var body = document.body;
 
@@ -335,4 +335,4 @@
 //		return false;
 //	}
 
-} )( epic, window, document )
+} )( epic, window, document );

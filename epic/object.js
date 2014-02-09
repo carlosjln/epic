@@ -90,7 +90,7 @@
 
 	// TO ARRAY
 	function to_array( object ) {
-		if( object == null ) {
+		if( typeof object == "undefined" ) {
 			return null;
 		}
 

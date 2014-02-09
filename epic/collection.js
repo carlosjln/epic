@@ -45,7 +45,7 @@ epic.collection = ( function() {
 		var k = t.to_string( key );
 		var previous_element = t.collection[ k ];
 
-		if( previous_element != undefined ) {
+		if( previous_element !== undefined ) {
 			delete this.collection[ k ];
 			return previous_element.value;
 		}

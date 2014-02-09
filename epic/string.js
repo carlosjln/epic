@@ -200,7 +200,7 @@
 	}
 	
 	function is_html( str ) {
-		return /^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i.test( str );
+		return (/^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i).test( str );
 	}
 	
 	function to_dom( str ) {

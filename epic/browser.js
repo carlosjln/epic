@@ -95,7 +95,7 @@
 					new RegExp( ( version_search || identity_search || identity ) + "[\\/\\s](\\d+\\.\\d+)" ).test( user_agent );
 
 					// BROWSER/OS NAME, VERSION
-					return [ epic.string.lowercase( identity ), parseFloat( RegExp.$1 )];
+					return [epic.string.lowercase( identity ), parseFloat( RegExp.$1 )];
 				}
 			}
 		}
@@ -109,17 +109,17 @@
 		var pathname = '';
 
 		anchor.href = document.location;
-		port = anchor.port;
+		port = parseInt( anchor.port, 10 );
 
 		if( relative ) {
-			pathname = anchor.pathname.replace( /^[/]/, '' );
+			pathname = anchor.pathname.replace( /^[\/]/, '' );
 
 			if( pathname ) {
 				pathname = pathname.substring( 0, pathname.lastIndexOf( "/" ) ) + "/";
 			}
 		}
 
-		return anchor.protocol + '//' + anchor.hostname + ( port && port != 0 ? ':' + port : '' ) + '/' + pathname;
+		return anchor.protocol + '//' + anchor.hostname + ( port && port !== 0 ? ':' + port : '' ) + '/' + pathname;
 	}
 
 	// ASYNC SCRIPTS/STYLESHEETS LOADING
@@ -130,12 +130,12 @@
 		var typeof_script = typeof( type );
 
 		// ADDING BASE URL
-		if( /^http/i.test( url ) == false ) {
+		if( /^http/i.test( url ) === false ) {
 			url = browser.url + url;
 		}
 
 		// ENSURES THE SCRIPT IS REQUESTED ONLY ONCE
-		if( loaded_documents[ url ] != null ) {
+		if( loaded_documents[ url ] !== null ) {
 			if( callback ) {
 				callback.free();
 			}
@@ -178,7 +178,7 @@
 			element.onreadystatechange = function() {
 				var state = this.readyState;
 
-				if( ( state === 'loaded' || state === 'complete' ) && data.loaded == false ) {
+				if( ( state === 'loaded' || state === 'complete' ) && data.loaded === false ) {
 					this.onreadystatechange = null;
 					data.loaded = true;
 					data.callback();
@@ -186,7 +186,7 @@
 			};
 
 			element.onload = function() {
-				if( data.loaded == false ) {
+				if( data.loaded === false ) {
 					data.loaded = true;
 					data.callback();
 				}
