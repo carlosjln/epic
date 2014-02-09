@@ -59,12 +59,12 @@
     function icon(settings) {
         settings = settings || {};
         var t = this;
-        var icon = t.element = document.createElement('i');
+        var i = t.element = document.createElement('i');
         t.name = settings.name || "";
         t.align = settings.align || epic.ui.align.none;
         t.classes = settings.classes || "";
         t.set_caption(settings.caption);
-        icon.addClass(t.name).addClass(t.align.toString()).addClass(t.classes)
+        i.addClass(t.name).addClass(t.align.toString()).addClass(t.classes)
     }
     function get_class(t) {
         return (t.name = name) + ' ' + t.align + ' ' + t.classes
@@ -104,17 +104,17 @@
         var caption = btn.caption = settings.caption || "";
         var tag = btn.tag = settings.tag || button.tag.button;
         var size = btn.size = settings.size || button.size.normal;
-        var role = tag == button.size.button ? 'type="' + (btn.role = settings.role || button.role.button) + '"' : "";
+        var role = tag === button.size.button ? 'type="' + (btn.role = settings.role || button.role.button) + '"' : "";
         var style = btn.style = settings.style || button.style.none;
         var classes = btn.classes = 'btn ' + (settings.classes || "");
         var attributes = btn.attributes = settings.attributes || "";
         var icon = btn.icon = settings.icon || new epic.icon;
         var align = epic.ui.align;
-        if (icon.align == align.none) {
+        if (icon.align === align.none) {
             icon.set_align(align.left)
         }
-        if (caption == "") {
-            if (icon.name != "") {
+        if (caption === "") {
+            if (icon.name !== "") {
                 classes += " btn-icon-only"
             }
             icon.set_align(align.none)
@@ -166,7 +166,7 @@
             loader.innerHTML = 'Working out...';
             if (state) {
                 loader.style.display = 'inline';
-                if (typeof state == "string") {
+                if (typeof state === "string") {
                     loader.innerHTML = state
                 }
             }
@@ -198,11 +198,11 @@
     function get_notification_rail() {
         var id = "epic-notification-rail";
         var rail = document.getElementById(id);
-        if (rail == null) {
+        if (rail === null) {
             rail = document.createElement("div");
             rail.id = id
         }
-        if (rail.parentNode == null) {
+        if (rail.parentNode === null) {
             document.body.insertBefore(rail, null)
         }
         return rail
@@ -216,7 +216,7 @@
         var message = t.message = document.createElement('div');
         var notice_type = settings.type;
         var title = settings.title;
-        title = title || (notice_type == notice.type.default ? "Information!" : (notice_type.charAt(0).toUpperCase() + notice_type.slice(1)) + "!");
+        title = title || (notice_type === notice.type.default ? "Information!" : (notice_type.charAt(0).toUpperCase() + notice_type.slice(1)) + "!");
         t.settings = settings;
         t.set_type(notice_type);
         close_button.innerHTML = "";
@@ -245,7 +245,7 @@
                 var t = this;
                 var container = t.container;
                 container.style.display = 'block';
-                if (t.parentNode == null) {
+                if (t.parentNode === null) {
                     get_notification_rail().insertBefore(container, null)
                 }
                 return t

@@ -50,7 +50,7 @@
 	var loaded_documents = [];
 
 	// INTERNET EXPLORER
-	browser.ie = ( browser.name == 'explorer' );
+	browser.ie = ( browser.name === 'explorer' );
 
 	// GET'S THE CURRENT URL PARTS
 	browser.get_current_url = get_current_url;
@@ -143,15 +143,15 @@
 			return loaded_documents[ url ].element;
 		}
 
-		if( typeof_script == 'function' ) {
+		if( typeof_script === 'function' ) {
 			callback = type;
 		}
 
-		if( typeof_script != 'string' ) {
+		if( typeof_script !== 'string' ) {
 			type = url.split( '?' )[ 0 ].file_ext();
 		}
 
-		if( type == 'js' ) {
+		if( type === 'js' ) {
 			tag = 'script';
 			rel = type = 'javascript';
 
@@ -192,8 +192,8 @@
 				}
 			};
 
-			if( type == 'css' ) {
-				if( browser.name == "firefox" ) {
+			if( type === 'css' ) {
+				if( browser.name === "firefox" ) {
 					element.textContent = '@import "' + url + '"';
 
 					var foo = setInterval( function() {

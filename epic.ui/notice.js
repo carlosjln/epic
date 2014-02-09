@@ -74,7 +74,7 @@
 			container.style.display = 'block';
 
 			if( t.parentNode === null ) {
-				get_notification_rail().insertBefore( container, null )
+				get_notification_rail().insertBefore( container, null );
 			}
 
 			return t;

@@ -51,7 +51,7 @@ var epic = ( function() {
 		}
 
 		type.is_window = function( object ) {
-			return object !== null && object == object.window;
+			return object !== null && object === object.window;
 		};
 
 		type.is_numeric = function( object ) {
@@ -59,7 +59,7 @@ var epic = ( function() {
 		};
 
 		type.is_undefined = function( object ) {
-			return typeof( object ) == 'undefined';
+			return typeof( object ) === 'undefined';
 		};
 
 		type.is_array = function( object ) {
@@ -79,11 +79,11 @@ var epic = ( function() {
 		};
 
 		type.is_boolean = function( object ) {
-			return type( object ) == 'boolean';
+			return type( object ) === 'boolean';
 		};
 
 		type.is_regexp = function( object ) {
-			return type( object ) == 'regexp';
+			return type( object ) === 'regexp';
 		};
 
 		type.is_element = function( object ) {
@@ -97,7 +97,7 @@ var epic = ( function() {
 	// DATA PARSING
 	epic.parse = {
 		currency: function( symbol, expression ) {
-			if( arguments.length == 1 ) {
+			if( arguments.length === 1 ) {
 				expression = symbol;
 				symbol = null;
 			}

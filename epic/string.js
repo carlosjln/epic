@@ -23,7 +23,7 @@
 	function replace_all_html_entities( str ) {
 		var i = str.charCodeAt( 0 );
 
-		if( ( i != 34 && i != 39 && i != 38 && i != 60 && i != 62 ) && ( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) ) {
+		if( ( i !== 34 && i !== 39 && i !== 38 && i !== 60 && i !== 62 ) && ( ( i > 31 && i < 96 ) || ( i > 96 && i < 127 ) ) ) {
 			return str;
 		} else {
 			return '&#' + i + ';';
@@ -92,10 +92,11 @@
 
 			output = output + String.fromCharCode( chr1 );
 
-			if( enc3 != 64 ) {
+			if( enc3 !== 64 ) {
 				output = output + String.fromCharCode( chr2 );
 			}
-			if( enc4 != 64 ) {
+			
+			if( enc4 !== 64 ) {
 				output = output + String.fromCharCode( chr3 );
 			}
 		}

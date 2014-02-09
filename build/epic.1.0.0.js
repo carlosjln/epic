@@ -28,13 +28,13 @@ var epic = (function() {
                 return typeof_object
             }
             type.is_window = function(object) {
-                return object !== null && object == object.window
+                return object !== null && object === object.window
             };
             type.is_numeric = function(object) {
                 return !isNaN(parseFloat(object)) && isFinite(object)
             };
             type.is_undefined = function(object) {
-                return typeof(object) == 'undefined'
+                return typeof(object) === 'undefined'
             };
             type.is_array = function(object) {
                 return type(object) === "array"
@@ -49,10 +49,10 @@ var epic = (function() {
                 return type(object) === "object"
             };
             type.is_boolean = function(object) {
-                return type(object) == 'boolean'
+                return type(object) === 'boolean'
             };
             type.is_regexp = function(object) {
-                return type(object) == 'regexp'
+                return type(object) === 'regexp'
             };
             type.is_element = function(object) {
                 var html_element = typeof HTMLElement === "object";
@@ -62,7 +62,7 @@ var epic = (function() {
         })();
         epic.parse = {
             currency: function(symbol, expression) {
-                if (arguments.length == 1) {
+                if (arguments.length === 1) {
                     expression = symbol;
                     symbol = null
                 }
@@ -167,7 +167,7 @@ var epic = (function() {
         return target
     }
     function to_array(object) {
-        if (typeof object == "undefined") {
+        if (typeof object === "undefined") {
             return null
         }
         var array = Array.prototype.slice.call(object);
@@ -198,7 +198,7 @@ var epic = (function() {
     }
     function replace_all_html_entities(str) {
         var i = str.charCodeAt(0);
-        if ((i != 34 && i != 39 && i != 38 && i != 60 && i != 62) && ((i > 31 && i < 96) || (i > 96 && i < 127))) {
+        if ((i !== 34 && i !== 39 && i !== 38 && i !== 60 && i !== 62) && ((i > 31 && i < 96) || (i > 96 && i < 127))) {
             return str
         }
         else {
@@ -262,10 +262,10 @@ var epic = (function() {
             chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
             chr3 = ((enc3 & 3) << 6) | enc4;
             output = output + String.fromCharCode(chr1);
-            if (enc3 != 64) {
+            if (enc3 !== 64) {
                 output = output + String.fromCharCode(chr2)
             }
-            if (enc4 != 64) {
+            if (enc4 !== 64) {
                 output = output + String.fromCharCode(chr3)
             }
         }
@@ -452,7 +452,7 @@ epic.collection = (function() {
                 }
         };
     var loaded_documents = [];
-    browser.ie = (browser.name == 'explorer');
+    browser.ie = (browser.name === 'explorer');
     browser.get_current_url = get_current_url;
     if (browser.ie) {
         try {
@@ -511,13 +511,13 @@ epic.collection = (function() {
             }
             return loaded_documents[url].element
         }
-        if (typeof_script == 'function') {
+        if (typeof_script === 'function') {
             callback = type
         }
-        if (typeof_script != 'string') {
+        if (typeof_script !== 'string') {
             type = url.split('?')[0].file_ext()
         }
-        if (type == 'js') {
+        if (type === 'js') {
             tag = 'script';
             rel = type = 'javascript'
         }
@@ -548,8 +548,8 @@ epic.collection = (function() {
                     data.callback()
                 }
             };
-            if (type == 'css') {
-                if (browser.name == "firefox") {
+            if (type === 'css') {
+                if (browser.name === "firefox") {
                     element.textContent = '@import "' + url + '"';
                     var foo = setInterval(function() {
                             try {
@@ -593,7 +593,7 @@ epic.collection = (function() {
         if (element instanceof selector) {
             list[index] = element.elements
         }
-        else if (typeof element == "string") {
+        else if (typeof element === "string") {
             list[index] = epic.html.create(element)
         }
     }
@@ -603,10 +603,10 @@ epic.collection = (function() {
         if (is_html(element)) {
             return epic.string.to_dom(element)
         }
-        if (element == 'option') {
+        if (element === 'option') {
             return create.option(params[0], params[1], params[2])
         }
-        if (element == "textnode") {
+        if (element === "textnode") {
             node = document.createTextNode(element)
         }
         else {
@@ -643,7 +643,7 @@ epic.collection = (function() {
                     var node;
                     while (j--) {
                         node = child_nodes[index++];
-                        if (node.nodeType == 1 || (node.nodeType == 3 && trim(node.textContent) !== '')) {
+                        if (node.nodeType === 1 || (node.nodeType === 3 && trim(node.textContent) !== '')) {
                             valid_nodes[valid_nodes.length] = node
                         }
                     }
@@ -712,7 +712,7 @@ epic.collection = (function() {
             selected = true;
             value = undefined
         }
-        value = typeof value == "undefined" ? caption : value;
+        value = typeof value === "undefined" ? caption : value;
         node.insertBefore(document.createTextNode(caption), null);
         node.setAttribute('value', value);
         if (selected) {
@@ -764,7 +764,7 @@ epic.collection = (function() {
         };
     function event(){}
     function add(element, event_name, method, parameters) {
-        if (typeof event_name != "string") {
+        if (typeof event_name !== "string") {
             return epic.fail("[event_name] must be a valid event name.")
         }
         var element_uid = element.uid || (element.uid = next_uid());
@@ -777,7 +777,7 @@ epic.collection = (function() {
         var handler = {
                 context: element, method: method, parameters: parameters || {}
             };
-        if (event_name == "mouseover" || event_name == "mouseout") {
+        if (event_name === "mouseover" || event_name === "mouseout") {
             handler.context = {
                 element: element, method: method
             };
@@ -839,7 +839,7 @@ epic.collection = (function() {
         var target = (e.target || e.srcElement) || document;
         var event_name = event_name_map[e.type] || e.type;
         var from_element = e.fromElement;
-        var related_target = from_element == target ? e.toElement : e.relatedTarget || from_element;
+        var related_target = from_element === target ? e.toElement : e.relatedTarget || from_element;
         var which = e.which;
         var keycode = which ? which : keycode;
         var charcode = e.charCode;
@@ -855,10 +855,10 @@ epic.collection = (function() {
         else if (e.ctrlKey || e.metaKey) {
             meta_key = 'CTRL'
         }
-        else if (e.shiftKey || charcode == 16) {
+        else if (e.shiftKey || charcode === 16) {
             meta_key = 'SHIFT'
         }
-        else if (keycode == 20) {
+        else if (keycode === 20) {
             meta_key = 'CAPSLOCK'
         }
         if (which === undefined && charcode === undefined) {
@@ -868,14 +868,14 @@ epic.collection = (function() {
             keycode = which !== 0 && charcode !== 0 ? which : keycode
         }
         keyvalue = keycode > 31 ? String.fromCharCode(keycode) : '';
-        if (keycode > 96 && keycode < 123 && meta_key == 'SHIFT' || keycode > 64 && keycode < 91 && meta_key != 'SHIFT') {
+        if (keycode > 96 && keycode < 123 && meta_key === 'SHIFT' || keycode > 64 && keycode < 91 && meta_key !== 'SHIFT') {
             capslock = true
         }
-        if (event_name == 'keydown' || event_name == 'keyup') {
-            if (keyvalue == 'CAPSLOCK') {
+        if (event_name === 'keydown' || event_name === 'keyup') {
+            if (keyvalue === 'CAPSLOCK') {
                 capslock = !capslock
             }
-            if (keycode > 64 && keycode < 91 && meta_key != 'SHIFT') {
+            if (keycode > 64 && keycode < 91 && meta_key !== 'SHIFT') {
                 keycode = keycode + 32;
                 keyvalue = String.fromCharCode(keycode)
             }
@@ -883,11 +883,11 @@ epic.collection = (function() {
         if (keycode_map[keycode]) {
             keyvalue = keycode_map[keycode]
         }
-        if (event_name == 'mousewheel') {
+        if (event_name === 'mousewheel') {
             delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
             delta = delta > 0 ? 1 : -1
         }
-        if (typeof e.pageX == "undefined" && e.clientX !== null) {
+        if (typeof e.pageX === "undefined" && e.clientX !== null) {
             var document_element = document.documentElement;
             var body = document.body;
             page_x = e.clientX + (document_element && document_element.scrollLeft || body && body.scrollLeft || 0) - (document_element && document_element.clientLeft || body && body.clientLeft || 0);

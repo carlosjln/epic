@@ -31,7 +31,7 @@
 
 		if( element instanceof selector ) {
 			list[ index ] = element.elements;
-		} else if( typeof element == "string" ) {
+		} else if( typeof element === "string" ) {
 			list[ index ] = epic.html.create( element );
 		}
 	}
@@ -44,11 +44,11 @@
 			return epic.string.to_dom( element );
 		}
 
-		if( element == 'option' ) {
+		if( element === 'option' ) {
 			return create.option( params[ 0 ], params[ 1 ], params[ 2 ] );
 		}
 
-		if( element == "textnode" ) {
+		if( element === "textnode" ) {
 			node = document.createTextNode( element );
 		} else {
 			node = document.createElement( element );
@@ -98,7 +98,7 @@
 					node = child_nodes[ index++ ];
 
 					// ENSURE ONLY ELEMENTS OR TEXT NODES WITH CONTENT ARE CONSIDERED ON THE INDEX
-					if( node.nodeType == 1 || ( node.nodeType == 3 && trim( node.textContent ) !== '' ) ) {
+					if( node.nodeType === 1 || ( node.nodeType === 3 && trim( node.textContent ) !== '' ) ) {
 						valid_nodes[ valid_nodes.length ] = node;
 					}
 				}
@@ -191,7 +191,7 @@
 			value = undefined;
 		}
 
-		value = typeof value == "undefined" ? caption : value;
+		value = typeof value === "undefined" ? caption : value;
 
 		// SET THE CAPTION
 		node.insertBefore( document.createTextNode( caption ), null );

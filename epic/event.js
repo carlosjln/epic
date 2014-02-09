@@ -41,7 +41,7 @@
 	}
 
 	function add( element, event_name, method, parameters ) {
-		if( typeof event_name != "string" ) {
+		if( typeof event_name !== "string" ) {
 			return epic.fail( "[event_name] must be a valid event name." );
 		}
 
@@ -64,7 +64,7 @@
 		};
 
 		// FIX THE MOUSEENTER/MOUSEOVER SO THAT IT DOESN'T GET TRIGGERED WHEN HOVERING ELEMENTS WITHIN THE CURRENT NODE
-		if( event_name == "mouseover" || event_name == "mouseout" ) {
+		if( event_name === "mouseover" || event_name === "mouseout" ) {
 
 			// OVERRIDE THE CONTEXT AND USE THAT DATA ON THE OVERRIDEN METHOD
 			// THIS AVOIDS THE NEED TO KEEP REFERENCES OVER THE ORIGINAL METHOD OR THE ELEMENT
@@ -163,7 +163,7 @@
 
 		var event_name = event_name_map[ e.type ] || e.type;
 		var from_element = e.fromElement;
-		var related_target = from_element == target ? e.toElement : e.relatedTarget || from_element;
+		var related_target = from_element === target ? e.toElement : e.relatedTarget || from_element;
 
 		var which = e.which;
 		var keycode = which ? which : keycode;
@@ -182,9 +182,9 @@
 			meta_key = 'ALT';
 		} else if( e.ctrlKey || e.metaKey ) {
 			meta_key = 'CTRL';
-		} else if( e.shiftKey || charcode == 16 ) {
+		} else if( e.shiftKey || charcode === 16 ) {
 			meta_key = 'SHIFT';
-		} else if( keycode == 20 ) {
+		} else if( keycode === 20 ) {
 			meta_key = 'CAPSLOCK';
 		}
 
@@ -203,17 +203,17 @@
 
 		// IF SHIFT KEY IS NOT PRESSED AND THE KEY CODE RETURNS 'A-Z'
 		// OR SHIFT KEY IS PRESSED BUT THE KEY CODE RETURNS 'a-z'.		
-		if( keycode > 96 && keycode < 123 && meta_key == 'SHIFT' || keycode > 64 && keycode < 91 && meta_key != 'SHIFT' ) {
+		if( keycode > 96 && keycode < 123 && meta_key === 'SHIFT' || keycode > 64 && keycode < 91 && meta_key !== 'SHIFT' ) {
 			capslock = true;
 		}
 
 		// A BIT OF CORRECTION TO THE BUGGY KEYDOWN AND KEYUP EVENTS
-		if( event_name == 'keydown' || event_name == 'keyup' ) {
-			if( keyvalue == 'CAPSLOCK' ) {
+		if( event_name === 'keydown' || event_name === 'keyup' ) {
+			if( keyvalue === 'CAPSLOCK' ) {
 				capslock = !capslock;
 			}
 
-			if( keycode > 64 && keycode < 91 && meta_key != 'SHIFT' ) {
+			if( keycode > 64 && keycode < 91 && meta_key !== 'SHIFT' ) {
 				keycode = keycode + 32;
 				keyvalue = String.fromCharCode( keycode );
 			}
@@ -225,12 +225,12 @@
 		}
 
 		// CORRECT WHEEL SCROLL DIRECTION 
-		if( event_name == 'mousewheel' ) {
+		if( event_name === 'mousewheel' ) {
 			delta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
 			delta = delta > 0 ? 1 : -1;
 		}
 
-		if( typeof e.pageX == "undefined" && e.clientX !== null ) {
+		if( typeof e.pageX === "undefined" && e.clientX !== null ) {
 			var document_element = document.documentElement;
 			var body = document.body;
 
