@@ -104,6 +104,7 @@ var epic = (function() {
         };
         return epic
     })();
+var epic;
 (function(epic) {
     function object(obj) {
         return new dsl(obj, to_array(arguments))
@@ -169,6 +170,9 @@ var epic = (function() {
     function to_array(object) {
         if (typeof object === "undefined") {
             return null
+        }
+        if (object instanceof Array) {
+            return object
         }
         var array = Array.prototype.slice.call(object);
         return array.length > 0 ? array : [object]
@@ -371,6 +375,7 @@ var epic = (function() {
     string.dsl = dsl;
     epic.string = string
 })(epic);
+var epic;
 (function(epic) {
     function array(list) {
         return new dsl(list, epic.object.to_array(arguments))
@@ -383,15 +388,39 @@ var epic = (function() {
         var a = [];
         return a.concat.apply(a, items)
     };
-    array.each = Array.prototype.forEach || function(list, callback, self) {
+    array.each = function(list, callback, self) {
         var i = 0;
         var length = list.length;
         self = self || list;
         for (; i < length; i++) {
-            if (callback.call(self, list[i], i, list) === false) {
-                break
+            callback.call(self, list[i], i, list)
+        }
+    };
+    array.every = function(list, callback, self) {
+        var i = 0;
+        var length = list.length;
+        self = self || list;
+        for (; i < length; i++) {
+            if (callback.call(self, list[i], i, list)) {
+                continue
+            }
+            return false
+        }
+        return true
+    };
+    array.filter = function(list, condition, self) {
+        var length = list.length;
+        var i = 0;
+        var result = [];
+        var item;
+        self = self || list;
+        for (; i < length; i++) {
+            item = list[i];
+            if (condition.call(self, item, i, list)) {
+                result[result.length] = item
             }
         }
+        return result
     };
     array.dsl = dsl;
     epic.array = array
@@ -749,6 +778,7 @@ epic.collection = (function() {
     html.create = create;
     epic.html = html
 })(epic, window, document);
+var epic;
 (function(epic, window, document) {
     var REGISTRY = {};
     var REGISTRY_POLICE = {};

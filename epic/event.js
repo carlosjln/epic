@@ -1,4 +1,5 @@
-﻿( function( epic, window, document ) {
+﻿var epic;
+( function( epic, window, document ) {
 	var REGISTRY = {};
 	var REGISTRY_POLICE = {};
 	var HANDLERS = {};
@@ -285,54 +286,5 @@
 	event.registry = REGISTRY;
 
 	epic.event = event;
-
-//	function get_uid( object ) {
-//		if( is_element( object ) == false ) {
-//			return null;
-//		}
-//
-//		return object.uid || ( object.uid = next_uid() );
-//	}
-
-//	function new_registry_entry() {
-//		var event_names = [
-//			"blur", "focus", "focusin", "focusout", "load", "resize", "scroll", "unload",
-//			"click", "dblclick", "mousedown", "mouseup", "mousemove", "mouseover", "mouseout",
-//			"mouseenter", "mouseleave", "change", "select", "submit", "keydown", "keypress",
-//			"keyup", "error", "contextmenu"
-//		];
-//
-//		var i = event_names.length;
-//		var object = {};
-//
-//		while( i-- ) {
-//			object[ event_names[ i ] ] = [];
-//		}
-//
-//		return object;
-//	}
-
-//	epic.event( element, "click", create_user, data );
-//	epic.event.handle( element, "click", create_user, data );
-//
-//	epic.html( element ).handle( create_user, "click", data );
-//	epic.html( element ).on( "click" ).handle( create_user, data );
-
-//	function is_registered( element_uid, event_name, method_uid  ) {
-//		var element;
-//		var event_data;
-//		var method;
-//		
-//
-//		if( element = REGISTRY_POLICE[ element_uid ] ) {
-//			if( event_data = element[ event_name ] ) {
-//				if( method = event_data[ event_name ] ) {
-//					return method[ method_uid ] ? true : false;
-//				}
-//			}
-//		}
-//
-//		return false;
-//	}
 
 } )( epic, window, document );

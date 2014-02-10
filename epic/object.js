@@ -1,4 +1,4 @@
-﻿
+﻿var epic;
 ( function( epic ) {
 
 	function object( obj ) {
@@ -92,6 +92,10 @@
 	function to_array( object ) {
 		if( typeof object === "undefined" ) {
 			return null;
+		}
+
+		if( object instanceof Array ) {
+			return object;
 		}
 
 		var array = Array.prototype.slice.call( object );
