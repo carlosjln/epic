@@ -1,48 +1,60 @@
-﻿( function( epic ) {
-	
-	// VIEWPORT
-	function viewport( target ) {
-		this.views = [];
-		this.target = target;
+﻿( function( epic, window, document ) {
+	var $ = epic.html;
+
+	function create( tag, classname, style, content ) {
+		var element = document.createElement( tag );
+		
+		element.className = classname || "";
+		element.style.cssText = style || "";
+		element.innerHTML = content || "";
+		
+		return element;
 	}
 
-	viewport.prototype.add_view = function( view ) {
-		var t = this;
-		var views = t.views;
+	// VIEWPORT
+	function viewport() {
+		var self = this;
 
-		view = view || new epic.view( t );
+		self.views = [];
+		self.container = create( "div", "epic-viewport" );
+	}
 
-		t.target.insertBefore( view.container, null );
+	viewport.prototype.add_view = function() {
+		var self = this;
+		var views = self.views;
+		var v = new view( self );
 
-		views[ views.length ] = view;
+		self.container.insertBefore( v.container, null );
 
-		return view;
+		views[ views.length ] = v;
+
+		return v;
 	};
 
 
 	// VIEW 
 	function view( viewport ) {
-		var create = epic.html.create;
+		var container = create("div", "epic-view", "");
+		var loader = create("span", "epic-view-status", "", "Working..."); 
+		var t = this;
 		
-		var container = create( '<div class="container stretch" style="display: none;"></div>' );
-		var loader = create( '<span class="view-status" style="display: none;">Working...</span>' );
+		t.container = container;
+		t.loader = loader;
+		t.viewport = viewport;
 
-		this.container = container[ 0 ];
-		this.loader = loader[ 0 ];
-		this.viewport = viewport;
-
-		container.append( loader );
+		container.insertBefore( loader, null );
 	}
 
 	view.prototype = {
 		is_busy: function( state ) {
 			var loader = this.loader;
+
 			loader.style.display = 'none';
 			loader.innerHTML = 'Working out...';
 
 			if( state ) {
 				loader.style.display = 'inline';
-				
+
 				if( typeof state === "string" ) {
 					loader.innerHTML = state;
 				}
@@ -50,38 +62,42 @@
 		},
 
 		activate: function() {
-			var t = this;
+			var self = this;
 
-			var viewport = t.viewport;
-			var current_view = viewport.current_view;
+			var vp = self.viewport;
+			var current_view = vp.current_view;
 
 			if( current_view ) {
-				epic.html( current_view.container ).css( 'display: none' );
+				current_view.container.style.display = "none";
 			}
 
-			t.container.style.display = 'block';
-			viewport.current_view = t;
+			self.container.style.display = 'block';
+			vp.current_view = self;
 
-			return t;
+			return self;
 		},
 
 		empty: function() {
-			var t = this;
-			var container = t.container;
-			
-			t.is_busy( false );
-			
-			epic.html( container ).empty().append( t.loader );
+			var self = this;
+			var container = self.container;
 
-			return t;
+			self.is_busy( false );
+
+			$( container ).empty().append( self.loader );
+
+			return self;
 		},
 
 		append: function( html ) {
-			epic.html( this.container ).append( html );
-			return this;
+			var self = this;
+			var content = $.create.document_fragment( html );
+
+			self.container.insertBefore( content, null );
+
+			return self;
 		}
 	};
-	
+
 	epic.viewport = viewport;
 	epic.view = view;
-} )( epic );
+} )( epic, window, document );

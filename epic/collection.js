@@ -1,53 +1,71 @@
-﻿
-epic.collection = ( function() {
+﻿var epic;
+( function( epic ) {
 
 	function collection() {
-		this.collection = {};
-	}
-
-	collection.prototype = {
-		get: get,
-		set: set,
-		remove: remove,
-		to_string: to_string
-	};
-
-	function get( key ) {
-		var t = this;
-
-		var key_str = t.to_string( key );
-		var pair = t.collection[ key_str ];
-
-		if( ( typeof pair ) === 'undefined' ) {
-			return undefined;
-		}
-
-		return pair.value;
+		var self = this;
+		self.collection = {};
+		self.list = [];
 	}
 
 	function set( key, value ) {
 		if( key === undefined || value === undefined ) {
 			return undefined;
 		}
+		
+		key = to_string( key );
 
-		var previous_value = this.get( key );
+		var self = this;
+		var old_record = self.collection[ key ];
+		var index = old_record ? old_record.index : self.list.length;
 
-		this.collection[ this.to_string( key ) ] = {
+		self.collection[ key ] = {
 			key: key,
-			value: value
+			value: value,
+			index: index
 		};
+		
+		self.list[ index ] = value;
 
-		return previous_value;
+		self.event_handler.call( self.event_context, "ITEM_ADDED", value );
+
+		return old_record;
 	}
 
-	function remove( key ) {
-		var t = this;
-		var k = t.to_string( key );
-		var previous_element = t.collection[ k ];
+	function get( key ) {
+		key = to_string( key );
 
-		if( previous_element !== undefined ) {
-			delete this.collection[ k ];
-			return previous_element.value;
+		var self = this;
+		var record = self.collection[ key ] || {};
+		var value = record.value;
+
+		if( value ) {
+			// ONLY TRIGGER EVENT HANDLER IF AN ACTUAL RECORD/VALUE EXIST
+			self.event_handler.call( self.event_context, "ITEM_RETRIEVED", value );
+		}
+		
+		return value;
+	}
+	
+	function remove( key ) {
+		key = to_string( key );
+		
+		var self = this;
+		
+		// PROVIDE AN EMPTY RECORD TO AVOID EXCEPTION
+		var record = self.collection[ key ] || {};
+		var value = record.value;
+		var index = record.index;
+
+		if( value ) {
+			// REMOVE THE ITEM FROM THE COLLECTION
+			delete self.collection[ key ];
+
+			// REMOVE THE ITEM FROM THE ARRAY
+			self.list.splice( index, 1 );
+
+			// TRIGGER EVENT HANDLER
+			self.event_handler.call( self.event_context, "ITEM_REMOVED", value );
+			return value;
 		}
 
 		return undefined;
@@ -56,6 +74,22 @@ epic.collection = ( function() {
 	function to_string( key ) {
 		return String( key );
 	}
-	
-	return collection;
-} )();
+
+	function set_event_handler( handler, context ) {
+		var self = this;
+		self.event_handler = handler;
+		self.event_context = context;
+	}
+
+	collection.prototype = {
+		set: set,
+		get: get,
+		remove: remove,
+
+		set_event_handler: set_event_handler,
+		event_handler: function( /*event_name, value*/) {},
+		event_context: null
+	};
+
+	epic.collection = collection;
+} )( epic );

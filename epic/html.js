@@ -1,60 +1,182 @@
 ﻿( function( epic, widnow, document ) {
 	var is_html = epic.string.is_html;
 	var array = epic.array;
+	var to_array = Array.prototype.slice;
 
 	function html( query, context ) {
 		return new selector( query, context );
 	}
 
 	function selector( query, context ) {
+		var t = this;
+
 		// RETURN AN EMPTY SELECTOR WHEN QUERY IS DARK MATTER (NULL, FALSE, UNDEFINED, "")
 		if( !query ) {
-			return this;
+			return t;
 		}
 
 		if( query instanceof selector ) {
 			return query;
 		}
+		
+		var elements = [];
 
-		this.query = query;
-		this.elements = [];
+		if( query.nodeName ) {
+			context = query;
+			elements[0] = query;
+		}
+
+		if( typeof query === "string" ) {
+			if( query === "body" && !context && document.body ) {
+				t.context = document;
+				t.elements = [document.body];
+				return t;
+			}
+			
+			if( is_html( query ) ) {
+				elements = to_array.call( document_fragment( query ).childNodes );
+			}
+		}
+
+		t.query = query;
+		t.context = context || [document];
+		t.elements = elements;
 	}
 
 	function flatten( list ) {
 		return array.flatten(
-			array.each( list, html_element_parser )
+			array.each( list, parse_elements )
 		);
 	}
 
-	function html_element_parser( element, index, list ) {
+	function parse_elements( element, index, list ) {
 		// IDENTIFIES THE ELEMENT TYPE AND "FIXES" IT BEFORE THE LIST IS FLATTENED
-
+		
 		if( element instanceof selector ) {
 			list[ index ] = element.elements;
-		} else if( typeof element === "string" ) {
+
+		} else if( is_html( element ) ) {
 			list[ index ] = epic.html.create( element );
+
+		} else if( typeof element === "string" ) {
+			list[ index ] = create( "textnode", element );
+
+		} else if( element.nodeName ) {
+			list[ index ] = element;
 		}
 	}
 
-	function create( element ) {
-		var params = Array.prototype.slice.call( arguments );
+	function create( tag /*, value1, value2*/ ) {
+		var parameters = arguments;
+		var param_1 = parameters[ 1 ];
+		var param_2 = parameters[ 2 ];
 		var node;
 
-		if( is_html( element ) ) {
-			return epic.string.to_dom( element );
-		}
+		if( tag === "fragment" ) {
+			node = document_fragment( param_1 );
 
-		if( element === 'option' ) {
-			return create.option( params[ 0 ], params[ 1 ], params[ 2 ] );
-		}
+		} else if( tag === 'option' ) {
+			node = option( parameters[ 0 ], param_1, param_2 );
 
-		if( element === "textnode" ) {
-			node = document.createTextNode( element );
+		} else if( tag === "textnode" ) {
+			node = document.createTextNode( param_1 );
+
 		} else {
-			node = document.createElement( element );
+			node = document.createElement( tag );
+		}
+
+		return node;
+	}
+
+	function document_fragment( content, callback ) {
+		var fragment = document.createDocumentFragment();
+		var content_holder;
+		var index;
+		var nodes;
+
+		if( content ) {
+			content_holder = document.createElement( 'div' );
+			content_holder.innerHTML = content;
+
+			// USE NON-BLOCKING APPEND IF CALL BACK IS SPECIFIED
+			if( callback ) {
+				( function() {
+					if( content_holder.firstChild ) {
+						fragment.appendChild( content_holder.firstChild );
+						setTimeout( arguments.callee, 0 );
+					} else {
+						callback( fragment );
+					}
+				} )();
+
+			} else {
+				nodes = content_holder.childNodes;
+				index = nodes.length;
+
+				while( index-- ) {
+					fragment.insertBefore( nodes[ index ], fragment.firstChild );
+				}
+			}
+
+		}
+
+		return fragment;
+	}
+
+	function option( caption, value, selected ) {
+		var node = document.createElement( "option" );
+
+		if( selected === undefined && value === true ) {
+			selected = true;
+			value = undefined;
+		}
+
+		value = typeof value === "undefined" ? caption : value;
+
+		// SET THE CAPTION
+		node.insertBefore( document.createTextNode( caption ), null );
+
+		// SET THE OPTION VALUE
+		node.setAttribute( 'value', value );
+
+		if( selected ) {
+			node.setAttribute( 'selected', 'selected' );
 		}
 
 		return new epic.html.selector( node );
+	}
+
+	function script( code ) {
+		var node = document.createElement( "script" );
+		var property = ( 'innerText' in node ) ? 'innerText' : 'textContent';
+		node.setAttribute( "type", "text/javascript" );
+
+		setTimeout( function() {
+			document.getElementsByTagName( 'head' )[ 0 ].insertBefore( node, null );
+			node[ property ] = code;
+		}, 10 );
+
+		return new epic.html.selector( node );
+	}
+
+	function style( css ) {
+		var node = document.createElement( "style" );
+		node.setAttribute( "type", "text/css" );
+
+		if( node.styleSheet ) { // IE
+			node.styleSheet.cssText = css;
+
+		} else { // the world
+			node.insertBefore( document.createTextNode( css ), null );
+		}
+
+		document.getElementsByTagName( 'head' )[ 0 ].insertBefore( node, null );
+
+		return new epic.html.selector( node );
+	}
+
+	function contains( container, element ) {
+		return container.contains ? container.contains( element ) : !!( container.compareDocumentPosition( element ) & 16 );
 	}
 
 	selector.prototype = {
@@ -77,7 +199,7 @@
 
 		insert: function( elements, position ) {
 			elements = flatten( elements );
-
+			console.log( elements );
 			var t = this;
 
 			var i = elements.length;
@@ -130,6 +252,21 @@
 			return this.insert( arguments, undefined );
 		},
 
+		html: function( content ) {
+			var self = this;
+			var element = self.elements[ 0 ];
+
+			if( element ) {
+				if( typeof content === "undefined" ) {
+					return element.innerHTML;
+				}
+
+				element.innerHTML = content;
+			}
+
+			return self;
+		},
+
 		get: function( index ) {
 			var elements = this.elements;
 			var upper_limit = elements.length - 1;
@@ -145,102 +282,21 @@
 
 		contains: function( element ) {
 			return html.contains( this.elements[0], element );
+		},
+
+		find: function( query ) {
+			throw new epic.fail("selector.find() is feeling sick :(" );
 		}
 	};
 
-	create.document_fragment = function( content, callback ) {
-		var document_fragment = document.createDocumentFragment();
-		var content_holder;
-		var index;
-		var nodes;
-
-		if( content ) {
-			content_holder = document.createElement( 'div' );
-			content_holder.innerHTML = content;
-
-			// USE NON-BLOCKING APPEND IF CALL BACK IS SPECIFIED
-			if( callback ) {
-				( function() {
-					if( content_holder.firstChild ) {
-						document_fragment.appendChild( content_holder.firstChild );
-						setTimeout( arguments.callee, 0 );
-					} else {
-						callback( document_fragment );
-					}
-				} )();
-
-			} else {
-				nodes = content_holder.childNodes;
-				index = nodes.length;
-
-				while( index-- ) {
-					document_fragment.insertBefore( nodes[ index ], document_fragment.firstChild );
-				}
-			}
-
-		}
-
-		return document_fragment;
-	};
-
-	create.option = function( caption, value, selected ) {
-		var node = document.createElement( "option" );
-
-		if( selected === undefined && value === true ) {
-			selected = true;
-			value = undefined;
-		}
-
-		value = typeof value === "undefined" ? caption : value;
-
-		// SET THE CAPTION
-		node.insertBefore( document.createTextNode( caption ), null );
-
-		// SET THE OPTION VALUE
-		node.setAttribute( 'value', value );
-
-		if( selected ) {
-			node.setAttribute( 'selected', 'selected' );
-		}
-
-		return new epic.html.selector( node );
-	};
-
-	create.script = function( code ) {
-		var script = document.createElement( "script" );
-		var property = ( 'innerText' in script ) ? 'innerText' : 'textContent';
-		script.setAttribute( "type", "text/javascript" );
-
-		setTimeout( function() {
-			document.getElementsByTagName( 'head' )[ 0 ].insertBefore( script, null );
-			script[ property ] = code;
-		}, 10 );
-
-		return new epic.html.selector( script );
-	};
-
-	create.style = function( css ) {
-		var style = document.createElement( "style" );
-		style.setAttribute( "type", "text/css" );
-
-		if( style.styleSheet ) { // IE
-			style.styleSheet.cssText = css;
-
-		} else { // the world
-			style.insertBefore( document.createTextNode( css ), null );
-		}
-
-		document.getElementsByTagName( 'head' )[ 0 ].insertBefore( style, null );
-
-		return new epic.html.selector( style );
-	};
-
-	html.contains = function( container, element ) {
-		return container.contains ? container.contains( element ) : !!( container.compareDocumentPosition( element ) & 16 );
-	};
-
-	html.selector = selector;
+	// STATIC METHODS
+	create.document_fragment = document_fragment;
+	create.option = option;
+	create.script = script;
+	create.style = style;
 	
+	html.contains = contains;
+	html.selector = selector;
 	html.create = create;
 
 	epic.html = html;

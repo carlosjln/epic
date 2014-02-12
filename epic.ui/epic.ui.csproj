@@ -19,6 +19,8 @@
   <ItemGroup>
     <Content Include="alert.js" />
     <Content Include="button.js" />
+    <Content Include="box.js" />
+    <Content Include="overlay.js" />
     <Content Include="notice.js" />
     <Content Include="core.js" />
     <Content Include="icon.js" />
@@ -43,6 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="theme\default\images\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="theme\default\less\viewport.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="theme\default\less\partials\helpers.less" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -184,8 +184,9 @@ var epic;
     epic.object = object
 })(epic);
 (function(epic) {
+    var to_array = Array.prototype.slice;
     function string(input) {
-        return new dsl(input, epic.object.to_array(arguments))
+        return new dsl(input, to_array.call(arguments))
     }
     function dsl(input, parameters) {
         this.input = input;
@@ -355,9 +356,7 @@ var epic;
         return (/^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i).test(str)
     }
     function to_dom(str) {
-        var container = document.createElement("div");
-        container.innerHTML = str;
-        return new epic.html(epic.object.to_array(container.childNodes))
+        return epic.html.create.document_fragment(str)
     }
     string.encode_base64 = encode_base64;
     string.decode_base64 = decode_base64;
@@ -384,6 +383,9 @@ var epic;
         this.object = list;
         this.parameters = parameters
     }
+    function remove(list, index, howmany) {
+        list.splice(index, howmany)
+    }
     array.flatten = function(items) {
         var a = [];
         return a.concat.apply(a, items)
@@ -395,6 +397,7 @@ var epic;
         for (; i < length; i++) {
             callback.call(self, list[i], i, list)
         }
+        return list
     };
     array.every = function(list, callback, self) {
         var i = 0;
@@ -422,50 +425,69 @@ var epic;
         }
         return result
     };
+    array.remove = remove;
     array.dsl = dsl;
     epic.array = array
 })(epic);
-epic.collection = (function() {
+var epic;
+(function(epic) {
     function collection() {
-        this.collection = {}
-    }
-    collection.prototype = {
-        get: get, set: set, remove: remove, to_string: to_string
-    };
-    function get(key) {
-        var t = this;
-        var key_str = t.to_string(key);
-        var pair = t.collection[key_str];
-        if ((typeof pair) === 'undefined') {
-            return undefined
-        }
-        return pair.value
+        var self = this;
+        self.collection = {};
+        self.list = []
     }
     function set(key, value) {
         if (key === undefined || value === undefined) {
             return undefined
         }
-        var previous_value = this.get(key);
-        this.collection[this.to_string(key)] = {
-            key: key, value: value
+        key = to_string(key);
+        var self = this;
+        var old_record = self.collection[key];
+        var index = old_record ? old_record.index : self.list.length;
+        self.collection[key] = {
+            key: key, value: value, index: index
         };
-        return previous_value
+        self.list[index] = value;
+        self.event_handler.call(self.event_context, "ITEM_ADDED", value);
+        return old_record
+    }
+    function get(key) {
+        key = to_string(key);
+        var self = this;
+        var record = self.collection[key] || {};
+        var value = record.value;
+        if (value) {
+            self.event_handler.call(self.event_context, "ITEM_RETRIEVED", value)
+        }
+        return value
     }
     function remove(key) {
-        var t = this;
-        var k = t.to_string(key);
-        var previous_element = t.collection[k];
-        if (previous_element !== undefined) {
-            delete this.collection[k];
-            return previous_element.value
+        key = to_string(key);
+        var self = this;
+        var record = self.collection[key] || {};
+        var value = record.value;
+        var index = record.index;
+        if (value) {
+            delete self.collection[key];
+            self.list.splice(index, 1);
+            self.event_handler.call(self.event_context, "ITEM_REMOVED", value);
+            return value
         }
         return undefined
     }
     function to_string(key) {
         return String(key)
     }
-    return collection
-})();
+    function set_event_handler(handler, context) {
+        var self = this;
+        self.event_handler = handler;
+        self.event_context = context
+    }
+    collection.prototype = {
+        set: set, get: get, remove: remove, set_event_handler: set_event_handler, event_handler: function(){}, event_context: null
+    };
+    epic.collection = collection
+})(epic);
 (function(epic, window, document, navigator) {
     var agent = navigator.userAgent;
     var vendor = navigator.vendor;
@@ -602,46 +624,140 @@ epic.collection = (function() {
 (function(epic, widnow, document) {
     var is_html = epic.string.is_html;
     var array = epic.array;
+    var to_array = Array.prototype.slice;
     function html(query, context) {
         return new selector(query, context)
     }
     function selector(query, context) {
+        var t = this;
         if (!query) {
-            return this
+            return t
         }
         if (query instanceof selector) {
             return query
         }
-        this.query = query;
-        this.elements = []
+        var elements = [];
+        if (query.nodeName) {
+            context = query;
+            elements[0] = query
+        }
+        if (typeof query === "string") {
+            if (query === "body" && !context && document.body) {
+                t.context = document;
+                t.elements = [document.body];
+                return t
+            }
+            if (is_html(query)) {
+                elements = to_array.call(document_fragment(query).childNodes)
+            }
+        }
+        t.query = query;
+        t.context = context || [document];
+        t.elements = elements
     }
     function flatten(list) {
-        return array.flatten(array.each(list, html_element_parser))
+        return array.flatten(array.each(list, parse_elements))
     }
-    function html_element_parser(element, index, list) {
+    function parse_elements(element, index, list) {
         if (element instanceof selector) {
             list[index] = element.elements
         }
-        else if (typeof element === "string") {
+        else if (is_html(element)) {
             list[index] = epic.html.create(element)
         }
+        else if (typeof element === "string") {
+            list[index] = create("textnode", element)
+        }
+        else if (element.nodeName) {
+            list[index] = element
+        }
     }
-    function create(element) {
-        var params = Array.prototype.slice.call(arguments);
+    function create(tag) {
+        var parameters = arguments;
+        var param_1 = parameters[1];
+        var param_2 = parameters[2];
         var node;
-        if (is_html(element)) {
-            return epic.string.to_dom(element)
+        if (tag === "fragment") {
+            node = document_fragment(param_1)
         }
-        if (element === 'option') {
-            return create.option(params[0], params[1], params[2])
+        else if (tag === 'option') {
+            node = option(parameters[0], param_1, param_2)
         }
-        if (element === "textnode") {
-            node = document.createTextNode(element)
+        else if (tag === "textnode") {
+            node = document.createTextNode(param_1)
         }
         else {
-            node = document.createElement(element)
+            node = document.createElement(tag)
+        }
+        return node
+    }
+    function document_fragment(content, callback) {
+        var fragment = document.createDocumentFragment();
+        var content_holder;
+        var index;
+        var nodes;
+        if (content) {
+            content_holder = document.createElement('div');
+            content_holder.innerHTML = content;
+            if (callback) {
+                (function() {
+                    if (content_holder.firstChild) {
+                        fragment.appendChild(content_holder.firstChild);
+                        setTimeout(arguments.callee, 0)
+                    }
+                    else {
+                        callback(fragment)
+                    }
+                })()
+            }
+            else {
+                nodes = content_holder.childNodes;
+                index = nodes.length;
+                while (index--) {
+                    fragment.insertBefore(nodes[index], fragment.firstChild)
+                }
+            }
+        }
+        return fragment
+    }
+    function option(caption, value, selected) {
+        var node = document.createElement("option");
+        if (selected === undefined && value === true) {
+            selected = true;
+            value = undefined
+        }
+        value = typeof value === "undefined" ? caption : value;
+        node.insertBefore(document.createTextNode(caption), null);
+        node.setAttribute('value', value);
+        if (selected) {
+            node.setAttribute('selected', 'selected')
         }
         return new epic.html.selector(node)
+    }
+    function script(code) {
+        var node = document.createElement("script");
+        var property = ('innerText' in node) ? 'innerText' : 'textContent';
+        node.setAttribute("type", "text/javascript");
+        setTimeout(function() {
+            document.getElementsByTagName('head')[0].insertBefore(node, null);
+            node[property] = code
+        }, 10);
+        return new epic.html.selector(node)
+    }
+    function style(css) {
+        var node = document.createElement("style");
+        node.setAttribute("type", "text/css");
+        if (node.styleSheet) {
+            node.styleSheet.cssText = css
+        }
+        else {
+            node.insertBefore(document.createTextNode(css), null)
+        }
+        document.getElementsByTagName('head')[0].insertBefore(node, null);
+        return new epic.html.selector(node)
+    }
+    function contains(container, element) {
+        return container.contains ? container.contains(element) : !!(container.compareDocumentPosition(element) & 16)
     }
     selector.prototype = {
         empty: function() {
@@ -658,6 +774,7 @@ epic.collection = (function() {
             return t
         }, insert: function(elements, position) {
                 elements = flatten(elements);
+                console.log(elements);
                 var t = this;
                 var i = elements.length;
                 var target = t.elements[0];
@@ -692,6 +809,16 @@ epic.collection = (function() {
                 }
             }, append: function() {
                 return this.insert(arguments, undefined)
+            }, html: function(content) {
+                var self = this;
+                var element = self.elements[0];
+                if (element) {
+                    if (typeof content === "undefined") {
+                        return element.innerHTML
+                    }
+                    element.innerHTML = content
+                }
+                return self
             }, get: function(index) {
                 var elements = this.elements;
                 var upper_limit = elements.length - 1;
@@ -704,76 +831,15 @@ epic.collection = (function() {
                 return elements[index]
             }, contains: function(element) {
                 return html.contains(this.elements[0], element)
+            }, find: function(query) {
+                throw new epic.fail("selector.find() is feeling sick :(");
             }
     };
-    create.document_fragment = function(content, callback) {
-        var document_fragment = document.createDocumentFragment();
-        var content_holder;
-        var index;
-        var nodes;
-        if (content) {
-            content_holder = document.createElement('div');
-            content_holder.innerHTML = content;
-            if (callback) {
-                (function() {
-                    if (content_holder.firstChild) {
-                        document_fragment.appendChild(content_holder.firstChild);
-                        setTimeout(arguments.callee, 0)
-                    }
-                    else {
-                        callback(document_fragment)
-                    }
-                })()
-            }
-            else {
-                nodes = content_holder.childNodes;
-                index = nodes.length;
-                while (index--) {
-                    document_fragment.insertBefore(nodes[index], document_fragment.firstChild)
-                }
-            }
-        }
-        return document_fragment
-    };
-    create.option = function(caption, value, selected) {
-        var node = document.createElement("option");
-        if (selected === undefined && value === true) {
-            selected = true;
-            value = undefined
-        }
-        value = typeof value === "undefined" ? caption : value;
-        node.insertBefore(document.createTextNode(caption), null);
-        node.setAttribute('value', value);
-        if (selected) {
-            node.setAttribute('selected', 'selected')
-        }
-        return new epic.html.selector(node)
-    };
-    create.script = function(code) {
-        var script = document.createElement("script");
-        var property = ('innerText' in script) ? 'innerText' : 'textContent';
-        script.setAttribute("type", "text/javascript");
-        setTimeout(function() {
-            document.getElementsByTagName('head')[0].insertBefore(script, null);
-            script[property] = code
-        }, 10);
-        return new epic.html.selector(script)
-    };
-    create.style = function(css) {
-        var style = document.createElement("style");
-        style.setAttribute("type", "text/css");
-        if (style.styleSheet) {
-            style.styleSheet.cssText = css
-        }
-        else {
-            style.insertBefore(document.createTextNode(css), null)
-        }
-        document.getElementsByTagName('head')[0].insertBefore(style, null);
-        return new epic.html.selector(style)
-    };
-    html.contains = function(container, element) {
-        return container.contains ? container.contains(element) : !!(container.compareDocumentPosition(element) & 16)
-    };
+    create.document_fragment = document_fragment;
+    create.option = option;
+    create.script = script;
+    create.style = style;
+    html.contains = contains;
     html.selector = selector;
     html.create = create;
     epic.html = html

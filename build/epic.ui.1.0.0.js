@@ -64,10 +64,10 @@
         t.align = settings.align || epic.ui.align.none;
         t.classes = settings.classes || "";
         t.set_caption(settings.caption);
-        i.addClass(t.name).addClass(t.align.toString()).addClass(t.classes)
+        i.className = get_class(t)
     }
     function get_class(t) {
-        return (t.name = name) + ' ' + t.align + ' ' + t.classes
+        return t.name + ' ' + t.align + ' ' + t.classes
     }
     icon.prototype = {
         change: function(name) {
@@ -137,27 +137,36 @@
     };
     epic.button = button
 })(epic);
-(function(epic) {
-    function viewport(target) {
-        this.views = [];
-        this.target = target
+(function(epic, window, document) {
+    var $ = epic.html;
+    function create(tag, classname, style, content) {
+        var element = document.createElement(tag);
+        element.className = classname || "";
+        element.style.cssText = style || "";
+        element.innerHTML = content || "";
+        return element
     }
-    viewport.prototype.add_view = function(view) {
-        var t = this;
-        var views = t.views;
-        view = view || new epic.view(t);
-        t.target.insertBefore(view.container, null);
-        views[views.length] = view;
-        return view
+    function viewport() {
+        var self = this;
+        self.views = [];
+        self.container = create("div", "epic-viewport")
+    }
+    viewport.prototype.add_view = function() {
+        var self = this;
+        var views = self.views;
+        var v = new view(self);
+        self.container.insertBefore(v.container, null);
+        views[views.length] = v;
+        return v
     };
     function view(viewport) {
-        var create = epic.html.create;
-        var container = create('<div class="container stretch" style="display: none;"></div>');
-        var loader = create('<span class="view-status" style="display: none;">Working...</span>');
-        this.container = container[0];
-        this.loader = loader[0];
-        this.viewport = viewport;
-        container.append(loader)
+        var container = create("div", "epic-view", "");
+        var loader = create("span", "epic-view-status", "", "Working...");
+        var t = this;
+        t.container = container;
+        t.loader = loader;
+        t.viewport = viewport;
+        container.insertBefore(loader, null)
     }
     view.prototype = {
         is_busy: function(state) {
@@ -171,29 +180,31 @@
                 }
             }
         }, activate: function() {
-                var t = this;
-                var viewport = t.viewport;
-                var current_view = viewport.current_view;
+                var self = this;
+                var vp = self.viewport;
+                var current_view = vp.current_view;
                 if (current_view) {
-                    epic.html(current_view.container).css('display: none')
+                    current_view.container.style.display = "none"
                 }
-                t.container.style.display = 'block';
-                viewport.current_view = t;
-                return t
+                self.container.style.display = 'block';
+                vp.current_view = self;
+                return self
             }, empty: function() {
-                var t = this;
-                var container = t.container;
-                t.is_busy(false);
-                epic.html(container).empty().append(t.loader);
-                return t
+                var self = this;
+                var container = self.container;
+                self.is_busy(false);
+                $(container).empty().append(self.loader);
+                return self
             }, append: function(html) {
-                epic.html(this.container).append(html);
-                return this
+                var self = this;
+                var content = $.create.document_fragment(html);
+                self.container.insertBefore(content, null);
+                return self
             }
     };
     epic.viewport = viewport;
     epic.view = view
-})(epic);
+})(epic, window, document);
 (function(epic, document) {
     function get_notification_rail() {
         var id = "epic-notification-rail";
@@ -216,25 +227,44 @@
         var message = t.message = document.createElement('div');
         var notice_type = settings.type;
         var title = settings.title;
+        var timeout = settings.timeout;
         title = title || (notice_type === notice.type.default ? "Information!" : (notice_type.charAt(0).toUpperCase() + notice_type.slice(1)) + "!");
         t.settings = settings;
         t.set_type(notice_type);
         close_button.innerHTML = "";
-        close_button.className = "notice-close";
+        close_button.className = "epic-notice-close";
         epic.event.add(close_button, "click", notice.event.close, container);
         title_bar.innerHTML = title;
-        title_bar.className = "notice-title";
+        title_bar.className = "epic-notice-title";
         message.innerHTML = settings.message;
-        message.className = "notice-content";
+        message.className = "epic-notice-content";
         container.insertBefore(close_button, null);
         container.insertBefore(title_bar, null);
         container.insertBefore(message, null);
         epic.event.add(container, "mouseover", notice.event.mouseover, close_button);
         epic.event.add(container, "mouseout", notice.event.mouseout, close_button);
-        get_notification_rail().insertBefore(container, null)
+        get_notification_rail().insertBefore(container, null);
+        if (typeof timeout === "number") {
+            setTimeout(function() {
+                !t.is_closed() && fade(t.container)
+            }, timeout * 1000)
+        }
     }
     function notify(settings) {
         return new notice(settings)
+    }
+    function fade(element) {
+        var opacity = 1;
+        var timer = setInterval(function() {
+                if (opacity <= 0.1) {
+                    clearInterval(timer);
+                    element.style.opacity = '1';
+                    element.style.display = 'none'
+                }
+                element.style.opacity = opacity;
+                element.style.filter = 'alpha(opacity=' + opacity * 100 + ")";
+                opacity -= opacity * 0.3
+            }, 50)
     }
     notice.prototype = {
         set_content: function(content) {
@@ -253,6 +283,8 @@
                 var t = this;
                 t.container.style.display = 'none';
                 return t
+            }, is_closed: function() {
+                return this.container.style.display == 'none'
             }, as_success: function() {
                 return this.set_type(alert.type.success)
             }, as_info: function() {
@@ -263,7 +295,7 @@
                 return this.set_type(alert.type.danger)
             }, set_type: function(type) {
                 var t = this;
-                t.container.className = "notice notice-" + type;
+                t.container.className = "epic-notice epic-notice-" + type;
                 return t
             }
     };
@@ -306,3 +338,111 @@
     epic.notice = notice;
     epic.notify = notify
 })(epic, document);
+(function(epic) {
+    var $ = epic.html;
+    function box(settings) {
+        var self = this;
+        var id = settings.id || ("box-" + epic.uid.next());
+        var container = $('<div id="' + id + '" class="box"></div>');
+        var header = $('<div class="box-header"></div>');
+        var caption_wrapper = $('<div class="box-caption-wrapper"></div>');
+        var caption = $('<span class="box-caption"></span>');
+        var controls = $('<div class="box-controls"></div>');
+        var body = $('<div class="box-body"></div>');
+        var viewport = self.viewport = new epic.viewport;
+        self.settings = settings;
+        self.container = container.get(0);
+        self.header = header.get(0);
+        self.caption_wrapper = caption_wrapper.get(0);
+        self.icon = settings.icon || new epic.icon;
+        self.caption = caption.get(0);
+        self.controls = controls.get(0);
+        self.body = body.get(0);
+        body.append(viewport.container);
+        caption_wrapper.append(self.icon.element);
+        caption_wrapper.append(caption);
+        header.append(caption_wrapper);
+        header.append(controls);
+        container.append(header);
+        container.append(body);
+        self.set_caption(settings.caption);
+        self.resize(settings.width, settings.height);
+        if (settings.singleview) {
+            self.viewport.add_view().activate()
+        }
+        if (settings.controls) {
+            controls.append(settings.controls)
+        }
+        if (settings.target) {
+            settings.target.append(container)
+        }
+    }
+    var prototype = box.prototype;
+    prototype.set_caption = function(caption) {
+        if (caption) {
+            $(this.caption).html(caption)
+        }
+    };
+    prototype.resize = function(width, height) {
+        if (width && height) {
+            var style = this.container.style;
+            style.width = width + 'px';
+            style.height = height + 'px'
+        }
+    };
+    epic.box = box
+})(epic);
+(function(epic) {
+    var $ = epic.html;
+    function create(tag, classname, style, content) {
+        var element = document.createElement(tag);
+        element.className = classname || "";
+        element.style.cssText = style || "";
+        element.innerHTML = content || "";
+        return element
+    }
+    function overlay(settings) {
+        var container = $(create("div", "modal-container"));
+        var dark_side = $(create("div", "modal-overlay"));
+        var content = $(settings.content).add_class("modal-content");
+        var btn_hide = content.find(".btn-hide-overlay");
+        var btn_remove = container.find(".btn-remove-overlay");
+        var handle = dark_side.events;
+        var self = this;
+        var event_data = {
+                container: container, btn_close: (btn_remove || btn_hide), overlay: self
+            };
+        container.append(dark_side, content);
+        self.container = container.get(0);
+        self.overlay = dark_side.get(0);
+        self.content = content.get(0);
+        btn_hide.click(event_data, handle.on_hide);
+        btn_remove.click(event_data, handle.on_hide);
+        container.keyup(event_data, handle.on_escape);
+        $(settings.target || "body").append(container);
+        var margin_top = content.height() / 2;
+        var margin_left = content.width() / 2;
+        content.css("margin", "-" + margin_top + "px 0 0 -" + margin_left + "px")
+    }
+    var prototype = overlay.prototype;
+    prototype.hide = function() {
+        this.container.style.display = 'none';
+        return this
+    };
+    prototype.show = function() {
+        this.container.style.display = 'block';
+        return this
+    };
+    overlay.events = {
+        on_hide: function(e) {
+            e.preventDefault();
+            e.data.overlay.hide()
+        }, on_escape: function(e) {
+                e.preventDefault();
+                if (e.which === 27) {
+                    e.data.btn_close.click()
+                }
+            }
+    };
+    epic.overlay = overlay
+})(epic);

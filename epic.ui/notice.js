@@ -7,7 +7,6 @@
 		if( rail === null ) {
 			rail = document.createElement( "div" );
 			rail.id = id;
-//			rail.style.cssText = "position: fixed; right: 20px; bottom: 20px; width: 301px; z-index: 9999;";
 		}
 
 		if( rail.parentNode === null ) {
@@ -29,34 +28,56 @@
 
 		var notice_type = settings.type;
 		var title = settings.title;
-		
+		var timeout = settings.timeout;
+
 		title = title || ( notice_type === notice.type.default ? "Information!" : ( notice_type.charAt( 0 ).toUpperCase() + notice_type.slice( 1 ) ) + "!" );
-		
+
 		t.settings = settings;
 		t.set_type( notice_type );
 
 		close_button.innerHTML = "";
-		close_button.className = "notice-close";
+		close_button.className = "epic-notice-close";
 		epic.event.add( close_button, "click", notice.event.close, container );
-		
+
 		title_bar.innerHTML = title;
-		title_bar.className = "notice-title";
+		title_bar.className = "epic-notice-title";
 
 		message.innerHTML = settings.message;
-		message.className = "notice-content";
+		message.className = "epic-notice-content";
 
 		container.insertBefore( close_button, null );
 		container.insertBefore( title_bar, null );
 		container.insertBefore( message, null );
-		
+
 		epic.event.add( container, "mouseover", notice.event.mouseover, close_button );
 		epic.event.add( container, "mouseout", notice.event.mouseout, close_button );
 
 		get_notification_rail().insertBefore( container, null );
+
+		if( typeof timeout === "number" ) {
+			setTimeout( function() {
+				!t.is_closed() && fade( t.container );
+			}, timeout * 1000 );
+		}
 	}
 
 	function notify( settings ) {
 		return new notice( settings );
+	}
+
+	function fade( element ) {
+		var opacity = 1; // initial opacity
+		var timer = setInterval( function() {
+			if( opacity <= 0.1 ) {
+				clearInterval( timer );
+				element.style.opacity = '1';
+				element.style.display = 'none';
+			}
+
+			element.style.opacity = opacity;
+			element.style.filter = 'alpha(opacity=' + opacity * 100 + ")";
+			opacity -= opacity * 0.3;
+		}, 50 );
 	}
 
 	// NOTICE PROPERTIES
@@ -86,6 +107,10 @@
 			return t;
 		},
 
+		is_closed: function() {
+			return this.container.style.display == 'none';
+		},
+
 		as_success: function() {
 			return this.set_type( alert.type.success );
 		},
@@ -104,7 +129,7 @@
 
 		set_type: function( type ) {
 			var t = this;
-			t.container.className = "notice notice-" + type;
+			t.container.className = "epic-notice epic-notice-" + type;
 			return t;
 		}
 	};
@@ -129,7 +154,7 @@
 	notice.event = {
 		close: function( e, container ) {
 			var parent = container.parentNode;
-			parent.removeChild( container);
+			parent.removeChild( container );
 		},
 
 		mouseover: function( e, close_button ) {

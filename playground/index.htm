@@ -12,14 +12,33 @@
 	</head>
 	<body>
 		<script type="text/javascript">
-			epic.notify( {
-				title: "Hello ^_^",
-				message: "Can you see me? :P"
-			});
+			// COLLECTION TEST
+			var collection = new epic.collection();
+			collection.set_event_handler( function( event, value ) {
+				epic.notify( {
+					title: event,
+					message: "Something happened."
+				});
+			} );
 
-			epic.notify.success( "We made it! ^_^ " );
-			epic.notify.warning( "Be careful!" );
-			epic.notify.danger( "RUN!!!" );
+			// VIEWPORT TEST
+			var viewport = new epic.viewport();
+			var element = viewport.container;
+			viewport.add_view().append("hello!").activate();
+
+			document.body.insertBefore( element, null );
+			
+			var x = epic.html(element);
+			x.empty().append("boom!");
+
+//			epic.notify( {
+//				title: "Hello ^_^",
+//				message: "Can you see me? :P"
+//			});
+//
+//			epic.notify.success( "We made it! ^_^ " );
+//			epic.notify.warning( "Be careful!" );
+//			epic.notify.danger( "RUN!!!" );
 		</script>
 	</body>
 </html>

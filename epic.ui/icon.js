@@ -12,11 +12,11 @@
 
 		t.set_caption( settings.caption );
 
-		i.addClass( t.name ).addClass( t.align.toString() ).addClass( t.classes );
+		i.className = get_class(t);
 	}
 
 	function get_class( t ) {
-		return ( t.name = name ) + ' ' + t.align + ' ' + t.classes;
+		return t.name + ' ' + t.align + ' ' + t.classes;
 	}
 
 	icon.prototype = {

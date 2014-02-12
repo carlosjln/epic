@@ -12,6 +12,8 @@
 		<input path="button.js"/>
 		<input path="viewport.js"/>
 		<input path="notice.js"/>
+		<input path="box.js"/>
+		<input path="overlay.js"/>
 	</output>
 	
 	<output path="..\build\epic.ui.min.1.0.0.js" type="js">
@@ -22,6 +24,8 @@
 		<input path="button.js"/>
 		<input path="viewport.js"/>
 		<input path="notice.js"/>
+		<input path="box.js"/>
+		<input path="overlay.js"/>
 	</output>
 	
 	<output path="..\build\theme\default\style\epic.ui.css" type="css">
@@ -29,7 +33,9 @@
 		<input path="theme\default\style\epic.ui.css"/>
 	</output>
 	
-	<!-- DEPLOY CURRENT BUILD TO PLAYGROUND -->
+	<!--
+		DEPLOY CURRENT BUILD TO PLAYGROUND
+	-->
 	<output path="..\playground\epic\epic.ui.1.0.0.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -global:epic -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
@@ -38,6 +44,8 @@
 		<input path="button.js"/>
 		<input path="viewport.js"/>
 		<input path="notice.js"/>
+		<input path="box.js"/>
+		<input path="overlay.js"/>
 	</output>
 	
 	<output path="..\playground\epic\theme\default\style\epic.ui.css" type="css">

@@ -1,8 +1,9 @@
 ﻿
 ( function( epic ) {
+	var to_array = Array.prototype.slice;
 
 	function string( input ) {
-		return new dsl( input, epic.object.to_array( arguments ) );
+		return new dsl( input, to_array.call( arguments ) );
 	}
 
 	function dsl( input, parameters ) {
@@ -205,10 +206,7 @@
 	}
 	
 	function to_dom( str ) {
-		var container = document.createElement( "div" );
-		container.innerHTML = str;
-
-		return new epic.html( epic.object.to_array( container.childNodes ) );
+		return epic.html.create.document_fragment( str );
 	}
 	
 	// STATIC METHODS

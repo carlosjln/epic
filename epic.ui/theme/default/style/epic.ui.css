@@ -1,3 +1,86 @@
+.pull-left {
+  float: left;
+}
+.pull-right {
+  float: right;
+}
+.clear-both {
+  clear: both;
+}
+.hidden {
+  display: none !important;
+}
+.inline-block {
+  display: -moz-inline-stack;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+}
+.unselectable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.transparent {
+  opacity: 0.4;
+  filter: alpha(opacity=40);
+}
+.no-background {
+  background-image: none !important;
+}
+.stretch {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
+.default-radius {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.set-top-radius {
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.set-bottom-radius {
+  -webkit-border-bottom-left-radius: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  -moz-border-radius-bottomright: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.clearfix:before,
+.clearfix:after {
+  content: " ";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+.busy-status {
+  padding-left: 30px;
+  vertical-align: middle;
+  background: transparent url('/resources/img/icon-loading.gif') center left no-repeat;
+}
 #epic-notification-rail {
   position: fixed;
   width: 300px;
@@ -5,18 +88,19 @@
   bottom: 20px;
   z-index: 2000;
 }
-.notice {
+.epic-notice {
   width: 300px;
   overflow: hidden;
   margin: 0 0 10px 0;
   position: relative;
   font-size: 13px;
   line-height: 25px;
+  opacity: 1;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
 }
-.notice .notice-title {
+.epic-notice-title {
   display: block;
   margin: 10px 26px -5px 10px;
   font-size: 14px;
@@ -24,7 +108,7 @@
   line-height: 25px;
   text-align: left;
 }
-.notice .notice-content {
+.epic-notice-content {
   overflow: hidden;
   text-align: left;
   margin: 10px;
@@ -32,7 +116,7 @@
   -ms-word-wrap: break-word;
   word-wrap: break-word;
 }
-.notice .notice-close {
+.epic-notice-close {
   display: none;
   width: 25px;
   height: 25px;
@@ -49,8 +133,8 @@
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
   filter: alpha(opacity=20);
 }
-.notice .notice-close:hover,
-.notice .notice-close:focus {
+.epic-notice-close:hover,
+.epic-notice-close:focus {
   text-decoration: none;
   cursor: pointer;
   -webkit-opacity: 0.5;
@@ -59,64 +143,45 @@
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: alpha(opacity=50);
 }
-.notice-success {
+.epic-notice-success {
   color: #3C763D;
   border-color: #D6E9C6;
   background-color: #DFF0D8;
 }
-.notice-info {
+.epic-notice-info {
   color: #31708F;
   border-color: #BCE8F1;
   background-color: #D9EDF7;
 }
-.notice-warning {
+.epic-notice-warning {
   color: #8A6D3B;
   border-color: #FAEBCC;
   background-color: #FCF8E3;
 }
-.notice-danger {
+.epic-notice-danger {
   color: #A94442;
   border-color: #EBCCD1;
   background-color: #F2DEDE;
 }
-.notice-default {
+.epic-notice-default {
   color: #ffffff;
   background-color: #2d323d;
   border-color: #171b20;
 }
-.notice-default .notice-close {
+.epic-notice-default .epic-notice-close {
   color: #FFF;
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAAEhcmxxAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAKpJREFUeNpi/P//PwMIMDFAwH+AAGIAiYB4/wECiBEqByYAAgjGgSs+D5XhB8mAGBdAMgABBNb9HwLOAzE/lD0fJgETgCmAWzwBiAVAFsEsAQggFBuRAUjHfJjtSC5hQDcfbgfM8vNIEvwwifNIKmEARQfM2PkgNkCAwSQYoAIwTyL77zxMMS67Ydadx+dYZNP+Y1HIj24DLsUYmpDdjy6JbgjYHzijAhcAADzkcmqZ0WKYAAAAAElFTkSuQmCC) no-repeat center center;
 }
-/*
-.notice-success {
-	.notice-variant( @state-success-text, @state-success-bg );
+.epic-viewport {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
-
-.notice-info {
-	.notice-variant( @state-info-text, @state-info-bg );
+.epic-viewport .epic-view {
+  display: none;
 }
-
-.notice-warning {
-	.notice-variant( @state-warning-text, @state-warning-bg );
+.epic-viewport .epic-view .epic-view-status {
+  display: none;
 }
-
-.notice-danger {
-	.notice-variant( @state-danger-text, @state-danger-bg );
-}
-
-.notice-default {
-	.notice-variant( #FFF, @charade );
-}
-
-// VARIANTS
-// ===================================================================
-.notice-variant( @color, @background ) {
-	@border: darken( spin(@background, -10), 10% );
-
-	color: @color;
-	background-color: @background;
-	border-color: @border;
-}
-
-*/

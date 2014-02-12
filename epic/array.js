@@ -9,7 +9,11 @@
 		this.object = list;
 		this.parameters = parameters;
 	}
-	
+
+	function remove( list, index, howmany ) {
+		list.splice( index, howmany );
+	}
+
 	array.flatten = function( items ) {
 		var a = [];
 		return a.concat.apply( a, items );
@@ -23,6 +27,8 @@
 		for(; i < length; i++ ) {
 			callback.call( self,  list[i], i, list );
 		}
+
+		return list;
 	};
 
 	array.every = function( list, callback, self ) {
@@ -60,6 +66,8 @@
 		
 		return result;
 	};
+
+	array.remove = remove;
 
 	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
 	array.dsl = dsl;
