@@ -15,15 +15,24 @@
 			return t;
 		}
 
+		// FEELING LAZY, TAKE IT BACK :P
 		if( query instanceof selector ) {
 			return query;
 		}
 		
 		var elements = [];
+		var node_type = query.nodeType;
 
-		if( query.nodeName ) {
+		// IS AN HTML ELEMENT ?
+		if( node_type ) {
 			context = query;
-			elements[0] = query;
+
+			// IS DOCUMENT FRAGMENT ?
+			if( node_type === 11 ) {
+				elements = to_array.call( query.childNodes );
+			}else {
+				elements[0] = query;
+			}
 		}
 
 		if( typeof query === "string" ) {
@@ -199,11 +208,11 @@
 
 		insert: function( elements, position ) {
 			elements = flatten( elements );
-			console.log( elements );
-			var t = this;
+			
+			var self = this;
 
 			var i = elements.length;
-			var target = t.elements[ 0 ];
+			var target = self.elements[ 0 ];
 			var reference = null;
 
 			var element;
@@ -241,11 +250,10 @@
 					element = document.createTextNode( element );
 				}
 
-				// doc.insertBefore( element, doc.firstChild );
 				target.insertBefore( element, reference );
 			}
 
-			// t.insertBefore( doc, reference );
+			return self;
 		},
 
 		append: function() {

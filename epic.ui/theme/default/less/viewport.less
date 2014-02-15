@@ -1,19 +1,18 @@
 ﻿// NOTICE
 // ===================================================================
 
-@import url('partials/mixins.less');
-@import url('partials/variables.less');
+@import "partials/mixins.less";
+@import "partials/variables.less";
 
 .epic-viewport {
 	position: absolute;
 	
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
+	.stretch;
 	
 	.epic-view {
 		display: none;
+		
+		.stretch;
 
 		.epic-view-status{
 			display: none;

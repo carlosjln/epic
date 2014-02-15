@@ -149,7 +149,7 @@
 		// TRIGGER THE HANDLERS ON THE ELEMENT'S PATH
 		if( !evt.propagation_stopped ) {
 			var parent = element.parentNode;
-
+			
 			if( parent ) {
 				evt.target = parent;
 				epic_event_handler( evt );

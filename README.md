@@ -25,18 +25,18 @@ Feedback, suggestions, ideas, bug-fixes & constructive criticisms are always wel
 	var error = new Error();
 	var match = /./;
 	
-    epic.type( "" ) == "string";	// true 
-	epic.type( 10 ) == "number";	// true
-	epic.type( {} ) == "object";	// true
-	epic.type( [] ) == "array";		// true
+    epic.type( "" ) === "string";	// true 
+	epic.type( 10 ) === "number";	// true
+	epic.type( {} ) === "object";	// true
+	epic.type( [] ) === "array";	// true
 	
-	epic.type( date ) == "date";	// true
-	epic.type( foo ) == "function";	// true
-	epic.type( error ) == "error";	// true
-	epic.type( match ) == "regexp";	// true
+	epic.type( date ) === "date";		// true
+	epic.type( foo ) === "function";	// true
+	epic.type( error ) === "error";		// true
+	epic.type( match ) === "regexp";	// true
 	
-	epic.type( true ) == "boolean";		// true
-	epic.type( false ) == "boolean";	// true
+	epic.type( true ) === "boolean";	// true
+	epic.type( false ) === "boolean";	// true
 
 **Data parsing**
 
@@ -81,4 +81,39 @@ When *epic.fail(...)* is preceded with the keyword *new* then it returns the err
 		// conquer the world!
 	} );
 
-A better approach is to place your JavaScript tags at the end of the document right before the closing body tag: *</body\>*
+A better approach is to place your JavaScript tags at the end of the document right before the closing *</ body >* tag.
+
+**Generating unique identifier**
+
+	epic.uid.next()	// outputs an incremental integer like: 1392264993125
+
+**Copying and cloning objects**
+
+	var default_settings = {
+	    timeout: 10,
+		foo: "bar"
+	};
+	
+	var settings = {
+	    timeout: 5
+	};
+	
+*epic.object.merge( obj[,...] )* **returns a new object** containing all properties from the passed sources.  
+	
+	epic.object.merge( default_settings, settings );
+	
+	{
+		timeout: 10,
+		foo: "bar"
+	}
+
+*epic.object.copy( source, target, undefined_only )* copies all properties from the *source* object into the *target* object. This **affects the actual *target* object**.
+
+If you want to preserve the values already defined on the target object, then pass the 3rd parameter flag as *true*
+
+	epic.object.merge( default_settings, settings, true );
+	
+	{
+		timeout: 5,
+		foo: "bar"
+	}

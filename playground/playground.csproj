@@ -17,13 +17,20 @@
     <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="epic\epic.1.0.0.js" />
-    <Content Include="epic\epic.ui.1.0.0.js" />
-    <Content Include="epic\theme\default\style\epic.ui.css" />
     <Content Include="index.htm" />
+    <Content Include="resources\plugins\epic\epic.1.0.0.js" />
+    <Content Include="resources\plugins\epic\epic.ui.1.0.0.js" />
+    <Content Include="resources\plugins\epic\theme\default\style\epic.ui.css" />
+    <Content Include="resources\plugins\font-awesome-4.0.3\css\font-awesome.css" />
+    <Content Include="resources\plugins\font-awesome-4.0.3\css\font-awesome.min.css" />
+    <Content Include="resources\plugins\font-awesome-4.0.3\fonts\fontawesome-webfont.svg" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="resources\plugins\font-awesome-4.0.3\fonts\fontawesome-webfont.eot" />
+    <Content Include="resources\plugins\font-awesome-4.0.3\fonts\fontawesome-webfont.ttf" />
+    <Content Include="resources\plugins\font-awesome-4.0.3\fonts\fontawesome-webfont.woff" />
+    <Content Include="resources\plugins\font-awesome-4.0.3\fonts\FontAwesome.otf" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

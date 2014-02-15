@@ -1,21 +1,20 @@
-﻿( function( epic ) {
-		var $ = epic.html;
+﻿( function( epic, $ ) {
 		
 		function box( settings ) {
 			var self = this;
-			var id = settings.id || ( "box-" + epic.uid.next() );
+			var id = settings.id || ( "epic-box-" + epic.uid.next() );
 
-			var container = $( '<div id="' + id + '" class="box"></div>' );
-			var header = $( '<div class="box-header"></div>' );
+			var container = $( '<div id="' + id + '" class="epic-box"></div>' );
+			var header = $( '<div class="epic-box-header"></div>' );
+			
+			var caption_wrapper = $( '<div class="epic-box-caption-wrapper"></div>' );
+			var caption = $( '<span class="epic-box-caption"></span>' );
 
-			var caption_wrapper = $( '<div class="box-caption-wrapper"></div>' );
-			var caption = $( '<span class="box-caption"></span>' );
-
-			var controls = $( '<div class="box-controls"></div>' );
-
-			var body = $( '<div class="box-body"></div>' );
+			var controls = $( '<div class="epic-box-controls"></div>' );
+			var body = $( '<div class="epic-box-body"></div>' );
 
 			var viewport = self.viewport = new epic.viewport();
+			var provided_controls = settings.controls;
 
 			self.settings = settings;
 			self.container = container.get( 0 );
@@ -31,7 +30,7 @@
 			
 			body.append( viewport.container );
 
-			caption_wrapper.append( self.icon.element );
+			caption_wrapper.append( self.icon.container );
 			caption_wrapper.append( caption );
 
 			header.append( caption_wrapper );
@@ -46,13 +45,13 @@
 			if( settings.singleview ) {
 				self.viewport.add_view().activate();
 			}
-
-			if( settings.controls ) {
-				controls.append( settings.controls );
+			
+			if( provided_controls ) {
+				controls.append( provided_controls );
 			}
 
 			if( settings.target ) {
-				settings.target.append( container );
+				$( settings.target ).append( container );
 			}
 		}
 
@@ -75,4 +74,4 @@
 
 	epic.box = box;
 
-} )( epic );
+} )( epic, epic.html );

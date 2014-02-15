@@ -36,7 +36,7 @@
 	<!--
 		DEPLOY CURRENT BUILD TO PLAYGROUND
 	-->
-	<output path="..\playground\epic\epic.ui.1.0.0.js" type="js">
+	<output path="..\playground\resources\plugins\epic\epic.ui.1.0.0.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -global:epic -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
 		<input path="alert.js"/>
@@ -48,7 +48,7 @@
 		<input path="overlay.js"/>
 	</output>
 	
-	<output path="..\playground\epic\theme\default\style\epic.ui.css" type="css">
+	<output path="..\playground\resources\plugins\epic\theme\default\style\epic.ui.css" type="css">
 		<arguments>-expr:raw -braces:same -line:M,4 -minify:false</arguments>
 		<input path="theme\default\style\epic.ui.css"/>
 	</output>

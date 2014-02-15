@@ -1,15 +1,28 @@
+/*!
+ * EPIC.UI.JS - v1.0.0
+ * Simple & awesome UI components for EPIC.JS
+ * https://github.com/carlosjln/epic
+ * 
+ * Copyright 2014
+ * Released under MIT License
+ * https://github.com/carlosjln/epic/blob/master/LICENSE
+ * 
+ * Author: Carlos J. Lopez
+ * https://github.com/carlosjln
+ */
 (function(epic) {
     function ui(){}
     ui.align = {
-        none: 'none', left: 'pull-left', right: 'pull-right'
+        'default': '', left: 'pull-left', right: 'pull-right'
     };
     epic.ui = ui
 })(epic);
 (function(epic) {
     function alert(settings) {
-        settings = this.settings = epic.object.merge(alert.default_settings, settings);
-        var element = this.element = document.createElement('div');
-        var inner = this.message = document.createElement('span');
+        var self = this;
+        settings = self.settings = epic.object.merge(alert.default_settings, settings);
+        var element = self.container = document.createElement('div');
+        var inner = self.message = document.createElement('span');
         var type = settings.type;
         var message = settings.message;
         var target = settings.target;
@@ -25,10 +38,10 @@
     }
     alert.prototype = {
         show: function() {
-            this.element.style.display = 'block';
+            this.container.style.display = 'block';
             return this
         }, hide: function() {
-                this.element.style.display = 'none';
+                this.container.style.display = 'none';
                 return this
             }, set_message: function(message) {
                 this.message.innerHTML = message;
@@ -43,7 +56,7 @@
                 return this.set_type(alert.type.danger)
             }, set_type: function(type) {
                 var t = this;
-                t.element.className = "alert alert-" + type;
+                t.container.className = "alert alert-" + type;
                 return t
             }
     };
@@ -58,85 +71,93 @@
 (function(epic) {
     function icon(settings) {
         settings = settings || {};
-        var t = this;
-        var i = t.element = document.createElement('i');
-        t.name = settings.name || "";
-        t.align = settings.align || epic.ui.align.none;
-        t.classes = settings.classes || "";
-        t.set_caption(settings.caption);
-        i.className = get_class(t)
+        var self = this;
+        var i = self.container = document.createElement('i');
+        self.name = settings.name || "";
+        self.align = settings.align || "";
+        self.classes = settings.classes || "";
+        self.set_caption(settings.caption);
+        i.className = get_class(self)
     }
-    function get_class(t) {
-        return t.name + ' ' + t.align + ' ' + t.classes
+    function get_class(self) {
+        return (self.name + ' ' + self.align + ' ' + self.classes).replace(/ +/, " ")
     }
     icon.prototype = {
         change: function(name) {
-            var t = this;
+            var self = this;
             if (name) {
-                t.name = name;
-                t.element.className = get_class(t)
+                self.name = name;
+                self.container.className = get_class(self)
             }
-            return t
+            return self
         }, set_align: function(alignment) {
-                var t = this;
-                t.align = alignment;
-                t.element.className = get_class(t);
-                return t
-            }, set_caption: function(caption) {
-                if (caption) {
-                    this.element.innerHTML = caption
+                var self = this;
+                if (typeof alignment === "string") {
+                    self.align = alignment;
+                    self.container.className = get_class(self)
                 }
-                return this
+                return self
+            }, set_caption: function(caption) {
+                var self = this;
+                if (typeof caption === "string") {
+                    self.container.innerHTML = caption
+                }
+                return self
             }, hide: function() {
-                this.element.style.display = 'none';
-                return this
+                var self = this;
+                self.container.style.display = 'none';
+                return self
             }, show: function() {
-                this.element.style.display = '';
-                return this
+                var self = this;
+                self.container.style.display = '';
+                return self
             }
     };
     epic.icon = icon
 })(epic);
-(function(epic) {
+(function(epic, $) {
+    var create_document_fragment = epic.html.create.document_fragment;
     function button(settings) {
-        var btn = this;
-        var id = btn.id = settings.id || epic.tools.uid.next().toString();
-        var caption = btn.caption = settings.caption || "";
-        var tag = btn.tag = settings.tag || button.tag.button;
-        var size = btn.size = settings.size || button.size.normal;
-        var role = tag === button.size.button ? 'type="' + (btn.role = settings.role || button.role.button) + '"' : "";
-        var style = btn.style = settings.style || button.style.none;
-        var classes = btn.classes = 'btn ' + (settings.classes || "");
-        var attributes = btn.attributes = settings.attributes || "";
-        var icon = btn.icon = settings.icon || new epic.icon;
+        settings = settings || {};
+        var self = this;
+        for (var property in settings) {
+            self[property] = settings[property]
+        }
+        var id = self.id = (self.id || epic.uid.next());
+        var caption = self.caption;
+        var tag = self.tag;
+        var size = self.size;
+        var style = self.style;
+        var attributes = self.attributes;
+        var classes = self.classes = ('btn ' + self.classes);
+        var role = tag === button.size.button ? 'type="' + self.role + '"' : "";
+        var icon = self.icon = settings.icon || new epic.icon;
         var align = epic.ui.align;
-        if (icon.align === align.none) {
+        if (icon.align === align.default) {
             icon.set_align(align.left)
         }
-        if (caption === "") {
-            if (icon.name !== "") {
-                classes += " btn-icon-only"
-            }
-            icon.set_align(align.none)
-        }
         var html_tag = '<' + tag + ' id="' + id + '"' + role + ' class="' + classes + ' btn-size-' + size + ' btn-' + style + '" ' + attributes + '></' + tag + '>';
-        var element = epic.html.create(html_tag).append(icon.element, caption);
-        btn.element = element.get(0)
+        var element = $(create_document_fragment(html_tag)).append(icon.container, caption);
+        self.container = element.get(0)
     }
     button.size = {
         mini: 'mini', small: 'small', normal: 'normal', large: 'large'
     };
-    button.size = {
+    button.tag = {
         anchor: 'a', button: 'button'
     };
     button.role = {
         button: 'button', submit: 'submit', reset: 'reset'
     };
     button.style = {
-        none: 'none', primary: 'primary', warning: 'warning', danger: 'danger', success: 'success', info: 'info'
+        'default': 'default', primary: 'primary', warning: 'warning', danger: 'danger', success: 'success', info: 'info'
     };
+    var prototype = {
+            caption: "", classes: "", attributes: "", tag: button.tag.button, size: button.size.normal, role: button.role.button, style: button.style.default
+        };
+    epic.object.extend(button, prototype);
     epic.button = button
-})(epic);
+})(epic, epic.html);
 (function(epic, window, document) {
     var $ = epic.html;
     function create(tag, classname, style, content) {
@@ -338,18 +359,18 @@
     epic.notice = notice;
     epic.notify = notify
 })(epic, document);
-(function(epic) {
-    var $ = epic.html;
+(function(epic, $) {
     function box(settings) {
         var self = this;
-        var id = settings.id || ("box-" + epic.uid.next());
-        var container = $('<div id="' + id + '" class="box"></div>');
-        var header = $('<div class="box-header"></div>');
-        var caption_wrapper = $('<div class="box-caption-wrapper"></div>');
-        var caption = $('<span class="box-caption"></span>');
-        var controls = $('<div class="box-controls"></div>');
-        var body = $('<div class="box-body"></div>');
+        var id = settings.id || ("epic-box-" + epic.uid.next());
+        var container = $('<div id="' + id + '" class="epic-box"></div>');
+        var header = $('<div class="epic-box-header"></div>');
+        var caption_wrapper = $('<div class="epic-box-caption-wrapper"></div>');
+        var caption = $('<span class="epic-box-caption"></span>');
+        var controls = $('<div class="epic-box-controls"></div>');
+        var body = $('<div class="epic-box-body"></div>');
         var viewport = self.viewport = new epic.viewport;
+        var provided_controls = settings.controls;
         self.settings = settings;
         self.container = container.get(0);
         self.header = header.get(0);
@@ -359,7 +380,7 @@
         self.controls = controls.get(0);
         self.body = body.get(0);
         body.append(viewport.container);
-        caption_wrapper.append(self.icon.element);
+        caption_wrapper.append(self.icon.container);
         caption_wrapper.append(caption);
         header.append(caption_wrapper);
         header.append(controls);
@@ -370,11 +391,11 @@
         if (settings.singleview) {
             self.viewport.add_view().activate()
         }
-        if (settings.controls) {
-            controls.append(settings.controls)
+        if (provided_controls) {
+            controls.append(provided_controls)
         }
         if (settings.target) {
-            settings.target.append(container)
+            $(settings.target).append(container)
         }
     }
     var prototype = box.prototype;
@@ -391,7 +412,7 @@
         }
     };
     epic.box = box
-})(epic);
+})(epic, epic.html);
 (function(epic) {
     var $ = epic.html;
     function create(tag, classname, style, content) {

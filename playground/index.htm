@@ -3,33 +3,93 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>Epic test B-)</title>
-		
-		<link href="epic/theme/default/style/epic.ui.css" rel="stylesheet" />
+		<title>Epic playground B-)</title>
 
-		<script src="epic/epic.1.0.0.js"></script>
-		<script src="epic/epic.ui.1.0.0.js"></script>
+		<link href="resources/plugins/epic/theme/default/style/epic.ui.css" rel="stylesheet" />
+		<link href="resources/plugins/font-awesome-4.0.3/css/font-awesome.min.css" rel="stylesheet"/>
+
+		<style type="text/css">
+			html,
+			body {
+				height: 100%;
+				width: 100%;
+
+				margin: 0;
+				padding: 0;
+				zoom: 1;
+
+				overflow: hidden;
+			}
+
+			body {
+				background-color: #ecebeb;
+				height: 100%;
+			}
+		</style>
+		
+		<script src="resources/plugins/epic/epic.1.0.0.js"></script>
+		<script src="resources/plugins/epic/epic.ui.1.0.0.js"></script>
 	</head>
+	
 	<body>
 		<script type="text/javascript">
-			// COLLECTION TEST
-			var collection = new epic.collection();
-			collection.set_event_handler( function( event, value ) {
-				epic.notify( {
-					title: event,
-					message: "Something happened."
-				});
+			// BOX TEST
+			var box = new epic.box( {
+				width: 300,
+				height: 200,
+				caption: "Hello!",
+				target: document.body,
+				singleview: true
 			} );
 
-			// VIEWPORT TEST
-			var viewport = new epic.viewport();
-			var element = viewport.container;
-			viewport.add_view().append("hello!").activate();
+			// BUTTON
+			var button = new epic.button( {
+				classes: "epic-box-btn",
+				style: epic.button.style.primary,
+				icon: new epic.icon( {
+					name: "fa-times",
+					classes: "fa"
+				})
+			} );
 
-			document.body.insertBefore( element, null );
+			box.controls.insertBefore( button.container, null );
+
+			// COPYCAT ENGINE TEST
+//			var default_settings = {
+//				attributes: {
+//					name: "a",
+//					active: true
+//				}
+//			};
+//
+//			var settings = {
+//				
+//			};
+//			
+//			var x = epic.object.copy( default_settings, null );
+//			
+//			console.clear();
+//			console.log( JSON.stringify( default_settings ) );
+//			console.log( JSON.stringify( settings ) );
+//			console.log(default_settings.settings == settings.attributes);
 			
-			var x = epic.html(element);
-			x.empty().append("boom!");
+			// COLLECTION TEST
+//			var collection = new epic.collection();
+//			collection.set_event_handler( function( event, value ) {
+//				epic.notify( {
+//					title: event,
+//					message: "Something happened."
+//				});
+//			} );
+
+			// VIEWPORT TEST
+//			var viewport = new epic.viewport();
+//			var element = viewport.container;
+//			viewport.add_view().append("hello!").activate();
+//			document.body.insertBefore( element, null );
+			
+//			var x = epic.html(element);
+//			x.empty().append("boom!");
 
 //			epic.notify( {
 //				title: "Hello ^_^",

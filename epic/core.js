@@ -1,3 +1,16 @@
+/*!
+ * EPIC.JS - v1.0.0
+ * Simple & awesome JavaScript library for BROGRAMMERS B-)
+ * https://github.com/carlosjln/epic
+ * 
+ * Copyright 2014
+ * Released under MIT License
+ * https://github.com/carlosjln/epic/blob/master/LICENSE
+ * 
+ * Author: Carlos J. Lopez
+ * https://github.com/carlosjln
+ */
+
 var epic = ( function() {
 	
 	function epic() {

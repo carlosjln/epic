@@ -3,59 +3,64 @@
 	function icon( settings ) {
 		settings = settings || {};
 
-		var t = this;
-		var i = t.element = document.createElement( 'i' );
+		var self = this;
+		var i = self.container = document.createElement( 'i' );
+		
+		self.name = settings.name || "";
+		self.align = settings.align || "";
+		self.classes = settings.classes || "";
 
-		t.name = settings.name || "";
-		t.align = settings.align || epic.ui.align.none;
-		t.classes = settings.classes || "";
-
-		t.set_caption( settings.caption );
-
-		i.className = get_class(t);
+		self.set_caption( settings.caption );
+		i.className = get_class( self );
 	}
 
-	function get_class( t ) {
-		return t.name + ' ' + t.align + ' ' + t.classes;
+	function get_class( self ) {
+		return (self.name + ' ' + self.align + ' ' + self.classes).replace(/ +/, " ");
 	}
 
 	icon.prototype = {
 		change: function( name ) {
-			var t = this;
+			var self = this;
 
 			if( name ) {
-				t.name = name;
-				t.element.className = get_class( t );
+				self.name = name;
+				self.container.className = get_class( self );
 			}
 
-			return t;
+			return self;
 		},
 
 		set_align: function( alignment ) {
-			var t = this;
+			var self = this;
+			
+			if( typeof alignment === "string" ) {
+				self.align = alignment;
+				self.container.className = get_class( self );				
+			}
 
-			t.align = alignment;
-			t.element.className = get_class( t );
-
-			return t;
+			return self;
 		},
 
 		set_caption: function( caption ) {
-			if( caption ) {
-				this.element.innerHTML = caption;
+			var self = this;
+			
+			if( typeof caption === "string" ) {
+				self.container.innerHTML = caption;
 			}
 
-			return this;
+			return self;
 		},
 
 		hide: function() {
-			this.element.style.display = 'none';
-			return this;
+			var self = this;
+			self.container.style.display = 'none';
+			return self;
 		},
 
 		show: function() {
-			this.element.style.display = '';
-			return this;
+			var self = this;
+			self.container.style.display = '';
+			return self;
 		}
 	};
 

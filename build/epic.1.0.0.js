@@ -1,3 +1,15 @@
+/*!
+ * EPIC.JS - v1.0.0
+ * Simple & awesome JavaScript library for BROGRAMMERS B-)
+ * https://github.com/carlosjln/epic
+ * 
+ * Copyright 2014
+ * Released under MIT License
+ * https://github.com/carlosjln/epic/blob/master/LICENSE
+ * 
+ * Author: Carlos J. Lopez
+ * https://github.com/carlosjln
+ */
 var epic = (function() {
         function epic(){}
         function log(message) {
@@ -106,6 +118,7 @@ var epic = (function() {
     })();
 var epic;
 (function(epic) {
+    var get_type = epic.type;
     function object(obj) {
         return new dsl(obj, to_array(arguments))
     }
@@ -113,49 +126,36 @@ var epic;
         this.object = obj;
         this.parameters = parameters
     }
-    dsl.prototype = {extends_from: function(base_class) {
-            var target = this.object;
-            for (var property_name in base_class) {
-                if (base_class.hasOwnProperty(property_name)) {
-                    target[property_name] = base_class[property_name]
-                }
-            }
-            function object() {
-                this.constructor = target;
-                this.base_class = base_class;
-                this.base = function() {
-                    this.base_class.apply(this, arguments)
-                }
-            }
-            object.prototype = base_class.prototype;
-            target.prototype = new object
-        }};
-    function copy(object, target) {
-        var object_type = epic.type(object);
-        var clone;
-        switch (object_type) {
-            case"object":
-                clone = target || {};
-                for (var attribute in object) {
-                    if (object.hasOwnProperty(attribute)) {
-                        clone[attribute] = copy(object[attribute])
-                    }
-                }
-                break;
-            case"array":
-                clone = target || [];
-                for (var i = 0, len = object.length; i < len; i++) {
-                    clone[i] = copy(object[i])
-                }
-                break;
-            case"date":
-                clone = new Date;
-                clone.setTime(object.getTime());
-                break;
-            default:
-                clone = object
+    function copy(source, target, undefined_only) {
+        var new_value;
+        var current_value;
+        var source_type = get_type(source);
+        undefined_only = undefined_only === true;
+        if (source_type === "date") {
+            target = new Date;
+            target.setTime(source.getTime());
+            return target
         }
-        return clone
+        if (source_type === "array" && undefined_only === false) {
+            var index = source.length;
+            target = target === undefined ? [] : target;
+            while (index--) {
+                target[index] = copy(source[index], target[index], undefined_only)
+            }
+            return target
+        }
+        if (source_type === "object") {
+            target = target === undefined ? {} : target;
+            for (var attribute in source) {
+                if (source.hasOwnProperty(attribute)) {
+                    new_value = source[attribute];
+                    current_value = target[attribute];
+                    target[attribute] = copy(new_value, current_value, undefined_only)
+                }
+            }
+            return target
+        }
+        return undefined_only ? (target !== undefined ? target : source) : source
     }
     function merge() {
         var objects = arguments;
@@ -177,9 +177,25 @@ var epic;
         var array = Array.prototype.slice.call(object);
         return array.length > 0 ? array : [object]
     }
+    function extend(klass, base) {
+        var klass_prototype = klass.prototype;
+        copy(base, klass, true);
+        if (get_type(base) === "function") {
+            copy(base.prototype, klass_prototype, true)
+        }
+        else {
+            copy(base, klass_prototype, true)
+        }
+        klass_prototype.constructor = klass;
+        klass_prototype.baseclass = base;
+        klass_prototype.base = function() {
+            this.baseclass.apply(this, arguments)
+        }
+    }
     object.merge = merge;
-    object.clone = copy;
+    object.copy = copy;
     object.to_array = to_array;
+    object.extend = extend;
     object.dsl = dsl;
     epic.object = object
 })(epic);
@@ -637,9 +653,15 @@ var epic;
             return query
         }
         var elements = [];
-        if (query.nodeName) {
+        var node_type = query.nodeType;
+        if (node_type) {
             context = query;
-            elements[0] = query
+            if (node_type === 11) {
+                elements = to_array.call(query.childNodes)
+            }
+            else {
+                elements[0] = query
+            }
         }
         if (typeof query === "string") {
             if (query === "body" && !context && document.body) {
@@ -774,10 +796,9 @@ var epic;
             return t
         }, insert: function(elements, position) {
                 elements = flatten(elements);
-                console.log(elements);
-                var t = this;
+                var self = this;
                 var i = elements.length;
-                var target = t.elements[0];
+                var target = self.elements[0];
                 var reference = null;
                 var element;
                 var valid_nodes = [];
@@ -807,6 +828,7 @@ var epic;
                     }
                     target.insertBefore(element, reference)
                 }
+                return self
             }, append: function() {
                 return this.insert(arguments, undefined)
             }, html: function(content) {

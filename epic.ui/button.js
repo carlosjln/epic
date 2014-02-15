@@ -1,40 +1,49 @@
-﻿( function( epic ) {
+﻿( function( epic, $ ) {
+	var create_document_fragment = epic.html.create.document_fragment;
 	
 	function button( settings ) {
-		var btn = this;
+		settings = settings || {};
 
-		var id = btn.id = settings.id || epic.tools.uid.next().toString();
-		var caption = btn.caption = settings.caption || "";
+		var self = this;
+		
+		// APPLY ALL SETTINGS TO THE CURRENT INSTANCE
+		for( var property in settings ) {
+			self[ property ] = settings[ property ];
+		}
 
-		var tag = btn.tag = settings.tag || button.tag.button;
-		var size = btn.size = settings.size || button.size.normal;
-		var role = tag === button.size.button ? 'type="' + ( btn.role = settings.role || button.role.button ) + '"' : "";
-		var style = btn.style = settings.style || button.style.none;
+		var id = self.id = (self.id || epic.uid.next());
+		
+		var caption = self.caption;
+		var tag = self.tag;
+		var size = self.size;
+		var style = self.style;
+		var attributes = self.attributes;
 
-		var classes = btn.classes = 'btn ' + ( settings.classes || "" );
-		var attributes = btn.attributes = settings.attributes || "";
+		var classes = self.classes = ('btn ' + self.classes);
+		var role = tag === button.size.button ? 'type="' + self.role + '"' : "";
 
-		var icon = btn.icon = settings.icon || new epic.icon();
+		var icon = self.icon = settings.icon || new epic.icon();
 		var align = epic.ui.align;
 
-		if( icon.align === align.none ){
+		if( icon.align === align.default ){
 			icon.set_align( align.left );
 		}
 		
-		if( caption === "" ) {
-			if( icon.name !== "" ) {
-				classes += " btn-icon-only";
-			}
-			
-			icon.set_align( align.none );
-		}
+//		if( caption === "" ) {
+//			if( icon.name !== "" ) {
+//				classes += " btn-icon-only";
+//			}
+//			
+//			icon.set_align( align.default );
+//		}
 
 		var html_tag = '<' + tag + ' id="' + id + '"' + role + ' class="' + classes + ' btn-size-' + size + ' btn-' + style + '" ' + attributes + '></' + tag + '>';
-		var element = epic.html.create( html_tag ).append( icon.element, caption );
+		var element = $( create_document_fragment( html_tag ) ).append( icon.container, caption );
 
-		btn.element = element.get( 0 );
+		self.container = element.get( 0 );
 	}
 
+	// STATIC PROPERTIES
 	button.size = {
 		mini: 'mini',
 		small: 'small',
@@ -42,7 +51,7 @@
 		large: 'large'
 	};
 
-	button.size = {
+	button.tag = {
 		anchor: 'a',
 		button: 'button'
 	};
@@ -54,7 +63,7 @@
 	};
 
 	button.style = {
-		none: 'none',
+		'default': 'default',
 		primary: 'primary',
 		warning: 'warning',
 		danger: 'danger',
@@ -62,5 +71,19 @@
 		info: 'info'
 	};
 
+	// PROTOTYPED DEFAULT SETTINGS
+	var prototype = {
+		caption: "",
+		classes: "",
+		attributes: "",
+		tag: button.tag.button,
+		size: button.size.normal,
+		role: button.role.button,
+		style: button.style.default,
+	};
+	
+	epic.object.extend( button, prototype );
+
 	epic.button = button;
-} )( epic );
+
+} )( epic, epic.html );

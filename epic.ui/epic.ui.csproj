@@ -50,7 +50,13 @@
     <Content Include="theme\default\less\viewport.less" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="theme\default\less\partials\helpers.less" />
+    <Content Include="theme\default\less\helpers.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="theme\default\less\box.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="theme\default\less\buttons.less" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -1,10 +1,11 @@
 ﻿( function( epic ) {
 
 	function alert( settings ) {
-		settings = this.settings = epic.object.merge( alert.default_settings, settings );
+		var self = this;
+		settings = self.settings = epic.object.merge( alert.default_settings, settings );
 
-		var element = this.element = document.createElement( 'div' );
-		var inner = this.message = document.createElement( 'span' );
+		var element = self.container = document.createElement( 'div' );
+		var inner = self.message = document.createElement( 'span' );
 
 		var type = settings.type;
 		var message = settings.message;
@@ -26,12 +27,12 @@
 
 	alert.prototype = {
 		show: function (){
-			this.element.style.display = 'block';
+			this.container.style.display = 'block';
 			return this;
 		},
 
 		hide: function (){
-			this.element.style.display = 'none';
+			this.container.style.display = 'none';
 			return this;
 		},
 
@@ -58,7 +59,7 @@
 		
 		set_type: function ( type ) {
 			var t = this;
-			t.element.className = "alert alert-" + type;
+			t.container.className = "alert alert-" + type;
 			return t;
 		}
 	};
