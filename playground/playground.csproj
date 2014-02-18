@@ -24,6 +24,7 @@
     <Content Include="resources\plugins\font-awesome-4.0.3\css\font-awesome.css" />
     <Content Include="resources\plugins\font-awesome-4.0.3\css\font-awesome.min.css" />
     <Content Include="resources\plugins\font-awesome-4.0.3\fonts\fontawesome-webfont.svg" />
+    <Content Include="resources\test.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@
 			self[ property ] = settings[ property ];
 		}
 
-		var id = self.id = (self.id || epic.uid.next());
+		var id = self.id = (self.id || "BTN-" + epic.uid.next());
 		
 		var caption = self.caption;
 		var tag = self.tag;
@@ -25,17 +25,21 @@
 		var icon = self.icon = settings.icon || new epic.icon();
 		var align = epic.ui.align;
 
+		// SETS DEFAULT ALIGNMENT TO THE LEFT
 		if( icon.align === align.default ){
 			icon.set_align( align.left );
 		}
 		
-//		if( caption === "" ) {
-//			if( icon.name !== "" ) {
-//				classes += " btn-icon-only";
-//			}
-//			
-//			icon.set_align( align.default );
-//		}
+		// WHEN THERE'S NO CAPTION
+		if( caption === "" ) {
+			// INDICATE THAT IT ONLY CONTAINS AN ICON
+			if( icon.name !== "" ) {
+				classes += " btn-icon-only";
+			}
+			
+			// REMOVE ALIGNMENT
+			icon.set_align( align.default );
+		}
 
 		var html_tag = '<' + tag + ' id="' + id + '"' + role + ' class="' + classes + ' btn-size-' + size + ' btn-' + style + '" ' + attributes + '></' + tag + '>';
 		var element = $( create_document_fragment( html_tag ) ).append( icon.container, caption );

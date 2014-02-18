@@ -208,7 +208,11 @@
 	function to_dom( str ) {
 		return epic.html.create.document_fragment( str );
 	}
-	
+
+	function purge_spaces( str ) {
+		return str.replace(/^ {0,}/,"").replace(/ {0,}$/,"").replace(/ {2,}/, " ");
+	}
+
 	// STATIC METHODS
 	string.encode_base64 = encode_base64;
 	string.decode_base64 = decode_base64;
@@ -229,6 +233,7 @@
 	string.is_html = is_html;
 
 	string.to_dom = to_dom;
+	string.purge_spaces = purge_spaces;
 
 	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
 	string.dsl = dsl;

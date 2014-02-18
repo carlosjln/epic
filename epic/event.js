@@ -41,7 +41,7 @@
 
 	}
 
-	function add( element, event_name, method, parameters ) {
+	function add( element, event_name, method, event_data ) {
 		if( typeof event_name !== "string" ) {
 			return epic.fail( "[event_name] must be a valid event name." );
 		}
@@ -61,7 +61,7 @@
 		var handler = {
 			context: element,
 			method: method,
-			parameters: parameters || {}
+			event_data: event_data || {}
 		};
 
 		// FIX THE MOUSEENTER/MOUSEOVER SO THAT IT DOESN'T GET TRIGGERED WHEN HOVERING ELEMENTS WITHIN THE CURRENT NODE
@@ -74,12 +74,12 @@
 				method: method
 			};
 
-			handler.method = function( e, params ) {
+			handler.method = function( e, data ) {
 				var t = this;
 				var elem = t.element;
 				
 				if( !contains( elem, e.related_target ) ) {
-					t.method.call( elem, e, params );
+					t.method.call( elem, e, data );
 				}
 			};
 		}
@@ -125,38 +125,57 @@
 	function epic_event_handler( e ) {
 		var evt = e instanceof epic_event ? e : new epic_event( e );
 
-		var element = evt.target;
-		var type = evt.type;
-		var events = REGISTRY[ element.uid ];
-		var handlers;
-		var handler;
-		var len;
-		var index = 0;
+		var target = evt.target;
+		var execution_path = [target];
 		
-		if( events && ( handlers = events[ type ] ) ) {
-			len = handlers.length;
+		while( target = target.parentNode ) {
+			execution_path[ execution_path.length ] = target;
+		}
 
-			// CALLING EPIC HANDLERS
-			while( len-- ) {
-				handler = handlers[ index++ ];
-				handler.method.call( handler.context, evt, handler.parameters );
-			}
+		process_execution_path( evt, execution_path );
 
-			// CALLLING NATIVE HANDLERS
-			// READ ME WELL: THEY SHOULDN'T EXIST!
-		} 
-
-		// TRIGGER THE HANDLERS ON THE ELEMENT'S PATH
-		if( !evt.propagation_stopped ) {
-			var parent = element.parentNode;
-			
-			if( parent ) {
-				evt.target = parent;
-				epic_event_handler( evt );
-			}
+		if( evt.propagation_stopped === false ) {
+			evt.stop_propagation();
 		}
 		
 		return this;
+	}
+
+	function process_execution_path( evt, elements ) {
+		var elements_count = elements.length;
+		var handlers;
+		var handler;
+		var element;
+		var events;
+		var i = 0;
+		var j;
+		var handlers_count;
+		var type = evt.type;
+		
+		for( ; i < elements_count; i++ ) {
+			element = elements[ i ];
+			events = REGISTRY[ element.uid ];
+
+			if( events && ( handlers = events[ type ] ) ) {
+				handlers_count = handlers.length;
+
+				// CALLING EPIC HANDLERS
+				for( j = 0; j < handlers_count; j++ ) {
+					handler = handlers[ j ];
+					handler.method.call( handler.context, evt, handler.event_data );
+					
+					// CALL IT OFF IF PROPAGATION HAVE BEEN STOPPED
+					if( evt.propagation_stopped === true ) {
+						return evt;
+					}
+					
+					// CALLLING NATIVE HANDLERS
+					// READ ME WELL: THEY SHOULDN'T EXIST!
+				}
+			}
+		}
+		
+		return evt;
 	}
 
 	function epic_event( e ) {
@@ -239,44 +258,56 @@
 			page_y = e.clientY + ( document_element && document_element.scrollTop || body && body.scrollTop || 0 ) - ( document_element && document_element.clientTop || body && body.clientTop || 0 );
 		}
 
-		// LET'S KEEP TRACK OF THE ORIGINAL EVENT, FOR FUN :P
-		this.original = e;
-
-		// IF TARGET ELEMENT IS A TEXT NODE THEN USE ITS PARENT NODE
-		this.target = target.nodeType === 3 ? target.parentNode : target;
-		this.type = event_name;
-
-		this.from_element = from_element;
-		this.to_element = e.toElement || target;
+		var self = this;
 		
-		this.pagex = page_x;
-		this.pagey = page_y;
+		// LET'S KEEP TRACK OF THE ORIGINAL EVENT, FOR FUN :P
+		self.original = e;
 
-		this.keycode = keycode;
-		this.keyvalue = keyvalue;
-		this.metaKey = meta_key;
+		self.event_phase = e.eventPhase;
+		
+		// IF TARGET ELEMENT IS A TEXT NODE THEN USE ITS PARENT NODE
+		self.target = target.nodeType === 3 ? target.parentNode : target;
+		self.type = event_name;
 
-		this.delta = delta;
-		this.capslock = capslock;
-		this.button = e.button;
+		self.from_element = from_element;
+		self.to_element = e.toElement || target;
+		
+		self.pagex = page_x;
+		self.pagey = page_y;
 
-		this.related_target = related_target;
-		this.propagation_stopped = false;
+		self.keycode = keycode;
+		self.keyvalue = keyvalue;
+		self.metaKey = meta_key;
+
+		self.delta = delta;
+		self.capslock = capslock;
+		self.button = e.button;
+
+		self.related_target = related_target;
+		self.propagation_stopped = false;
 	}
 
 	epic_event.prototype = {
 		prevent_default: function() {
-			this.original.preventDefault();
-			this.result = false;
+			var foo = this;
+			foo.original.preventDefault();
+			foo.original.result = false;
 		},
 
 		stop_propagation: function() {
-			var original = this.original;
-
+			var self = this;
+			var original = self.original;
+			
 			original.cancelBubble = true;
 			original.stopPropagation();
 			
-			this.propagation_stopped = true;
+			self.propagation_stopped = true;
+		},
+
+		stop: function() {
+			var self = this;
+			self.prevent_default();
+			self.stop_propagation();
 		}
 	};
 

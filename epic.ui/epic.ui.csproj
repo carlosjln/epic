@@ -20,6 +20,7 @@
     <Content Include="alert.js" />
     <Content Include="button.js" />
     <Content Include="box.js" />
+    <Content Include="dropdown.js" />
     <Content Include="overlay.js" />
     <Content Include="notice.js" />
     <Content Include="core.js" />
@@ -32,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="theme\default\less\dropdown.less" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="theme\default\less\notice.less" />
