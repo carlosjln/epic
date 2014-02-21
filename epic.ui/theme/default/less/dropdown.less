@@ -5,8 +5,8 @@
 // -------------------------
 
 // dropdown arrow/caret
-@caret-width-base:	4px;
-@caret-width-large:	5px;
+@caret-width-base:	6px;
+@caret-width-large:	6px;
 
 .caret {
 	display: inline-block;
@@ -14,7 +14,6 @@
 	width: 0;
 	height: 0;
 
-	margin-left: 2px;
 	vertical-align: middle;
 
 	border-top:   @caret-width-base solid @dropdown-caret-color;
@@ -25,25 +24,26 @@
 	content: "";
 }
 
-// The dropdown wrapper (div)
 .dropdown {
 	position: relative;
 	.inline-block;
 }
 
-// Prevent the focus on the dropdown toggle when closing dropdowns
-.dropdown-toggle:focus {
-	outline: 0;
+.dropdown-toggle {
+	.caret {
+		margin-top: -3px;
+	}
+
+	&:focus {
+		outline: 0;
+	}
 }
 
-// The dropdown menu (ul)
 .dropdown-menu {
-	display: none; // none by default, but block on "open" of the menu
+	display: none;
 	float: left;
 
 	min-width: 150px;
-
-	// overflow: hidden;
 
 	position: absolute;
 	top: 100%;
@@ -55,7 +55,7 @@
 
 	font-size: @font-size-base;
 	background-color: @dropdown-bg;
-	border: 1px solid @dropdown-fallback-border; // IE8 fallback
+	border: 1px solid @dropdown-fallback-border;
 	border: 1px solid @dropdown-border;
 	
 	.set-shadow( 0 6px 12px rgba(0,0,0,.175) );
@@ -63,7 +63,7 @@
 	.set-background-clip;
 
 	// Aligns the dropdown menu to right
-	&.float-right {
+	&.pull-right {
 		right: 0;
 		left: auto;
 	}
@@ -71,7 +71,7 @@
 	// Dividers (basically an hr) within the dropdown
 	.divider {
 		height: 1px;
-		margin: 5px 0;
+		margin: 0;
 		overflow: hidden;
 		background-color: #e5e5e5;
 		border: 0 none;
@@ -83,8 +83,9 @@
 		padding: 3px 20px;
 		clear: both;
 
+		font-family: sans-serif;
 		font-weight: normal;
-		line-height: 35px;
+		line-height: 25px;
 		color: @dropdown-link-color;
 		text-decoration: none;
 
@@ -109,8 +110,6 @@
 		}
 	}
 
-	// Disabled state
-	// Gray out text and ensure the hover/focus state remains gray
 	> .disabled > a {
 		&,
 		&:hover,
@@ -119,12 +118,11 @@
 		}
 	}
 	
-	// Nuke hover/focus effects
 	> .disabled > a {
 		&:hover,
 		&:focus {
 			background-color: transparent;
-			background-image: none; // Remove CSS gradient
+			background-image: none;
 			cursor: not-allowed;
 			
 			.reset-filter();
@@ -142,14 +140,12 @@
 }
 
 
-// Open state for the dropdown
 .open {
 	> .dropdown-menu {
 		display: block;
 	}
 }
 
-// Dropdown section headers
 .dropdown-header {
 	display: block;
 	padding: 3px 20px;
@@ -157,47 +153,4 @@
 	font-size: @font-size-small;
 	line-height: @line-height-base;
 	color: @dropdown-header-color;
-}
-
-// Backdrop to catch body clicks on mobile, etc.
-.dropdown-backdrop {
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-
-	z-index: @zindex-dropdown - 10;
-}
-
-// Allow for dropdowns to go bottom up (aka, dropup-menu)
-.dropup {
-	// Reverse the caret
-	.caret {
-		// Firefox fix for https://github.com/twbs/bootstrap/issues/9538. Once this
-		// gets fixed, restore `border-top: 0;`.
-		border-top: 0 dotted;
-		border-bottom: 4px solid @dropdown-caret-color;
-		content: "";
-	}
-
-	// Different positioning for bottom up menu
-	.dropdown-menu {
-		top: auto;
-		bottom: 100%;
-		margin-bottom: 1px;
-	}
-}
-
-// Right aligned dropdowns
-.float-right > .dropdown-menu {
-	right: 0;
-	left: auto;
-}
-
-// Right aligned menus need alt position
-.action-bar.float-right > li > .dropdown-menu,
-.action-bar > li > .dropdown-menu.pull-right {
-	left: auto;
-	right: 0;
 }

@@ -179,7 +179,7 @@ var epic;
     }
     function extend(klass, base) {
         if (typeof klass !== "function") {
-            return null
+            return false
         }
         var klass_prototype = klass.prototype;
         copy(base, klass, true);
@@ -193,7 +193,8 @@ var epic;
         klass_prototype.baseclass = base;
         klass_prototype.base = function() {
             this.baseclass.apply(this, arguments)
-        }
+        };
+        return true
     }
     object.merge = merge;
     object.copy = copy;
@@ -377,9 +378,6 @@ var epic;
     function to_dom(str) {
         return epic.html.create.document_fragment(str)
     }
-    function purge_spaces(str) {
-        return str.replace(/^ {0,}/, "").replace(/ {0,}$/, "").replace(/ {2,}/, " ")
-    }
     string.encode_base64 = encode_base64;
     string.decode_base64 = decode_base64;
     string.encode_utf8 = encode_utf8;
@@ -393,7 +391,6 @@ var epic;
     string.trim = trim;
     string.is_html = is_html;
     string.to_dom = to_dom;
-    string.purge_spaces = purge_spaces;
     string.dsl = dsl;
     epic.string = string
 })(epic);
@@ -448,6 +445,25 @@ var epic;
         }
         return result
     };
+    array.indexof = function(list, element, from_index) {
+        var length = list.length >>> 0;
+        from_index = +from_index || 0;
+        if (Math.abs(from_index) === Infinity) {
+            from_index = 0
+        }
+        if (from_index < 0) {
+            from_index += length;
+            if (from_index < 0) {
+                from_index = 0
+            }
+        }
+        for (; from_index < length; from_index++) {
+            if (this[from_index] === element) {
+                return from_index
+            }
+        }
+        return -1
+    };
     array.remove = remove;
     array.dsl = dsl;
     epic.array = array
@@ -459,55 +475,66 @@ var epic;
         self.collection = {};
         self.list = []
     }
-    function set(key, value) {
-        if (key === undefined || value === undefined) {
-            return undefined
+    function set(key, item, override) {
+        if (key === undefined || item === undefined) {
+            return null
         }
         key = to_string(key);
         var self = this;
-        var old_record = self.collection[key];
-        var index = old_record ? old_record.index : self.list.length;
+        var current = self.collection[key];
+        var index = current ? current.index : self.list.length;
+        if (current && !override) {
+            return null
+        }
         self.collection[key] = {
-            key: key, value: value, index: index
+            key: key, value: item, index: index
         };
-        self.list[index] = value;
-        self.event_handler.call(self.event_context, "ITEM_ADDED", value);
-        return old_record
+        self.list[index] = item;
+        return item
+    }
+    function set_items(key_name, items, override) {
+        if (!(items instanceof Array)) {
+            return null
+        }
+        var self = this;
+        var length = items.length;
+        var index = 0;
+        var item;
+        var key;
+        var processed = [];
+        while (length--) {
+            item = items[index++];
+            key = item[key_name];
+            self.set(key, item, override);
+            processed[processed.length] = (self.collection[key] || {}).value
+        }
+        return processed
     }
     function get(key) {
         key = to_string(key);
         var self = this;
         var record = self.collection[key] || {};
-        var value = record.value;
-        if (value) {
-            self.event_handler.call(self.event_context, "ITEM_RETRIEVED", value)
-        }
-        return value
+        var item = record.value;
+        return item
     }
     function remove(key) {
         key = to_string(key);
         var self = this;
         var record = self.collection[key] || {};
-        var value = record.value;
+        var item = record.value;
         var index = record.index;
-        if (value) {
+        if (item) {
             delete self.collection[key];
             self.list.splice(index, 1);
-            self.event_handler.call(self.event_context, "ITEM_REMOVED", value);
-            return value
+            return item
         }
         return undefined
     }
     function to_string(key) {
         return String(key)
     }
-    function set_event_handler(handler, context) {
-        var self = this;
-        self.event_handler = handler;
-        self.event_context = context
-    }
     collection.prototype = {
-        set: set, get: get, remove: remove, set_event_handler: set_event_handler, event_handler: function(){}, event_context: null
+        set: set, get: get, remove: remove, set_items: set_items
     };
     epic.collection = collection
 })(epic);
@@ -648,36 +675,35 @@ var epic;
     var is_html = epic.string.is_html;
     var array = epic.array;
     var to_array = Array.prototype.slice;
+    var trim_spaces = epic.string.trim;
     function html(query, context) {
         return new selector(query, context)
     }
     function selector(query, context) {
         var t = this;
-        if (!query) {
-            return t
-        }
-        if (query instanceof selector) {
-            return query
-        }
         var elements = [];
-        var node_type = query.nodeType;
-        if (node_type) {
-            context = query;
-            if (node_type === 11) {
-                elements = to_array.call(query.childNodes)
+        if (query) {
+            if (query instanceof selector) {
+                return query
             }
-            else {
-                elements[0] = query
+            var node_type = query.nodeType;
+            if (node_type) {
+                context = query;
+                if (node_type === 11) {
+                    elements = to_array.call(query.childNodes)
+                }
+                else {
+                    elements = [query]
+                }
             }
-        }
-        if (typeof query === "string") {
-            if (query === "body" && !context && document.body) {
-                t.context = document;
-                t.elements = [document.body];
-                return t
-            }
-            if (is_html(query)) {
-                elements = to_array.call(document_fragment(query).childNodes)
+            if (typeof query === "string") {
+                if (query === "body" && !context && document.body) {
+                    context = document;
+                    elements = [document.body]
+                }
+                else if (is_html(query)) {
+                    elements = to_array.call(create_document_fragment(query).childNodes)
+                }
             }
         }
         t.query = query;
@@ -701,16 +727,32 @@ var epic;
             list[index] = element
         }
     }
+    function add_class(element, classes) {
+        var trim = trim_spaces;
+        var class_list = trim(element.className, true).split(' ');
+        var class_count;
+        var i = 0;
+        var name;
+        classes = trim(classes, true).split(' ');
+        for (class_count = classes.length; i < class_count; i++) {
+            name = classes[i];
+            if (class_list.indexOf(name) === -1) {
+                class_list[class_list.length] = name
+            }
+        }
+        element.className = trim(class_list.join(' '));
+        return element
+    }
     function create(tag) {
         var parameters = arguments;
         var param_1 = parameters[1];
         var param_2 = parameters[2];
         var node;
         if (tag === "fragment") {
-            node = document_fragment(param_1)
+            node = create_document_fragment(param_1)
         }
         else if (tag === 'option') {
-            node = option(parameters[0], param_1, param_2)
+            node = create_option(parameters[0], param_1, param_2)
         }
         else if (tag === "textnode") {
             node = document.createTextNode(param_1)
@@ -720,7 +762,7 @@ var epic;
         }
         return node
     }
-    function document_fragment(content, callback) {
+    function create_document_fragment(content, callback) {
         var fragment = document.createDocumentFragment();
         var content_holder;
         var index;
@@ -749,7 +791,7 @@ var epic;
         }
         return fragment
     }
-    function option(caption, value, selected) {
+    function create_option(caption, value, selected) {
         var node = document.createElement("option");
         if (selected === undefined && value === true) {
             selected = true;
@@ -763,7 +805,7 @@ var epic;
         }
         return new epic.html.selector(node)
     }
-    function script(code) {
+    function create_script(code) {
         var node = document.createElement("script");
         var property = ('innerText' in node) ? 'innerText' : 'textContent';
         node.setAttribute("type", "text/javascript");
@@ -773,7 +815,7 @@ var epic;
         }, 10);
         return new epic.html.selector(node)
     }
-    function style(css) {
+    function create_style(css) {
         var node = document.createElement("style");
         node.setAttribute("type", "text/css");
         if (node.styleSheet) {
@@ -862,15 +904,16 @@ var epic;
                 return html.contains(this.elements[0], element)
             }, find: function(query) {
                 throw new epic.fail("selector.find() is feeling sick :(");
-            }
+            }, has_class: function(){}, add_class: function(){}, remove_class: function(){}
     };
-    create.document_fragment = document_fragment;
-    create.option = option;
-    create.script = script;
-    create.style = style;
+    create.document_fragment = create_document_fragment;
+    create.option = create_option;
+    create.script = create_script;
+    create.style = create_style;
     html.contains = contains;
     html.selector = selector;
     html.create = create;
+    html.add_class = add_class;
     epic.html = html
 })(epic, window, document);
 var epic;

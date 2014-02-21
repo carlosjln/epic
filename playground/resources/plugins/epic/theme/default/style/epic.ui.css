@@ -479,11 +479,10 @@ button.close {
     display: inline-block;
     width: 0;
     height: 0;
-    margin-left: 2px;
     vertical-align: middle;
-    border-top: 4px solid #000;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
+    border-top: 6px solid #000;
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
     border-bottom: 0 dotted;
     content: ""
 }
@@ -493,6 +492,9 @@ button.close {
     display: inline-block;
     zoom: 1;
     *display: inline
+}
+.dropdown-toggle .caret {
+    margin-top: -3px
 }
 .dropdown-toggle:focus {
     outline: 0
@@ -524,13 +526,13 @@ button.close {
     -webkit-background-clip: padding-box;
     background-clip: padding-box
 }
-.dropdown-menu.float-right {
+.dropdown-menu.pull-right {
     right: 0;
     left: auto
 }
 .dropdown-menu .divider {
     height: 1px;
-    margin: 5px 0;
+    margin: 0;
     overflow: hidden;
     background-color: #e5e5e5;
     border: 0 none
@@ -539,8 +541,9 @@ button.close {
     display: block;
     padding: 3px 20px;
     clear: both;
+    font-family: sans-serif;
     font-weight: normal;
-    line-height: 35px;
+    line-height: 25px;
     color: #2d323d;
     text-decoration: none;
     white-space: nowrap !important
@@ -578,30 +581,4 @@ button.close {
     font-size: 12px;
     line-height: 1.428571429;
     color: #999
-}
-.dropdown-backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 990
-}
-.dropup .caret {
-    border-top: 0 dotted;
-    border-bottom: 4px solid #000;
-    content: ""
-}
-.dropup .dropdown-menu {
-    top: auto;
-    bottom: 100%;
-    margin-bottom: 1px
-}
-.float-right>.dropdown-menu {
-    right: 0;
-    left: auto
-}
-.action-bar.float-right>li>.dropdown-menu, .action-bar>li>.dropdown-menu.pull-right {
-    left: auto;
-    right: 0
 }

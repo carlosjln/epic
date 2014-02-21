@@ -2,6 +2,7 @@
 	var is_html = epic.string.is_html;
 	var array = epic.array;
 	var to_array = Array.prototype.slice;
+	var trim_spaces = epic.string.trim;
 
 	function html( query, context ) {
 		return new selector( query, context );
@@ -9,41 +10,37 @@
 
 	function selector( query, context ) {
 		var t = this;
-
-		// RETURN AN EMPTY SELECTOR WHEN QUERY IS DARK MATTER (NULL, FALSE, UNDEFINED, "")
-		if( !query ) {
-			return t;
-		}
-
-		// FEELING LAZY, TAKE IT BACK :P
-		if( query instanceof selector ) {
-			return query;
-		}
-		
 		var elements = [];
-		var node_type = query.nodeType;
 
-		// IS AN HTML ELEMENT ?
-		if( node_type ) {
-			context = query;
-
-			// IS DOCUMENT FRAGMENT ?
-			if( node_type === 11 ) {
-				elements = to_array.call( query.childNodes );
-			}else {
-				elements[0] = query;
-			}
-		}
-
-		if( typeof query === "string" ) {
-			if( query === "body" && !context && document.body ) {
-				t.context = document;
-				t.elements = [document.body];
-				return t;
+		// I ONLY KNOW WHAT TO DO WITH NON-DARK MATTER (NULL, FALSE, UNDEFINED, "")
+		if( query ) {
+			// FEELING LAZY, TAKE IT BACK :P
+			if( query instanceof selector ) {
+				return query;
 			}
 			
-			if( is_html( query ) ) {
-				elements = to_array.call( document_fragment( query ).childNodes );
+			var node_type = query.nodeType;
+
+			// IS AN HTML ELEMENT ?
+			if( node_type ) {
+				context = query;
+
+				// IS DOCUMENT FRAGMENT ?
+				if( node_type === 11 ) {
+					elements = to_array.call( query.childNodes );
+				}else {
+					elements = [query];
+				}
+			}
+
+			if( typeof query === "string" ) {
+				if( query === "body" && !context && document.body ) {
+					context = document;
+					elements = [document.body];
+
+				}else if( is_html( query ) ) {
+					elements = to_array.call( create_document_fragment( query ).childNodes );
+				}
 			}
 		}
 
@@ -52,6 +49,7 @@
 		t.elements = elements;
 	}
 
+	// UTILS
 	function flatten( list ) {
 		return array.flatten(
 			array.each( list, parse_elements )
@@ -75,6 +73,28 @@
 		}
 	}
 
+	function add_class( element, classes ) {
+		var trim = trim_spaces;
+		var class_list = trim( element.className, true).split(' ');
+		var class_count;
+		var i = 0;
+		var name;
+		
+		classes = trim( classes, true).split(' ');
+
+		for( class_count = classes.length; i < class_count; i++ ) {
+			name = classes[i];
+			if( class_list.indexOf( name ) === -1 ) {
+				class_list[ class_list.length ] = name;
+			}
+		}
+
+		element.className = trim( class_list.join(' ') );
+
+		return element;
+	}
+
+	// BUILDERS
 	function create( tag /*, value1, value2*/ ) {
 		var parameters = arguments;
 		var param_1 = parameters[ 1 ];
@@ -82,10 +102,10 @@
 		var node;
 
 		if( tag === "fragment" ) {
-			node = document_fragment( param_1 );
+			node = create_document_fragment( param_1 );
 
 		} else if( tag === 'option' ) {
-			node = option( parameters[ 0 ], param_1, param_2 );
+			node = create_option( parameters[ 0 ], param_1, param_2 );
 
 		} else if( tag === "textnode" ) {
 			node = document.createTextNode( param_1 );
@@ -97,7 +117,7 @@
 		return node;
 	}
 
-	function document_fragment( content, callback ) {
+	function create_document_fragment( content, callback ) {
 		var fragment = document.createDocumentFragment();
 		var content_holder;
 		var index;
@@ -132,7 +152,7 @@
 		return fragment;
 	}
 
-	function option( caption, value, selected ) {
+	function create_option( caption, value, selected ) {
 		var node = document.createElement( "option" );
 
 		if( selected === undefined && value === true ) {
@@ -155,7 +175,7 @@
 		return new epic.html.selector( node );
 	}
 
-	function script( code ) {
+	function create_script( code ) {
 		var node = document.createElement( "script" );
 		var property = ( 'innerText' in node ) ? 'innerText' : 'textContent';
 		node.setAttribute( "type", "text/javascript" );
@@ -168,7 +188,7 @@
 		return new epic.html.selector( node );
 	}
 
-	function style( css ) {
+	function create_style( css ) {
 		var node = document.createElement( "style" );
 		node.setAttribute( "type", "text/css" );
 
@@ -294,18 +314,31 @@
 
 		find: function( query ) {
 			throw new epic.fail("selector.find() is feeling sick :(" );
+		},
+
+		has_class: function () {
+			
+		},
+
+		add_class: function () {
+			
+		},
+
+		remove_class: function () {
+			
 		}
 	};
 
 	// STATIC METHODS
-	create.document_fragment = document_fragment;
-	create.option = option;
-	create.script = script;
-	create.style = style;
+	create.document_fragment = create_document_fragment;
+	create.option = create_option;
+	create.script = create_script;
+	create.style = create_style;
 	
 	html.contains = contains;
 	html.selector = selector;
 	html.create = create;
+	html.add_class = add_class;
 
 	epic.html = html;
 

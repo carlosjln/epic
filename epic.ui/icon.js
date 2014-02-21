@@ -1,6 +1,6 @@
 ﻿( function( epic, document ) {
 	var copy = epic.object.copy;
-	var purge_spaces = epic.string.purge_spaces;
+	var trim_spaces = epic.string.trim;
 	var prototype = {
 		constructor: icon,
 		family: "",
@@ -73,7 +73,15 @@
 	}
 
 	function get_class( self ) {
-		return purge_spaces( self.family + ' ' + (self.prefix + '-' + self.name) + ' ' + self.align + ' ' + self.classes );
+		var prefix = self.prefix || '';
+		var family = self.family || '';
+		var name = self.name || '';
+		var align = self.align || '';
+		var classes = self.classes || '';
+
+		prefix = prefix ? prefix + '-' : '';
+		
+		return trim_spaces( family + ' ' + prefix + name + ' ' + align + ' ' + classes, true );
 	}
 
 	icon.setup = function( default_settings ) {

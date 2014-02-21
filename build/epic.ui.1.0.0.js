@@ -70,7 +70,7 @@
 })(epic);
 (function(epic, document) {
     var copy = epic.object.copy;
-    var purge_spaces = epic.string.purge_spaces;
+    var trim_spaces = epic.string.trim;
     var prototype = {
             constructor: icon, family: "", prefix: "", classes: "", change: function(name) {
                     var self = this;
@@ -111,7 +111,13 @@
         self.set_caption(self.caption)
     }
     function get_class(self) {
-        return purge_spaces(self.family + ' ' + (self.prefix + '-' + self.name) + ' ' + self.align + ' ' + self.classes)
+        var prefix = self.prefix || '';
+        var family = self.family || '';
+        var name = self.name || '';
+        var align = self.align || '';
+        var classes = self.classes || '';
+        prefix = prefix ? prefix + '-' : '';
+        return trim_spaces(family + ' ' + prefix + name + ' ' + align + ' ' + classes, true)
     }
     icon.setup = function(default_settings) {
         copy(default_settings, icon.prototype)
@@ -479,10 +485,108 @@
 })(epic);
 (function(epic, window, document, undefined) {
     var add_event = epic.event.add;
-    var purge_spaces = epic.string.purge_spaces;
+    var trim_spaces = epic.string.trim;
+    var epic_button = epic.button;
+    var add_class = epic.html.add_class;
     var last_dropdown_toggled;
-    function create_element(tag) {
-        return document.createElement(tag)
+    var epic_uid = epic.uid;
+    var choice = (function() {
+            function choice(settings) {
+                var self = this;
+                var container = self.container = document.createElement("a");
+                container.setAttribute("href", "#");
+                self.set_caption(settings.caption);
+                self.data = settings.data;
+                self.onclick = settings.onclick
+            }
+            choice.prototype = {
+                constructor: choice, disable: function() {
+                        var self = this;
+                        var container = self.container;
+                        container.className = "disabled";
+                        container.setAttribute("disabled", "true");
+                        self.disabled = true
+                    }, enable: function() {
+                        var self = this;
+                        var container = self.container;
+                        container.className = "";
+                        container.removeAttribute("disabled");
+                        self.disabled = false
+                    }, set_caption: function(caption) {
+                        var self = this;
+                        if (typeof caption === "string") {
+                            self.caption = caption;
+                            self.container.innerHTML = caption
+                        }
+                        return self
+                    }
+            };
+            return choice
+        })();
+    function choice_selected(e, context) {
+        e.prevent_default();
+        var option = context.option;
+        if (option.disabled !== true) {
+            (option.onclick || context.dropdown.onselect).call(e.target, e, option)
+        }
+    }
+    function options_collection(context) {
+        var items = [];
+        var collection = {};
+        this.add = function(options) {
+            if (options === undefined) {
+                return
+            }
+            options = options instanceof Array ? options : [options];
+            var length = options.length;
+            var i = 0;
+            var option;
+            var li;
+            var document_fragment = document.createDocumentFragment();
+            var container;
+            for (; i < length; i++) {
+                option = options[i];
+                li = document.createElement("li");
+                if (option.divide === true) {
+                    li.className = 'divider'
+                }
+                else {
+                    option = items[items.length] = new choice(option);
+                    container = option.container;
+                    add_event(container, "click", choice_selected, {
+                        dropdown: context, option: option
+                    });
+                    li.insertBefore(container, null)
+                }
+                document_fragment.insertBefore(li, null)
+            }
+            context.list.insertBefore(document_fragment, null)
+        };
+        this.get = function(index) {
+            return items[index]
+        }
+    }
+    function dropdown(settings) {
+        var self = this;
+        var container = self.container = document.createElement("span");
+        var toggle = self.toggle_button = settings.toggle_button || new epic_button({
+                style: epic_button.style.primary, icon: new epic.icon({name: "caret"})
+            });
+        var toggle_container = toggle.container;
+        var list = self.list = document.createElement("ul");
+        var options = self.options = new options_collection(self);
+        add_class(toggle_container, "dropdown-toggle");
+        list.className = "dropdown-menu";
+        container.id = settings.id || "DD-" + epic_uid.next();
+        container.insertBefore(toggle_container, null);
+        container.insertBefore(list, null);
+        add_class(container, "dropdown " + settings.classes);
+        self.onselect = settings.onselect || do_nothing;
+        add_event(toggle_container, "click", handle_toggle_click, self);
+        options.add(settings.options)
+    }
+    function do_nothing(e) {
+        e.prevent_default()
     }
     function open_dropdown(instance) {
         close_dropdown(last_dropdown_toggled);
@@ -497,55 +601,19 @@
             return
         }
         var container = instance.container;
-        container.className = purge_spaces(container.className.replace(/open/, ""));
+        container.className = trim_spaces(container.className.replace(/open/, ""), true);
         last_dropdown_toggled = undefined
-    }
-    function dropdown(settings) {
-        var self = this;
-        var container = self.container = create_element("span");
-        var options = self.options = create_element("ul");
-        var toggle = self.toggle_button = new epic.button({
-                classes: "dropdown-toggle", style: epic.button.style.primary, icon: new epic.icon({name: "chevron-down"})
-            });
-        var toggle_btn = toggle.container;
-        container.className = "dropdown";
-        options.className = "dropdown-menu";
-        container.insertBefore(toggle_btn, null);
-        container.insertBefore(options, null);
-        add_event(toggle_btn, "click", handle_toggle_click, self);
-        self.on_select = settings.on_select || self.on_select;
-        self.add(settings.options)
     }
     function handle_toggle_click(e, instance) {
         e.stop_propagation();
         instance.toggle()
     }
     dropdown.prototype = {
-        constructor: dropdown, on_select: function(e, option) {
-                e.prevent_default();
-                console.log(option)
-            }, divide: function() {
-                var divider = create_element("hr");
+        constructor: dropdown, divide: function() {
+                var divider = document.createElement("hr");
                 divider.className = "divider unselectable";
                 this.options.insertBefore(divider);
                 return divider
-            }, add: function(option) {
-                var self = this;
-                var options = option instanceof Array ? option : [option];
-                var length = options.length;
-                var list = self.options;
-                var i = 0;
-                var item;
-                var div = create_element("div");
-                var li;
-                var on_select = self.on_select;
-                for (; i < length; i++) {
-                    item = options[i];
-                    div.innerHTML = '<li class="unselectable"><a href="#">' + item.caption + '</a></li>';
-                    li = div.firstChild;
-                    add_event(li, "click", on_select, item);
-                    list.insertBefore(li, null)
-                }
             }, open: function() {
                 open_dropdown(this)
             }, close: function() {

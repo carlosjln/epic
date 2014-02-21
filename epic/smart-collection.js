@@ -5,11 +5,12 @@
 		var self = this;
 		self.collection = {};
 		self.list = [];
+		self.handlers = {};
 	}
 
 	function set( key, item, override ) {
 		if( key === undefined || item === undefined ) {
-			return null;
+			return undefined;
 		}
 		
 		key = to_string( key );
@@ -18,10 +19,16 @@
 		var current = self.collection[ key ];
 		var index = current ? current.index : self.list.length;
 
-		if( current && !override) {
-			return null;
-		}
+		item = call_event( "ITEM_RECEIVED", self, key, item );
 		
+		if( current && !override) {
+			return call_event( "ITEM_EXISTS", self, key, item, current );
+		}
+
+		if( item === undefined ) {
+			return call_event( "ITEM_SKIPPED", self, key, item );
+		}
+
 		self.collection[ key ] = {
 			key: key,
 			value: item,
@@ -30,12 +37,12 @@
 		
 		self.list[ index ] = item;
 
-		return item;
+		return call_event( "ITEM_ADDED", self, key, item );
 	}
 
 	function set_items( key_name, items, override ) {
 		if( !(items instanceof Array) ) {
-			return null;
+			return;
 		}
 		
 		var self = this;
@@ -45,6 +52,8 @@
 		var key;
 		var processed = [];
 
+		call_event( "ITEMS_RECEIVED", self, key_name, items );
+
 		while( length-- ) {
 			item = items[ index++ ];
 			key = item[key_name];
@@ -53,7 +62,7 @@
 			processed[ processed.length ] = (self.collection[key]||{}).value;
 		}
 
-		return processed;
+		call_event( "ITEMS_PROCESSED", self, key_name, processed );
 	}
 
 	function get( key ) {
@@ -63,6 +72,8 @@
 		var record = self.collection[ key ] || {};
 		var item = record.value;
 		
+		call_event( "ITEM_RETRIEVED", self, key, item );
+
 		return item;
 	}
 	
@@ -83,6 +94,8 @@
 			// REMOVE THE ITEM FROM THE ARRAY
 			self.list.splice( index, 1 );
 
+			call_event( "ITEM_REMOVED", self, key, item );
+
 			return item;
 		}
 
@@ -93,12 +106,30 @@
 		return String( key );
 	}
 
+	function handle( event, context, handler ) {
+		this.handlers[event] = {
+			context: context,
+			handler: handler
+		};
+	}
+
+	function call_event( event_name, self, key, item, param3, param4 ) {
+		var event = self.handlers[ event_name ];
+		
+		if( event ) {
+			return event.handler.call( event.context, key, item, param3, param4 );
+		}
+
+		return item;
+	}
 
 	collection.prototype = {
 		set: set,
 		get: get,
 		remove: remove,
-		set_items: set_items
+		set_items: set_items,
+
+		handle: handle
 	};
 
 	epic.collection = collection;

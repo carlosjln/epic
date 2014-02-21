@@ -90,7 +90,7 @@
 	// CLASS HIERARCHY EXTENSOR
 	function extend( klass, base ) {
 		if( typeof klass !== "function" ) {
-			return null;
+			return false;
 		}
 		
 		var klass_prototype = klass.prototype;
@@ -111,6 +111,8 @@
 		klass_prototype.base = function() {
 			this.baseclass.apply( this, arguments );
 		};
+
+		return true;
 	}
 
 	// STATIC METHODS
