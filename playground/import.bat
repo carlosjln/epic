@@ -1,1 +1,0 @@
-xcopy /Y ..\build\*.js .\epic\

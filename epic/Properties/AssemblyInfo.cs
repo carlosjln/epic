@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle( "EPIC" )]
 [assembly: AssemblyProduct( "EPIC" )]
-[assembly: AssemblyDescription( "EPIC JavaScript Library :)" )]
+[assembly: AssemblyDescription( "Simple & awesome JavaScript library for BROGRAMMERS B-) " )]
 
 [assembly: AssemblyCompany( "Carlos J. López" )]
 [assembly: AssemblyCopyright( "Copyright © 2013 Carlos J. López" )]

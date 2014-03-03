@@ -93,6 +93,19 @@
 		return -1;
 	};
 
+	array.locate = function( list, element ) {
+		// HACK TO CONVERT OBJECT.LENGTH TO A UInt32
+		var length = list.length >>> 0;
+
+		while( length-- ) {
+			if( list[ length ] === element ) {
+				return length;
+			}
+		}
+
+		return -1;
+	};
+
 	array.remove = remove;
 
 // EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+	<id>Epic</id>
+		<version>1.0.0</version>
+		
+		<title>Epic</title>
+		<description>Simple and awesome JavaScript library for BROGRAMMERS B-)</description>
+		<tags></tags>
+		
+		<projectUrl>https://github.com/carlosjln/epic</projectUrl>
+		<licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+		
+		<owners>Carlos J. López</owners>
+		<authors>Carlos J. López</authors>
+		
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<copyright>Copyright © 2014</copyright>
+	</metadata>
+	
+	<files>
+	  <file src="bin\epic.js" target="content\resources\plugins\epic" /> 
+	  <file src="bin\epic.min.js" target="content\resources\plugins\epic" />
+	</files>
+</package>

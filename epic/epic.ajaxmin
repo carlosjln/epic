@@ -1,11 +1,12 @@
 <root>
 	<norename name="epic" />
+	
 	<!--
 	IGNORE
 	Performance warning JS1272: Function defined but not referenced
 	Code warning JS1137: Reserved words and should not be used as an identifier; cross-browser differences: default
 	-->
-	<output path="..\build\epic.1.0.0.js" type="js">
+	<output path="bin\epic.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -braces:same -line:M,4 -minify:false</arguments>
 		<input path="core.js"/>
 		<input path="object.js"/>
@@ -17,7 +18,7 @@
 		<input path="event.js"/>
 	</output>
 	
-	<output path="..\build\epic.min.1.0.0.js" type="js">
+	<output path="bin\epic.min.js" type="js">
 		<arguments>-clobber -term -esc -ignore:JS1272,JS1137</arguments>
 		<input path="core.js"/>
 		<input path="object.js"/>
@@ -29,18 +30,4 @@
 		<input path="event.js"/>
 	</output>
 
-	<!--
-	Deploy current build to playground
-	-->
-	<output path="..\playground\resources\plugins\epic\epic.1.0.0.js" type="js">
-		<arguments>-clobber -term -esc -ignore:JS1272,JS1137 -braces:same -line:M,4 -minify:false</arguments>
-		<input path="core.js"/>
-		<input path="object.js"/>
-		<input path="string.js"/>
-		<input path="array.js"/>
-		<input path="collection.js"/>
-		<input path="browser.js"/>
-		<input path="html.js"/>
-		<input path="event.js"/>
-	</output>
 </root>

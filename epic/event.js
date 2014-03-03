@@ -7,7 +7,8 @@
 	var next_uid = epic.uid.next;
 	var contains = epic.html.contains;
 	var set_event_handler = document.addEventListener ? add_event_listener : attach_event;
-
+	var trigger = document.createEvent ? dispatch_event : fire_event;
+	
 	var event_name_map = {
 		"mouseenter": "mouseover",
 		"mouseleave": "mouseout",
@@ -41,7 +42,7 @@
 
 	}
 
-	function add( element, event_name, method, event_data ) {
+	function add( event_name, element, method, event_data ) {
 		if( typeof event_name !== "string" ) {
 			return epic.fail( "[event_name] must be a valid event name." );
 		}
@@ -77,7 +78,7 @@
 			handler.method = function( e, data ) {
 				var t = this;
 				var elem = t.element;
-				
+
 				if( !contains( elem, e.related_target ) ) {
 					t.method.call( elem, e, data );
 				}
@@ -94,15 +95,28 @@
 		return true;
 	}
 
-	function remove( element, event_name, handler, data ) {
+	function remove( event_name, element, handler ) {
 
 	}
 
-	function trigger( element, event_name, handler, data ) {
-
+	function dispatch_event( event_name, element ) {
+		// Syntax: event.initMouseEvent(type, canBubble, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
+		
+		var evt = document.createEvent( 'HTMLEvents' );
+		evt.initEvent( event_name, true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null);
+		element.dispatchEvent( evt );
+		
+		return element;
 	}
 
-	function add_event_listener( element, event_name, element_uid ) {
+	function fire_event( event_name, element ) {
+		var evt = document.createEventObject();
+		element.fireEvent( 'on' + event_name , evt );
+		
+		return element;
+	}
+	
+	function add_event_listener( event_name, element, element_uid ) {
 		var element_event = element_uid + "_" + event_name;
 
 		if( !HANDLERS[ element_event ] ) {
@@ -112,7 +126,7 @@
 		}
 	}
 
-	function attach_event( element, event_name, element_uid ) {
+	function attach_event( event_name, element, element_uid ) {
 		var element_event = element_uid + "_" + event_name;
 
 		if( !HANDLERS[ element_event ] ) {
@@ -127,7 +141,7 @@
 
 		var target = evt.target;
 		var execution_path = [target];
-		
+
 		while( target = target.parentNode ) {
 			execution_path[ execution_path.length ] = target;
 		}
@@ -137,7 +151,7 @@
 		if( evt.propagation_stopped === false ) {
 			evt.stop_propagation();
 		}
-		
+
 		return this;
 	}
 
@@ -151,7 +165,7 @@
 		var j;
 		var handlers_count;
 		var type = evt.type;
-		
+
 		for( ; i < elements_count; i++ ) {
 			element = elements[ i ];
 			events = REGISTRY[ element.uid ];
@@ -163,18 +177,18 @@
 				for( j = 0; j < handlers_count; j++ ) {
 					handler = handlers[ j ];
 					handler.method.call( handler.context, evt, handler.event_data );
-					
+
 					// CALL IT OFF IF PROPAGATION HAVE BEEN STOPPED
 					if( evt.propagation_stopped === true ) {
 						return evt;
 					}
-					
+
 					// CALLLING NATIVE HANDLERS
 					// READ ME WELL: THEY SHOULDN'T EXIST!
 				}
 			}
 		}
-		
+
 		return evt;
 	}
 
@@ -259,19 +273,19 @@
 		}
 
 		var self = this;
-		
+
 		// LET'S KEEP TRACK OF THE ORIGINAL EVENT, FOR FUN :P
 		self.original = e;
 
 		self.event_phase = e.eventPhase;
-		
+
 		// IF TARGET ELEMENT IS A TEXT NODE THEN USE ITS PARENT NODE
 		self.target = target.nodeType === 3 ? target.parentNode : target;
 		self.type = event_name;
 
 		self.from_element = from_element;
 		self.to_element = e.toElement || target;
-		
+
 		self.pagex = page_x;
 		self.pagey = page_y;
 
@@ -297,10 +311,10 @@
 		stop_propagation: function() {
 			var self = this;
 			var original = self.original;
-			
+
 			original.cancelBubble = true;
 			original.stopPropagation();
-			
+
 			self.propagation_stopped = true;
 		},
 
