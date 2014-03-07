@@ -209,9 +209,10 @@
 		return epic.html.create.document_fragment( str );
 	}
 
-//	function purge_spaces( str ) {
-//		return str.replace(/^ {0,}/,"").replace(/ {0,}$/,"").replace(/ {2,}/, " ");
-//	}
+	function capitalize( str ) {
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	}
+
 
 	// STATIC METHODS
 	string.encode_base64 = encode_base64;
@@ -228,12 +229,13 @@
 	
 	string.uppercase = uppercase;
 	string.lowercase = lowercase;
+	string.capitalize = capitalize;
 
 	string.trim = trim;
 	string.is_html = is_html;
 
 	string.to_dom = to_dom;
-
+	
 	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
 	string.dsl = dsl;
 	

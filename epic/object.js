@@ -1,4 +1,4 @@
-﻿var epic;
+﻿
 ( function( epic ) {
 	var get_type = epic.type;
 
@@ -101,16 +101,16 @@
 		if( typeof base === "function" ) {
 			// COPY ALL PROTOTYPED PROPERTIES TO THE INHERITOR
 			copy( base.prototype, klass_prototype, true );
+
+			klass_prototype.constructor = klass;
+			klass_prototype.baseclass = base;
+			klass_prototype.base = function() {
+				this.baseclass.apply( this, arguments );
+			};
 		} else {
 			// ASSUME IT IS A PLAIN OBJECT & COPY PROPERTIES TO THE INHERITORS PROTOTYPE
 			copy( base, klass_prototype, true );
 		}
-
-		klass_prototype.constructor = klass;
-		klass_prototype.baseclass = base;
-		klass_prototype.base = function() {
-			this.baseclass.apply( this, arguments );
-		};
 
 		return true;
 	}

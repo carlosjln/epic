@@ -1,4 +1,4 @@
-﻿var epic;
+﻿
 ( function( epic ) {
 
 	function collection() {

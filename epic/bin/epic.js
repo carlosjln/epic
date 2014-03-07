@@ -1,5 +1,5 @@
 /*!
- * EPIC.JS - v1.0.0
+ * EPIC.JS - v1.0.4
  * Simple & awesome JavaScript library for BROGRAMMERS B-)
  * https://github.com/carlosjln/epic
  * 
@@ -40,7 +40,7 @@ var epic = (function() {
                 return typeof_object
             }
             type.is_window = function(object) {
-                return object !== null && object === object.window
+                return object != null && object === object.window
             };
             type.is_numeric = function(object) {
                 return !isNaN(parseFloat(object)) && isFinite(object)
@@ -104,10 +104,16 @@ var epic = (function() {
         epic.log = log;
         epic.fail = fail;
         epic.uid = (function() {
+            var token = "__::UID::__";
             function uid(){}
-            uid.seed = (new Date).getTime();
-            uid.next = function() {
+            function next() {
                 return ++uid.seed
+            }
+            uid.seed = (new Date).getTime();
+            uid.token = token;
+            uid.next = next;
+            uid.get = function(object) {
+                return object[token] || (object[token] = ++uid.seed)
             };
             return uid
         })();
@@ -116,7 +122,6 @@ var epic = (function() {
         };
         return epic
     })();
-var epic;
 (function(epic) {
     var get_type = epic.type;
     function object(obj) {
@@ -184,16 +189,16 @@ var epic;
         var klass_prototype = klass.prototype;
         copy(base, klass, true);
         if (typeof base === "function") {
-            copy(base.prototype, klass_prototype, true)
+            copy(base.prototype, klass_prototype, true);
+            klass_prototype.constructor = klass;
+            klass_prototype.baseclass = base;
+            klass_prototype.base = function() {
+                this.baseclass.apply(this, arguments)
+            }
         }
         else {
             copy(base, klass_prototype, true)
         }
-        klass_prototype.constructor = klass;
-        klass_prototype.baseclass = base;
-        klass_prototype.base = function() {
-            this.baseclass.apply(this, arguments)
-        };
         return true
     }
     object.merge = merge;
@@ -378,6 +383,9 @@ var epic;
     function to_dom(str) {
         return epic.html.create.document_fragment(str)
     }
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1)
+    }
     string.encode_base64 = encode_base64;
     string.decode_base64 = decode_base64;
     string.encode_utf8 = encode_utf8;
@@ -388,13 +396,13 @@ var epic;
     string.decode_html_entities = decode_html_entities;
     string.uppercase = uppercase;
     string.lowercase = lowercase;
+    string.capitalize = capitalize;
     string.trim = trim;
     string.is_html = is_html;
     string.to_dom = to_dom;
     string.dsl = dsl;
     epic.string = string
 })(epic);
-var epic;
 (function(epic) {
     function array(list) {
         return new dsl(list, epic.object.to_array(arguments))
@@ -477,7 +485,6 @@ var epic;
     array.dsl = dsl;
     epic.array = array
 })(epic);
-var epic;
 (function(epic) {
     function collection() {
         var self = this;
@@ -682,45 +689,68 @@ var epic;
 })(epic, window, document, navigator);
 (function(epic, widnow, document) {
     var is_html = epic.string.is_html;
-    var array = epic.array;
-    var to_array = Array.prototype.slice;
+    var get_epic_uid = epic.uid.get;
     var trim_spaces = epic.string.trim;
+    var capitalize = epic.string.capitalize;
+    var array = epic.array;
+    var flatten = array.flatten;
+    var for_each = array.each;
+    var to_array = Array.prototype.slice;
+    var match_class_only = /^\.([\w\-]+)$/i;
+    var match_pixel_value = /^(\d*.?\d*)px$/;
+    var document_element = document.documentElement;
+    var contains = 'compareDocumentPosition' in document_element ? compare_document_position : container_contains;
+    var get_style = window.getComputedStyle ? function(element, property) {
+            return element.ownerDocument.defaultView.getComputedStyle(element, '')[property]
+        } : function(element, property) {
+            return element.curentStyle[property]
+        };
     function html(query, context) {
         return new selector(query, context)
     }
     function selector(query, context) {
         var t = this;
         var elements = [];
+        if (!context) {
+            context = document
+        }
+        else if (typeof context === 'string') {
+            context = selector(context).elements[0]
+        }
+        else if (!context.nodeType && isFinite(context.length)) {
+            context = context[0]
+        }
         if (query) {
             if (query instanceof selector) {
                 return query
             }
             var node_type = query.nodeType;
             if (node_type) {
-                context = query;
                 if (node_type === 11) {
-                    elements = to_array.call(query.childNodes)
+                    var child_nodes = query.childNodes;
+                    elements = to_array.call(child_nodes);
+                    context = to_array.call(child_nodes)
                 }
                 else {
-                    elements = [query]
+                    elements = [query];
+                    context = [query]
                 }
             }
             if (typeof query === "string") {
                 if (query === "body" && !context && document.body) {
-                    context = document;
                     elements = [document.body]
                 }
                 else if (is_html(query)) {
                     elements = to_array.call(create_document_fragment(query).childNodes)
                 }
+                else {
+                    elements = query_selector(query, context)
+                }
             }
         }
         t.query = query;
-        t.context = context || [document];
+        t.context = context;
         t.elements = elements
-    }
-    function flatten(list) {
-        return array.flatten(array.each(list, parse_elements))
     }
     function parse_elements(element, index, list) {
         if (element instanceof selector) {
@@ -736,21 +766,35 @@ var epic;
             list[index] = element
         }
     }
-    function add_class(element, classes) {
-        var trim = trim_spaces;
-        var class_list = trim(element.className, true).split(' ');
-        var class_count;
-        var i = 0;
-        var name;
-        classes = trim(classes, true).split(' ');
-        for (class_count = classes.length; i < class_count; i++) {
-            name = classes[i];
-            if (class_list.indexOf(name) === -1) {
-                class_list[class_list.length] = name
-            }
+    function compare_document_position(container, element) {
+        return (container.compareDocumentPosition(element) & 16) === 16
+    }
+    function container_contains(container, element) {
+        container = container === document || container === window ? document_element : container;
+        return container !== element && container.contains(element)
+    }
+    function is_node(object) {
+        var node_type;
+        return object && typeof object === 'object' && (node_type = object.nodeType) && (node_type === 1 || node_type === 9)
+    }
+    function get_uid(element) {
+        var node_type = (element || {}).nodeType;
+        if (node_type === 1 || node_type === 9) {
+            return get_epic_uid(element)
         }
-        element.className = trim(class_list.join(' '));
-        return element
+        return null
+    }
+    function query_selector(query, context) {
+        var match;
+        if (document_element.getElementsByClassName && (match = match_class_only.exec(query))) {
+            return to_array.call(context.getElementsByClassName(match[1]))
+        }
+        else if ((query.document || (query.nodeType && query.nodeType === 9))) {
+            return [query]
+        }
+        else {
+            return to_array.call(context.querySelectorAll(query))
+        }
     }
     function create(tag) {
         var parameters = arguments;
@@ -836,8 +880,56 @@ var epic;
         document.getElementsByTagName('head')[0].insertBefore(node, null);
         return new epic.html.selector(node)
     }
-    function contains(container, element) {
-        return container.contains ? container.contains(element) : !!(container.compareDocumentPosition(element) & 16)
+    function unique(elements, target, control) {
+        var list = target || [];
+        var collection = control || {};
+        var length = elements.length;
+        var i = 0;
+        var uid;
+        var element;
+        for (; i < length; i++) {
+            element = elements[i];
+            uid = get_uid(element);
+            if (collection[uid]) {
+                continue
+            }
+            collection[uid] = true;
+            list[list.length] = element
+        }
+        return list
+    }
+    function add_class(element, class_names) {
+        var trim = trim_spaces;
+        var class_list = trim(element.className, true).split(' ');
+        var class_count;
+        var i = 0;
+        var name;
+        class_names = trim(class_names, true).split(' ');
+        for (class_count = class_names.length; i < class_count; i++) {
+            name = class_names[i];
+            if (class_list.indexOf(name) === -1) {
+                class_list[class_list.length] = name
+            }
+        }
+        element.className = trim(class_list.join(' '));
+        return element
+    }
+    function style(value){}
+    function get_dimension(element, property) {
+        var offset_name = "offset" + capitalize(property);
+        if (element) {
+            element = element === element.window ? element.document : element;
+            if (element.nodeType === 9) {
+                element = element.document.documentElement;
+                return Math.max(element.body[offset_name], element[offset_name])
+            }
+            var value = get_style(element, property);
+            if (value != null && value != "") {
+                value = value.replace(match_pixel_value, '$1');
+                return isNaN(value) ? value : parseFloat(value)
+            }
+        }
+        return null
     }
     selector.prototype = {
         empty: function() {
@@ -853,7 +945,7 @@ var epic;
             }
             return t
         }, insert: function(elements, position) {
-                elements = flatten(elements);
+                elements = flatten(for_each(elements, parse_elements));
                 var self = this;
                 var i = elements.length;
                 var target = self.elements[0];
@@ -909,11 +1001,59 @@ var epic;
                     index = upper_limit
                 }
                 return elements[index]
-            }, contains: function(element) {
-                return html.contains(this.elements[0], element)
             }, find: function(query) {
-                throw new epic.fail("selector.find() is feeling sick :(");
-            }, has_class: function(){}, add_class: function(){}, remove_class: function(){}
+                var context = this.elements;
+                var length = context.length;
+                var i = 0;
+                var new_selector = new selector;
+                var elements = new_selector.elements;
+                var result;
+                var collection = {};
+                for (; i < length; i++) {
+                    result = query_selector(query, context[i]);
+                    unique(result, elements, collection)
+                }
+                return new_selector
+            }, has_class: function(name) {
+                var t = this;
+                var elements = t.elements;
+                var length = elements.length;
+                var i = 0;
+                for (; i < length; ) {
+                    if (elements[i++].className.indexOf(name) > -1) {
+                        return true
+                    }
+                }
+                return false
+            }, add_class: function(class_names) {
+                var t = this;
+                var elements = t.elements;
+                var length = elements.length;
+                var i = 0;
+                for (; i < length; i++) {
+                    add_class(elements[i], class_names)
+                }
+                return t
+            }, remove_class: function(class_name) {
+                var t = this;
+                var trailing_spaces = /^\s+|\s+$/g;
+                var multiple_spaces = /\s+/g;
+                var pattern = new RegExp(class_name.replace(trailing_spaces, '').replace(multiple_spaces, '|'), 'g');
+                var elements = t.elements;
+                var j = elements.length;
+                var element;
+                while (j--) {
+                    element = elements[j];
+                    element.className = element.className.replace(pattern, '').replace(multiple_spaces, ' ').replace(trailing_spaces, ' ')
+                }
+                return t
+            }, width: function() {
+                return get_dimension(this.elements[0], "width")
+            }, height: function() {
+                return get_dimension(this.elements[0], "height")
+            }, css: function(value){}, contains: function(element) {
+                return contains(this.elements[0], element)
+            }
     };
     create.document_fragment = create_document_fragment;
     create.option = create_option;
@@ -923,17 +1063,19 @@ var epic;
     html.selector = selector;
     html.create = create;
     html.add_class = add_class;
+    html.is_node = is_node;
+    html.get_uid = get_uid;
     epic.html = html
 })(epic, window, document);
-var epic;
 (function(epic, window, document) {
     var REGISTRY = {};
     var REGISTRY_POLICE = {};
     var HANDLERS = {};
-    var next_uid = epic.uid.next;
+    var get_uid = epic.uid.get;
     var contains = epic.html.contains;
     var set_event_handler = document.addEventListener ? add_event_listener : attach_event;
     var trigger = document.createEvent ? dispatch_event : fire_event;
+    var get_element_uid = epic.html.get_uid;
     var event_name_map = {
             mouseenter: "mouseover", mouseleave: "mouseout", DOMMouseScroll: "mousewheel"
         };
@@ -941,13 +1083,13 @@ var epic;
             8: 'BACKSPACE', 9: 'TAB', 10: 'ENTER', 13: 'ENTER', 20: 'CAPSLOCK', 27: 'ESC', 33: 'PAGEUP', 34: 'PAGEDOWN', 35: 'END', 36: 'HOME', 37: 'LEFT', 38: 'UP', 39: 'RIGHT', 40: 'DOWN', 45: 'INSERT', 46: 'DELETE'
         };
     function event(){}
-    function add(event_name, element, method, event_data) {
+    function add(element, event_name, method, event_data) {
         if (typeof event_name !== "string") {
             return epic.fail("[event_name] must be a valid event name.")
         }
-        var element_uid = element.uid || (element.uid = next_uid());
+        var element_uid = get_element_uid(element);
         var element_events = REGISTRY[element_uid] || (REGISTRY[element_uid] = {});
-        var method_uid = method.uid || (method.uid = next_uid());
+        var method_uid = get_uid(method);
         var police_key = element_uid + "_" + event_name + "_" + method_uid;
         if (REGISTRY_POLICE[police_key]) {
             return false
@@ -972,26 +1114,26 @@ var epic;
         REGISTRY_POLICE[police_key] = true;
         return true
     }
-    function remove(event_name, element, handler){}
-    function dispatch_event(event_name, element) {
+    function remove(element, event_name, handler){}
+    function dispatch_event(element, event_name) {
         var evt = document.createEvent('HTMLEvents');
         evt.initEvent(event_name, true, true, window, 0, 0, 0, 80, 20, false, false, false, false, 0, null);
         element.dispatchEvent(evt);
         return element
     }
-    function fire_event(event_name, element) {
+    function fire_event(element, event_name) {
         var evt = document.createEventObject();
         element.fireEvent('on' + event_name, evt);
         return element
     }
-    function add_event_listener(event_name, element, element_uid) {
+    function add_event_listener(element, event_name, element_uid) {
         var element_event = element_uid + "_" + event_name;
         if (!HANDLERS[element_event]) {
             HANDLERS[element_event] = true;
             element.addEventListener(event_name, epic_event_handler, false)
         }
     }
-    function attach_event(event_name, element, element_uid) {
+    function attach_event(element, event_name, element_uid) {
         var element_event = element_uid + "_" + event_name;
         if (!HANDLERS[element_event]) {
             HANDLERS[element_event] = true;
@@ -1007,7 +1149,8 @@ var epic;
         }
         process_execution_path(evt, execution_path);
         if (evt.propagation_stopped === false) {
-            evt.stop_propagation()
+            e.cancelBubble = true;
+            e.stopPropagation()
         }
         return this
     }
@@ -1023,7 +1166,7 @@ var epic;
         var type = evt.type;
         for (; i < elements_count; i++) {
             element = elements[i];
-            events = REGISTRY[element.uid];
+            events = REGISTRY[get_element_uid(element)];
             if (events && (handlers = events[type])) {
                 handlers_count = handlers.length;
                 for (j = 0; j < handlers_count; j++) {
@@ -1134,5 +1277,15 @@ var epic;
     event.remove = remove;
     event.trigger = trigger;
     event.registry = REGISTRY;
-    epic.event = event
+    epic.event = event;
+    var plugins = {click: function(event_handler, data) {
+                var t = this;
+                var elements = t.elements;
+                var i = elements.length;
+                while (i--) {
+                    add(elements[i], "click", event_handler, data)
+                }
+                return t
+            }};
+    epic.object.copy(plugins, epic.html.selector.prototype)
 })(epic, window, document);

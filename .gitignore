@@ -5,6 +5,7 @@ epic/obj/
 [Dd]ebug/
 x64/
 backup/
+nuget-release.bat
 
 # mstest test results
 TestResults

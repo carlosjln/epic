@@ -1,5 +1,5 @@
 /*!
- * EPIC.JS - v1.0.0
+ * EPIC.JS - v1.0.4
  * Simple & awesome JavaScript library for BROGRAMMERS B-)
  * https://github.com/carlosjln/epic
  * 
@@ -12,27 +12,27 @@
  */
 
 var epic = ( function() {
-	
+
 	function epic() {
 	}
 
 	// FAIL LIKE A NINJA, SILENTLY :)
 	function log( message ) {
 		if( typeof window.console !== "undefined" ) {
-			console.log( epic.object.to_array(arguments) );
+			console.log( epic.object.to_array( arguments ) );
 		}
 	}
-	
+
 	function fail( message, number ) {
 		var error = new Error( message, number );
-		
-		if ( this instanceof fail ) {
+
+		if( this instanceof fail ) {
 			return error;
 		}
-		
+
 		log( error );
 	}
-	
+
 	// OBJECT TYPE VERIFICATION
 	epic.type = ( function() {
 		var core_types = {
@@ -64,7 +64,7 @@ var epic = ( function() {
 		}
 
 		type.is_window = function( object ) {
-			return object !== null && object === object.window;
+			return object != null && object === object.window;
 		};
 
 		type.is_numeric = function( object ) {
@@ -101,7 +101,7 @@ var epic = ( function() {
 
 		type.is_element = function( object ) {
 			var html_element = typeof HTMLElement === "object";
-			return html_element ? object instanceof HTMLElement : object && typeof object === "object" && object.nodeType === 1 && typeof object.nodeName==="string";
+			return html_element ? object instanceof HTMLElement : object && typeof object === "object" && object.nodeType === 1 && typeof object.nodeName === "string";
 		};
 
 		return type;
@@ -165,16 +165,24 @@ var epic = ( function() {
 
 	epic.log = log;
 	epic.fail = fail;
-	
+
 	// UNIQUE IDENTIFIER
 	epic.uid = ( function() {
+		var token = "__::UID::__";
+
 		function uid() {
 		}
 
-		uid.seed = ( new Date() ).getTime();
-
-		uid.next = function() {
+		function next() {
 			return ++uid.seed;
+		}
+
+		uid.seed = ( new Date() ).getTime();
+		uid.token = token;
+		uid.next = next;
+
+		uid.get = function( object ) {
+			return object[ token ] || ( object[ token ] = ++uid.seed );
 		};
 
 		return uid;

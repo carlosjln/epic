@@ -18,6 +18,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="array.js" />
+    <Content Include="bin\epic.js" />
+    <Content Include="bin\playground.html" />
     <Content Include="event.js" />
     <Content Include="html.js" />
     <Content Include="string.js" />
@@ -26,7 +28,6 @@
     <Content Include="object.js" />
     <Content Include="core.js" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
@@ -69,7 +70,6 @@
     <ItemGroup>
       <DeleteAfterBuild Include="$(ProjectDir)bin\*.dll" />
     </ItemGroup>
-	
     <Exec Command="$(SolutionDir)Tools\post-build-local-release.bat $(SolutionDir)" Condition="Exists('$(SolutionDir)Tools\post-build-local-release.bat')" />
     <Delete Files="@(DeleteAfterBuild)" />
     <RemoveDir Directories="$(ProjectDir)obj\" Condition="Exists('$(ProjectDir)obj\')" />

@@ -1,4 +1,4 @@
-ABOUT EPIC.JS (v 1.0.0)
+ABOUT EPIC.JS
 ====
 
 This JavaScript library aims at being:

@@ -1,5 +1,4 @@
-﻿var epic;
-( function( epic ) {
+﻿( function( epic ) {
 
 	function array( list ) {
 		return new dsl( list, epic.object.to_array( arguments ) );
@@ -108,7 +107,7 @@
 
 	array.remove = remove;
 
-// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
+	// EXPOSE THE DSL SO THAT ITS PROTOTYPE CAN BE ENHANCED WITH MORE METHODS
 	array.dsl = dsl;
 
 	epic.array = array;

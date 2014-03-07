@@ -1,8 +1,29 @@
 ﻿( function( epic, widnow, document ) {
 	var is_html = epic.string.is_html;
-	var array = epic.array;
-	var to_array = Array.prototype.slice;
+	var get_epic_uid = epic.uid.get;
 	var trim_spaces = epic.string.trim;
+	var capitalize = epic.string.capitalize;
+
+	var array = epic.array;
+	var flatten = array.flatten;
+	var for_each = array.each;
+	var to_array = Array.prototype.slice;
+
+	var match_class_only = /^\.([\w\-]+)$/i;
+	var match_pixel_value = /^(\d*.?\d*)px$/;
+	var match_spaces_in_css = /\ *((;)|(:))+ *([\w]*)/ig;
+	var match_css_rules = /\ *((-*\**[\w]+)+): *([-()\w, .#%]*)/ig;
+
+	var document_element = document.documentElement;
+
+	var contains = 'compareDocumentPosition' in document_element ? compare_document_position : container_contains;
+	var get_style = window.getComputedStyle ?
+		function( element, property ) {
+			return element.ownerDocument.defaultView.getComputedStyle( element, '' )[ property ];
+		} :
+		function( element, property ) {
+			return element.curentStyle[ property ];
+		};
 
 	function html( query, context ) {
 		return new selector( query, context );
@@ -12,53 +33,65 @@
 		var t = this;
 		var elements = [];
 
+		// NORMALIZE CONTEXT
+		if( !context ) {
+			context = document;
+
+		} else if( typeof context === 'string' ) {
+			context = selector( context ).elements[ 0 ];
+
+		} else if( !context.nodeType && isFinite( context.length ) ) {
+			context = context[ 0 ];
+		}
+
 		// I ONLY KNOW WHAT TO DO WITH NON-DARK MATTER (NULL, FALSE, UNDEFINED, "")
 		if( query ) {
 			// FEELING LAZY, TAKE IT BACK :P
 			if( query instanceof selector ) {
 				return query;
 			}
-			
+
 			var node_type = query.nodeType;
 
 			// IS AN HTML ELEMENT ?
 			if( node_type ) {
-				context = query;
 
-				// IS DOCUMENT FRAGMENT ?
+				// IS A DOCUMENT FRAGMENT ?
 				if( node_type === 11 ) {
-					elements = to_array.call( query.childNodes );
-				}else {
+					var child_nodes = query.childNodes;
+
+					elements = to_array.call( child_nodes );
+					context = to_array.call( child_nodes );
+				} else {
 					elements = [query];
+					context = [query];
 				}
+
 			}
 
 			if( typeof query === "string" ) {
 				if( query === "body" && !context && document.body ) {
-					context = document;
 					elements = [document.body];
 
-				}else if( is_html( query ) ) {
+				} else if( is_html( query ) ) {
 					elements = to_array.call( create_document_fragment( query ).childNodes );
+
+				} else {
+					// LET THE FUN BEGIN :)
+					elements = query_selector( query, context );
 				}
 			}
 		}
 
 		t.query = query;
-		t.context = context || [document];
+		t.context = context;
 		t.elements = elements;
 	}
 
 	// UTILS
-	function flatten( list ) {
-		return array.flatten(
-			array.each( list, parse_elements )
-		);
-	}
-
 	function parse_elements( element, index, list ) {
 		// IDENTIFIES THE ELEMENT TYPE AND "FIXES" IT BEFORE THE LIST IS FLATTENED
-		
+
 		if( element instanceof selector ) {
 			list[ index ] = element.elements;
 
@@ -73,25 +106,42 @@
 		}
 	}
 
-	function add_class( element, classes ) {
-		var trim = trim_spaces;
-		var class_list = trim( element.className, true).split(' ');
-		var class_count;
-		var i = 0;
-		var name;
-		
-		classes = trim( classes, true).split(' ');
+	function compare_document_position( container, element ) {
+		return ( container.compareDocumentPosition( element ) & 16 ) === 16;
+	}
 
-		for( class_count = classes.length; i < class_count; i++ ) {
-			name = classes[i];
-			if( class_list.indexOf( name ) === -1 ) {
-				class_list[ class_list.length ] = name;
-			}
+	function container_contains( container, element ) {
+		container = container === document || container === window ? document_element : container;
+		return container !== element && container.contains( element );
+	}
+
+	function is_node( object ) {
+		var node_type;
+		return object && typeof object === 'object' && ( node_type = object.nodeType ) && ( node_type === 1 || node_type === 9 );
+	}
+
+	function get_uid( element ) {
+		var node_type = ( element || {} ).nodeType;
+
+		if( node_type === 1 || node_type === 9 ) {
+			return get_epic_uid( element );
 		}
 
-		element.className = trim( class_list.join(' ') );
+		return null;
+	}
 
-		return element;
+	function query_selector( query, context ) {
+		var match;
+
+		if( document_element.getElementsByClassName && ( match = match_class_only.exec( query ) ) ) {
+			return to_array.call( context.getElementsByClassName( match[ 1 ] ) );
+
+		} else if( ( query.document || ( query.nodeType && query.nodeType === 9 ) ) ) {
+			return [query];
+
+		} else {
+			return to_array.call( context.querySelectorAll( query ) );
+		}
 	}
 
 	// BUILDERS
@@ -204,11 +254,122 @@
 		return new epic.html.selector( node );
 	}
 
-	function contains( container, element ) {
-		return container.contains ? container.contains( element ) : !!( container.compareDocumentPosition( element ) & 16 );
+	function unique( elements, target, control ) {
+		var list = target || [];
+		var collection = control || {};
+
+		var length = elements.length;
+		var i = 0;
+		var uid;
+		var element;
+
+		for( ; i < length; i++ ) {
+			element = elements[ i ];
+			uid = get_uid( element );
+
+			if( collection[ uid ] ) {
+				continue;
+			}
+
+			collection[ uid ] = true;
+			list[ list.length ] = element;
+		}
+
+		return list;
+	}
+
+	// PROTOTYPED METHODS
+	function add_class( element, class_names ) {
+		var trim = trim_spaces;
+		var class_list = trim( element.className, true ).split( ' ' );
+		var class_count;
+		var i = 0;
+		var name;
+
+		class_names = trim( class_names, true ).split( ' ' );
+
+		for( class_count = class_names.length; i < class_count; i++ ) {
+			name = class_names[ i ];
+
+			if( class_list.indexOf( name ) === -1 ) {
+				class_list[ class_list.length ] = name;
+			}
+		}
+
+		element.className = trim( class_list.join( ' ' ) );
+
+		return element;
+	}
+
+	function style( element, new_style, merge ) {
+		// INDICATES IF THE NEW RULES WILL BE MERGED INTO THE EXISTING ONES
+		merge =  typeof merge === "undefined" ? true : false;
+		
+		// REMOVES SPACES BETWEEN PROPERTIES
+		new_style = new_style.replace( match_spaces_in_css, '$2$3$4' );
+
+		var element_style = element.style;
+		
+		// COLLAPSE SPACES BETWEEN CSS RULES AND VALUES
+		var clean_style = element_style.cssText.replace( match_spaces_in_css, '$2$3$4' );
+		
+		if ( clean_style && !/;$/.test(x) ) {
+			clean_style += ';';
+		}
+
+		if ( merge ) {
+			var replacer = function ( a, property ) {
+				var value = a;
+
+				// CREATE NEW REGEXP TO MATCH THE SPECIFIED CSS PROPERTY NAME
+				var p = RegExp( "(^|;)+(" + property + "): *([-()\\w, .#%=]*)", "ig" );
+
+				// REPLACE ANY MATCHING CSS PROPERTY WITH THE NEW VALUE
+				new_style = new_style.replace( p, function ( t, x, y, z ) {
+					if ( z == '-' ) {
+						value = '';
+					} else {
+						value = y + ':' + z;
+					}
+
+					return '';
+				} );
+
+				return value;
+			};
+
+			new_style = clean_style.replace( match_css_rules, replacer ) + new_style;
+		}
+
+		element_style.cssText = new_style;
+
+		return element;
+	}
+
+	function get_dimension( element, property ) {
+		var offset_name = "offset" + capitalize( property );
+		
+		if( element ) {
+			// IS WINDOW?
+			element = element === element.window ? element.document : element;
+
+			if( element.nodeType === 9 ) {
+				element = element.document.documentElement;
+				return Math.max( element.body[ offset_name ], element[ offset_name ] );
+			}
+
+			var value = get_style( element, property );
+			if( value != null && value != "" ) {
+				value = value.replace( match_pixel_value, '$1' );
+				return isNaN( value ) ? value : parseFloat( value );
+			}			
+		}
+
+		return null;
 	}
 
 	selector.prototype = {
+		// CONTENT HANDLING
 		empty: function() {
 			var t = this;
 			var elements = t.elements;
@@ -227,8 +388,8 @@
 		},
 
 		insert: function( elements, position ) {
-			elements = flatten( elements );
-			
+			elements = flatten( for_each( elements, parse_elements ) );
+
 			var self = this;
 
 			var i = elements.length;
@@ -295,6 +456,7 @@
 			return self;
 		},
 
+		// ELEMENTS ACCESS
 		get: function( index ) {
 			var elements = this.elements;
 			var upper_limit = elements.length - 1;
@@ -308,24 +470,92 @@
 			return elements[ index ];
 		},
 
-		contains: function( element ) {
-			return html.contains( this.elements[0], element );
-		},
-
 		find: function( query ) {
-			throw new epic.fail("selector.find() is feeling sick :(" );
+			var context = this.elements;
+			var length = context.length;
+			var i = 0;
+
+			var new_selector = new selector();
+			var elements = new_selector.elements;
+			var result;
+			var collection = {};
+
+			for( ; i < length; i++ ) {
+				result = query_selector( query, context[ i ] );
+				unique( result, elements, collection );
+			}
+
+			return new_selector;
 		},
 
-		has_class: function () {
-			
+		// CLASS HANDLING
+		has_class: function( name ) {
+			var t = this;
+
+			var elements = t.elements;
+			var length = elements.length;
+			var i = 0;
+
+			for( ; i < length; ) {
+				if( elements[ i++ ].className.indexOf( name ) > -1 ) {
+					return true;
+				}
+			}
+
+			return false;
 		},
 
-		add_class: function () {
-			
+		add_class: function( class_names ) {
+			var t = this;
+
+			var elements = t.elements;
+			var length = elements.length;
+			var i = 0;
+
+			for( ; i < length; i++ ) {
+				add_class( elements[ i ], class_names );
+			}
+
+			return t;
 		},
 
-		remove_class: function () {
-			
+		remove_class: function( class_name ) {
+			var t = this;
+			var trailing_spaces = /^\s+|\s+$/g;
+			var multiple_spaces = /\s+/g;
+
+			// TRIM, MAKE REGEXP
+			var pattern = new RegExp( class_name.replace( trailing_spaces, '' ).replace( multiple_spaces, '|' ), 'g' );
+
+			var elements = t.elements;
+			var j = elements.length;
+			var element;
+
+			while( j-- ) {
+				element = elements[ j ];
+				element.className = element.className.replace( pattern, '' ).replace( multiple_spaces, ' ' ).replace( trailing_spaces, ' ' );
+			}
+
+			return t;
+		},
+
+		// STYLE
+		width: function() {
+			return get_dimension( this.elements[ 0 ], "width" );
+		},
+
+		height: function() {
+			return get_dimension( this.elements[ 0 ], "height" );
+		},
+
+		css: function( properties ) {
+			style(this.elements[0], properties );
+			return this;
+		},
+
+		// MISC
+		contains: function( element ) {
+			return contains( this.elements[ 0 ], element );
 		}
 	};
 
@@ -334,11 +564,13 @@
 	create.option = create_option;
 	create.script = create_script;
 	create.style = create_style;
-	
+
 	html.contains = contains;
 	html.selector = selector;
 	html.create = create;
 	html.add_class = add_class;
+	html.is_node = is_node;
+	html.get_uid = get_uid;
 
 	epic.html = html;
 

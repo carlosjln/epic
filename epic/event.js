@@ -1,14 +1,14 @@
-﻿var epic;
-( function( epic, window, document ) {
+﻿( function( epic, window, document ) {
 	var REGISTRY = {};
 	var REGISTRY_POLICE = {};
 	var HANDLERS = {};
 
-	var next_uid = epic.uid.next;
+	var get_uid = epic.uid.get;
 	var contains = epic.html.contains;
 	var set_event_handler = document.addEventListener ? add_event_listener : attach_event;
 	var trigger = document.createEvent ? dispatch_event : fire_event;
-	
+	var get_element_uid = epic.html.get_uid;
+
 	var event_name_map = {
 		"mouseenter": "mouseover",
 		"mouseleave": "mouseout",
@@ -42,15 +42,14 @@
 
 	}
 
-	function add( event_name, element, method, event_data ) {
+	function add( element, event_name, method, event_data ) {
 		if( typeof event_name !== "string" ) {
 			return epic.fail( "[event_name] must be a valid event name." );
 		}
 
-		var element_uid = element.uid || ( element.uid = next_uid() );
+		var element_uid = get_element_uid( element );
 		var element_events = REGISTRY[ element_uid ] || ( REGISTRY[ element_uid ] = {} );
-
-		var method_uid = method.uid || ( method.uid = next_uid() );
+		var method_uid = get_uid( method );
 
 		// PREVENT THE SNEAKY METHOD FROM REGISTERING MORE THAN ONCE :P
 		var police_key = element_uid + "_" + event_name + "_" + method_uid;
@@ -95,11 +94,11 @@
 		return true;
 	}
 
-	function remove( event_name, element, handler ) {
+	function remove( element, event_name, handler ) {
 
 	}
 
-	function dispatch_event( event_name, element ) {
+	function dispatch_event( element, event_name ) {
 		// Syntax: event.initMouseEvent(type, canBubble, cancelable, view, detail, screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey, button, relatedTarget);
 		
 		var evt = document.createEvent( 'HTMLEvents' );
@@ -109,14 +108,14 @@
 		return element;
 	}
 
-	function fire_event( event_name, element ) {
+	function fire_event( element, event_name ) {
 		var evt = document.createEventObject();
 		element.fireEvent( 'on' + event_name , evt );
 		
 		return element;
 	}
 	
-	function add_event_listener( event_name, element, element_uid ) {
+	function add_event_listener( element, event_name, element_uid ) {
 		var element_event = element_uid + "_" + event_name;
 
 		if( !HANDLERS[ element_event ] ) {
@@ -126,7 +125,7 @@
 		}
 	}
 
-	function attach_event( event_name, element, element_uid ) {
+	function attach_event( element, event_name, element_uid ) {
 		var element_event = element_uid + "_" + event_name;
 
 		if( !HANDLERS[ element_event ] ) {
@@ -149,7 +148,8 @@
 		process_execution_path( evt, execution_path );
 
 		if( evt.propagation_stopped === false ) {
-			evt.stop_propagation();
+			e.cancelBubble = true;
+			e.stopPropagation();
 		}
 
 		return this;
@@ -168,7 +168,7 @@
 
 		for( ; i < elements_count; i++ ) {
 			element = elements[ i ];
-			events = REGISTRY[ element.uid ];
+			events = REGISTRY[ get_element_uid( element ) ];
 
 			if( events && ( handlers = events[ type ] ) ) {
 				handlers_count = handlers.length;
@@ -183,8 +183,8 @@
 						return evt;
 					}
 
-					// CALLLING NATIVE HANDLERS
-					// READ ME WELL: THEY SHOULDN'T EXIST!
+					// CALLLING INLINE HANDLERS?
+					// LOOK AT ME @_@ - THEY SHOULDN'T EXIST!
 				}
 			}
 		}
@@ -331,5 +331,23 @@
 	event.registry = REGISTRY;
 
 	epic.event = event;
+
+	// ADD EVENT HANDLING SHORTCUT TO THE HTML SELECTOR
+	var plugins = {
+		click: function( event_handler, data ) {
+			var t = this;
+			
+			var elements = t.elements;
+			var i = elements.length;
+			
+			while( i-- ) {
+				add( elements[i], "click", event_handler, data );
+			}
+
+			return t;
+		}	
+	};
+
+	epic.object.copy( plugins, epic.html.selector.prototype );
 
 } )( epic, window, document );
