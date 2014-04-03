@@ -13,15 +13,24 @@
 	</head>
 	<body>
 		<!-- Type selectors -->
-		<div>
-			
+		<div id="div" class="div">
+			<a class="a"></a>
 		</div>
 
 		<script src="epic.js"></script>
 		
 		<script type="text/javascript">
-			console.log( epic.html( "div" ).width() );
-			console.log( epic.html( "div" ).height() );
+			epic.html( "div" ).click( function( e ) {
+				console.log( e );
+			} );
+			
+//			console.log( epic.html( "#div" ).elements );
+//			console.log( epic.html( "div" ).elements );
+//			console.log( epic.html( ".div" ).elements );
+			
+			var div = epic.html( "div" ).elements[0];
+			console.log( epic.html.toggle_class(div, "xxx") );
+			console.log( epic.html.toggle_class(div, "xxx") );
 		</script>
 	</body>
 </html>

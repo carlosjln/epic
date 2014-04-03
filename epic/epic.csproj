@@ -19,6 +19,7 @@
   <ItemGroup>
     <Content Include="array.js" />
     <Content Include="bin\epic.js" />
+    <Content Include="bin\epic.min.js" />
     <Content Include="bin\playground.html" />
     <Content Include="event.js" />
     <Content Include="html.js" />

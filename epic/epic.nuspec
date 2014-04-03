@@ -2,10 +2,10 @@
 <package >
   <metadata>
 	<id>Epic</id>
-		<version>1.0.4</version>
+		<version>1.0.6</version>
 		
 		<title>Epic</title>
-		<description>Simple and awesome JavaScript library for BROGRAMMERS B-)</description>
+		<description>Simple and awesome JavaScript library B-)</description>
 		<tags></tags>
 		
 		<projectUrl>https://github.com/carlosjln/epic</projectUrl>

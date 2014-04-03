@@ -75,16 +75,19 @@
 
 	// TO ARRAY
 	function to_array( object ) {
-		if( typeof object === "undefined" ) {
-			return null;
+		if( object === undefined || object === null ) {
+			return [];
 		}
 
 		if( object instanceof Array ) {
 			return object;
 		}
 
-		var array = Array.prototype.slice.call( object );
-		return array.length > 0 ? array : [object];
+		if( isFinite( object.length ) ) {
+			return Array.prototype.slice.call( object );	
+		}
+
+		return [ object ];
 	}
 
 	// CLASS HIERARCHY EXTENSOR

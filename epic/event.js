@@ -141,7 +141,7 @@
 		var target = evt.target;
 		var execution_path = [target];
 
-		while( target = target.parentNode ) {
+		while( (target = target.parentNode) ) {
 			execution_path[ execution_path.length ] = target;
 		}
 
@@ -334,18 +334,43 @@
 
 	// ADD EVENT HANDLING SHORTCUT TO THE HTML SELECTOR
 	var plugins = {
-		click: function( event_handler, data ) {
+		on: function( event_name, event_handler, data ) {
 			var t = this;
 			
 			var elements = t.elements;
 			var i = elements.length;
 			
 			while( i-- ) {
-				add( elements[i], "click", event_handler, data );
+				add( elements[i], event_name, event_handler, data );
+			}
+			
+			return t;
+		},
+
+		click: function( event_handler, data ) {
+			var t = this;
+
+			if ( arguments.length === 0 ) {
+				t.trigger( "click" );
+			}else {
+				t.on( "click", event_handler, data );
 			}
 
 			return t;
-		}	
+		},
+
+		trigger: function( event_name ) {
+			var t = this;
+			
+			var elements = t.elements;
+			var i = elements.length;
+			
+			while( i-- ) {
+				trigger( elements[i], event_name );
+			}
+			
+			return t;
+		}
 	};
 
 	epic.object.copy( plugins, epic.html.selector.prototype );

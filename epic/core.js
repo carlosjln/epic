@@ -64,7 +64,7 @@ var epic = ( function() {
 		}
 
 		type.is_window = function( object ) {
-			return object != null && object === object.window;
+			return object !== null && object === object.window;
 		};
 
 		type.is_numeric = function( object ) {

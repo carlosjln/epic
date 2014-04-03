@@ -202,7 +202,7 @@
 	}
 	
 	function is_html( str ) {
-		return (/^<(\w)+(\b[^>]*)\/?>(.*?)(<\w+\/?>)?$/i).test( str );
+		return (/^(?:\s*(<[\w\W]+>)[^>]*)$/img).test( str );
 	}
 	
 	function to_dom( str ) {
