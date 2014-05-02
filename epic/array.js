@@ -13,6 +13,19 @@
 		list.splice( index, howmany );
 	}
 
+	function locate( list, element ) {
+		// HACK TO CONVERT OBJECT.LENGTH TO A UInt32
+		var length = list.length >>> 0;
+
+		while( length-- ) {
+			if( list[ length ] === element ) {
+				return length;
+			}
+		}
+
+		return -1;
+	}
+
 	array.flatten = function( items ) {
 		var a = [];
 		return a.concat.apply( a, items );
@@ -92,17 +105,10 @@
 		return -1;
 	};
 
-	array.locate = function( list, element ) {
-		// HACK TO CONVERT OBJECT.LENGTH TO A UInt32
-		var length = list.length >>> 0;
+	array.locate = locate;
 
-		while( length-- ) {
-			if( list[ length ] === element ) {
-				return length;
-			}
-		}
-
-		return -1;
+	array.contains = function( list, element ) {
+		return locate( list, element) > -1 ? true : false;
 	};
 
 	array.remove = remove;

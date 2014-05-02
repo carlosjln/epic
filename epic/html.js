@@ -7,6 +7,8 @@
 	var array = epic.array;
 	var flatten = array.flatten;
 	var for_each = array.each;
+	var array_contains = array.contains;
+	
 	var to_array = epic.object.to_array;
 
 //	var match_id_selector = /^(?:#([\w-]+))$/i;
@@ -67,7 +69,8 @@
 					elements = query_selector( query, context );
 				}
 				
-			}else 
+			}
+
 			// FEELING LAZY, TAKE IT BACK :P
 			if( query instanceof selector ) {
 				return query;
@@ -366,7 +369,7 @@
 		return element;
 	}
 
-	function gs_value( val ) {
+	function get_set_value( val ) {
 		var t = this;
 
 		var elements = t.elements;
@@ -379,7 +382,7 @@
 		// GET
 		if( arguments.length === 0 ) {
 			if( (element = elements[0]) ) {
-				getter = gs_value[ element.nodeName.toLowerCase() ];
+				getter = get_set_value[ element.nodeName.toLowerCase() ];
 
 				if( getter && "get" in getter && (result = getter.get( element )) !== undefined ) {
 					return result;
@@ -409,7 +412,7 @@
 				val += "";
 			}
 
-			getter = gs_value[ element.nodeName.toLowerCase() ];
+			getter = get_set_value[ element.nodeName.toLowerCase() ];
 
 			if( !getter || !("set" in getter) && getter.set( element ) === undefined ) {
 				element.value = val;
@@ -485,6 +488,17 @@
 		}
 
 		return null;
+	}
+
+	function set_css_display( context, value ) {
+		var elements = context.elements;
+		var i = elements.length;
+
+		while( i-- ) {
+			elements[ i ].style.display = value;
+		}
+
+		return context;
 	}
 
 	selector.prototype = {
@@ -611,6 +625,29 @@
 			return new_selector;
 		},
 
+		parent: function() {
+			return (this.elements[0] || {}).parentNode;
+		},
+
+		parents: function( query ) {
+			var parents = new selector( query );
+			var elements = parents.elements;
+
+			var element = this.elements[0] || {};
+			var result = [];
+			var current = element;
+
+			// KEEP GOING UP UNTIL YOU FIND A MATCH
+			while( (current = current.parentNode) ) {
+				if( array_contains(elements, current) ) {
+					result[ result.length ] = current;
+				}
+			}
+
+			parents.elements = result;
+			return parents;
+		},
+
 		// CLASS HANDLING
 		has_class: function( name ) {
 			var t = this;
@@ -699,6 +736,14 @@
 			return set_css( element, property );
 		},
 
+		show: function (){
+			return set_css_display(this, '');
+		},
+
+		hide: function (){
+			return set_css_display(this, 'none');
+		},
+
 		// MISC
 		contains: function( element ) {
 			return contains( this.elements[ 0 ], element );
@@ -727,7 +772,30 @@
 			return t;
 		},
 
-		value: gs_value
+		attr: function( name, value ) {
+			var t = this;
+			var elements = t.elements;
+			var length = elements.length;
+			var element;
+			var i = 0;
+			
+			if( value === undefined ) {
+				element = elements[0];
+				return element ? element.getAttribute(name): undefined;
+			}
+
+			for( ; i < length; i++ ) {
+				element = elements[i];
+
+				if( element ) {
+					element.setAttribute( name, value );
+				}
+			}
+
+			return t;
+		},
+
+		value: get_set_value
 	};
 
 	// STATIC METHODS

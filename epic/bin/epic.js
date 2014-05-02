@@ -416,6 +416,15 @@ var epic = (function() {
     function remove(list, index, howmany) {
         list.splice(index, howmany)
     }
+    function locate(list, element) {
+        var length = list.length >>> 0;
+        while (length--) {
+            if (list[length] === element) {
+                return length
+            }
+        }
+        return -1
+    }
     array.flatten = function(items) {
         var a = [];
         return a.concat.apply(a, items)
@@ -474,14 +483,9 @@ var epic = (function() {
         }
         return -1
     };
-    array.locate = function(list, element) {
-        var length = list.length >>> 0;
-        while (length--) {
-            if (list[length] === element) {
-                return length
-            }
-        }
-        return -1
+    array.locate = locate;
+    array.contains = function(list, element) {
+        return locate(list, element) > -1 ? true : false
     };
     array.remove = remove;
     array.dsl = dsl;
@@ -697,6 +701,7 @@ var epic = (function() {
     var array = epic.array;
     var flatten = array.flatten;
     var for_each = array.each;
+    var array_contains = array.contains;
     var to_array = epic.object.to_array;
     var match_id_tag_class = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
     var match_pixel_value = /^(\d*.?\d*)px$/;
@@ -739,7 +744,7 @@ var epic = (function() {
                     elements = query_selector(query, context)
                 }
             }
-            else if (query instanceof selector) {
+            if (query instanceof selector) {
                 return query
             }
             var node_type = query.nodeType;
@@ -964,7 +969,7 @@ var epic = (function() {
         element.className = trim(class_list.join(' '));
         return element
     }
-    function gs_value(val) {
+    function get_set_value(val) {
         var t = this;
         var elements = t.elements;
         var length = elements.length;
@@ -974,7 +979,7 @@ var epic = (function() {
         var i = 0;
         if (arguments.length === 0) {
             if ((element = elements[0])) {
-                getter = gs_value[element.nodeName.toLowerCase()];
+                getter = get_set_value[element.nodeName.toLowerCase()];
                 if (getter && "get" in getter && (result = getter.get(element)) !== undefined) {
                     return result
                 }
@@ -994,7 +999,7 @@ var epic = (function() {
             else if (typeof val === "number") {
                 val += ""
             }
-            getter = gs_value[element.nodeName.toLowerCase()];
+            getter = get_set_value[element.nodeName.toLowerCase()];
             if (!getter || !("set" in getter) && getter.set(element) === undefined) {
                 element.value = val
             }
@@ -1044,6 +1049,14 @@ var epic = (function() {
             }
         }
         return null
+    }
+    function set_css_display(context, value) {
+        var elements = context.elements;
+        var i = elements.length;
+        while (i--) {
+            elements[i].style.display = value
+        }
+        return context
     }
     selector.prototype = {
         empty: function() {
@@ -1132,6 +1145,21 @@ var epic = (function() {
                 }
                 new_selector.length = elements.length;
                 return new_selector
+            }, parent: function() {
+                return (this.elements[0] || {}).parentNode
+            }, parents: function(query) {
+                var parents = new selector(query);
+                var elements = parents.elements;
+                var element = this.elements[0] || {};
+                var result = [];
+                var current = element;
+                while ((current = current.parentNode)) {
+                    if (array_contains(elements, current)) {
+                        result[result.length] = current
+                    }
+                }
+                parents.elements = result;
+                return parents
             }, has_class: function(name) {
                 var t = this;
                 var elements = t.elements;
@@ -1187,6 +1215,10 @@ var epic = (function() {
                     return get_computed_style(element, property)
                 }
                 return set_css(element, property)
+            }, show: function() {
+                return set_css_display(this, '')
+            }, hide: function() {
+                return set_css_display(this, 'none')
             }, contains: function(element) {
                 return contains(this.elements[0], element)
             }, prop: function(name, value) {
@@ -1206,7 +1238,24 @@ var epic = (function() {
                     }
                 }
                 return t
-            }, value: gs_value
+            }, attr: function(name, value) {
+                var t = this;
+                var elements = t.elements;
+                var length = elements.length;
+                var element;
+                var i = 0;
+                if (value === undefined) {
+                    element = elements[0];
+                    return element ? element.getAttribute(name) : undefined
+                }
+                for (; i < length; i++) {
+                    element = elements[i];
+                    if (element) {
+                        element.setAttribute(name, value)
+                    }
+                }
+                return t
+            }, value: get_set_value
     };
     create.document_fragment = create_document_fragment;
     create.option = create_option;
