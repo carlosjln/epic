@@ -10,7 +10,8 @@
 	var array_contains = array.contains;
 	
 	var to_array = epic.object.to_array;
-
+	var encode_url = epic.string.encode_url;
+	
 //	var match_id_selector = /^(?:#([\w-]+))$/i;
 //	var match_tag_selector = /^(\w+)$/i;
 //	var match_class_only = /^\.([\w\-]+)$/i;
@@ -23,6 +24,9 @@
 
 	var match_line_return = /\r/g;
 
+	var match_trailing_spaces = /^\s+|\s+$/g;
+	var match_multiple_spaces = /\s+/g;
+	
 	var document_element = document.documentElement;
 
 	var contains = 'compareDocumentPosition' in document_element ? compare_document_position : container_contains;
@@ -382,9 +386,10 @@
 		// GET
 		if( arguments.length === 0 ) {
 			if( (element = elements[0]) ) {
+				// Search for custom value getter
 				getter = get_set_value[ element.nodeName.toLowerCase() ];
 
-				if( getter && "get" in getter && (result = getter.get( element )) !== undefined ) {
+				if( getter && ("get" in getter) && (result = getter.get( element )) !== undefined ) {
 					return result;
 				}
 				
@@ -412,6 +417,7 @@
 				val += "";
 			}
 
+			// Search for custom value setter
 			getter = get_set_value[ element.nodeName.toLowerCase() ];
 
 			if( !getter || !("set" in getter) && getter.set( element ) === undefined ) {
@@ -521,7 +527,7 @@
 		},
 
 		insert: function( elements, position ) {
-			elements = flatten( for_each( elements, parse_elements ) );
+			elements = flatten( for_each( to_array(elements), parse_elements ) );
 			
 			var t = this;
 			var elements_count = elements.length;
@@ -556,8 +562,9 @@
 				}
 			}
 
+			index = 0;
 			while( elements_count-- ) {
-				element = elements[ elements_count ];
+				element = elements[ index++ ];
 
 				if( !element ) {
 					continue;
@@ -592,6 +599,27 @@
 			return self;
 		},
 
+		remove: function () {
+			var self = this;
+			var elements = self.elements;
+			var length = elements.length;
+			var i = 0;
+			
+			var parent;
+			var element;
+
+			for( ; i < length; i++ ) {
+				element = elements[i];
+				parent = element.parentNode;
+
+				parent.removeChild( element );
+			}
+
+			return self;
+		},
+
+		value: get_set_value,
+		
 		// ELEMENTS ACCESS
 		get: function( index ) {
 			var elements = this.elements;
@@ -604,6 +632,10 @@
 			}
 
 			return elements[ index ];
+		},
+
+		first: function() {
+			return new selector( this.elements[0] );
 		},
 
 		find: function( query ) {
@@ -695,11 +727,9 @@
 
 		remove_class: function( class_name ) {
 			var t = this;
-			var trailing_spaces = /^\s+|\s+$/g;
-			var multiple_spaces = /\s+/g;
-
+			
 			// TRIM, MAKE REGEXP
-			var pattern = new RegExp( class_name.replace( trailing_spaces, '' ).replace( multiple_spaces, '|' ), 'g' );
+			var pattern = new RegExp( class_name.replace( match_trailing_spaces, '' ).replace( match_multiple_spaces, '|' ), 'g' );
 
 			var elements = t.elements;
 			var j = elements.length;
@@ -707,7 +737,22 @@
 
 			while( j-- ) {
 				element = elements[ j ];
-				element.className = element.className.replace( pattern, '' ).replace( multiple_spaces, ' ' ).replace( trailing_spaces, ' ' );
+				element.className = element.className.replace( pattern, '' ).replace( match_multiple_spaces, ' ' ).replace( match_trailing_spaces, ' ' );
+			}
+
+			return t;
+		},
+
+		replace_class: function( class_name, new_class_name ) {
+			var t = this;
+			
+			var elements = t.elements;
+			var j = elements.length;
+			var element;
+
+			while( j-- ) {
+				element = elements[ j ];
+				element.className = element.className.replace( class_name, new_class_name ).replace( match_multiple_spaces, ' ' ).replace( match_trailing_spaces, ' ' );
 			}
 
 			return t;
@@ -795,7 +840,94 @@
 			return t;
 		},
 
-		value: get_set_value
+		remove_attr: function ( name ) {
+			var t = this;
+			var elements = t.elements;
+			var length = elements.length;
+			var element;
+			var i = 0;
+			
+			for( ; i < length; i++ ) {
+				element = elements[i];
+
+				if( element ) {
+					element.removeAttribute( name );
+				}
+			}
+
+			return t;
+		},
+
+		serialize: function() {
+			var empty = '';
+			var concat = empty;
+			var query = empty;
+			var amp = '&';
+			
+			var t = this;
+			
+			var encrypt_method;
+			var type;
+			
+			// PARSE SELECT ELEMENTS
+			var elements = t.find('select').elements;
+			var element;
+			var element_id;
+			
+			var i = elements.length;
+			
+			while( i-- ) {
+				element = array[i];
+				
+				if( (element_id = element.id || element.name || empty) == empty ) continue;
+				
+				query += ( query != empty ? amp : empty ) + element_id + '=' + encode_url( element.value );
+			}
+			
+			// PARSE INPUT ELEMENTS
+			elements = t.find('input').elements;
+			i = elements.length;
+			
+			while( i-- ) {
+				element = elements[i];
+
+				if( (element_id = element.id || element.name || empty) == empty ) continue;
+				
+				concat = query != empty ? amp : empty;
+				type = element.type.toLowerCase();
+				
+				value = encode_url( element.value );
+
+				if ( 'checkbox,radio'.indexOf( type ) > -1 ) {
+					query += concat + element_id + '=' + ( element.checked ? value : empty );
+
+				} else {
+					encrypt_method = window[element.getAttribute( 'encrypt-method' )];
+
+					if ( encrypt_method ) {
+						try {
+							value = encrypt_method( value );
+						} catch ( er ) {}
+					}
+
+					query += concat + element_id + '=' + value;
+				}
+			}
+			
+			// PARSE INPUT AREAS
+			elements = t.find('textarea').elements;
+			i = elements.length;
+			
+			while ( i-- ) {
+				element = array[i];
+				
+				if( (element_id = element.id || element.name || empty) == empty ) continue;
+				
+				query += ( query != empty ? amp : empty ) + element_id + '=' + encode_url( element.value );
+			}
+			
+			return query;
+		}
 	};
 
 	// STATIC METHODS

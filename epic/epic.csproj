@@ -23,6 +23,7 @@
     <Content Include="bin\playground.html" />
     <Content Include="event.js" />
     <Content Include="html.js" />
+    <Content Include="task_worker.js" />
     <Content Include="string.js" />
     <Content Include="browser.js" />
     <Content Include="collection.js" />

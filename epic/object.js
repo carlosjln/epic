@@ -65,11 +65,11 @@
 		var length = objects.length;
 		var target = {};
 		var i = 0;
-
+		
 		for( ; i < length; i++ ) {
 			copy( objects[ i ], target );
 		}
-
+		
 		return target;
 	}
 

@@ -16,6 +16,7 @@
 		<input path="browser.js"/>
 		<input path="html.js"/>
 		<input path="event.js"/>
+		<input path="task_worker.js"/>
 	</output>
 	
 	<output path="bin\epic.min.js" type="js">
@@ -28,6 +29,7 @@
 		<input path="browser.js"/>
 		<input path="html.js"/>
 		<input path="event.js"/>
+		<input path="task_worker.js"/>
 	</output>
 
 </root>
