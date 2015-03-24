@@ -654,6 +654,7 @@
 			}
 
 			new_selector.length = elements.length;
+
 			return new_selector;
 		},
 
@@ -768,7 +769,8 @@
 		},
 
 		css: function( property ) {
-			var element = this.elements[ 0 ];
+			var self = this;
+			var element = self.elements[ 0 ];
 
 			if( !property ) {
 				return element.style.cssText;
@@ -778,7 +780,9 @@
 				return get_computed_style( element, property );
 			}
 			
-			return set_css( element, property );
+			set_css( element, property );
+
+			return self;
 		},
 
 		show: function (){
@@ -877,7 +881,7 @@
 			var i = elements.length;
 			
 			while( i-- ) {
-				element = array[i];
+				element = elements[i];
 				
 				if( (element_id = element.id || element.name || empty) == empty ) continue;
 				
@@ -919,7 +923,7 @@
 			i = elements.length;
 			
 			while ( i-- ) {
-				element = array[i];
+				element = elements[i];
 				
 				if( (element_id = element.id || element.name || empty) == empty ) continue;
 				

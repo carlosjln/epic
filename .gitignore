@@ -34,6 +34,7 @@ AppPackages/
 *.suo
 *.user
 *.sln.docstates
+*.nuspec
 
 *.dll
 *_i.c

@@ -1234,14 +1234,16 @@ var epic = (function() {
             }, height: function() {
                 return get_dimension(this.elements[0], "height")
             }, css: function(property) {
-                var element = this.elements[0];
+                var self = this;
+                var element = self.elements[0];
                 if (!property) {
                     return element.style.cssText
                 }
                 if (match_css_property_name.test(property)) {
                     return get_computed_style(element, property)
                 }
-                return set_css(element, property)
+                set_css(element, property);
+                return self
             }, show: function() {
                 return set_css_display(this, '')
             }, hide: function() {
@@ -1308,7 +1310,7 @@ var epic = (function() {
                 var element_id;
                 var i = elements.length;
                 while (i--) {
-                    element = array[i];
+                    element = elements[i];
                     if ((element_id = element.id || element.name || empty) == empty)
                         continue;
                     query += (query != empty ? amp : empty) + element_id + '=' + encode_url(element.value)
@@ -1339,7 +1341,7 @@ var epic = (function() {
                 elements = t.find('textarea').elements;
                 i = elements.length;
                 while (i--) {
-                    element = array[i];
+                    element = elements[i];
                     if ((element_id = element.id || element.name || empty) == empty)
                         continue;
                     query += (query != empty ? amp : empty) + element_id + '=' + encode_url(element.value)
