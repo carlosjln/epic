@@ -1,9 +1,8 @@
 /*!
- * EPIC.JS - v1.0.4
  * Simple & awesome JavaScript library for BROGRAMMERS B-)
  * https://github.com/carlosjln/epic
  * 
- * Copyright 2014
+ * Copyright 2015
  * Released under MIT License
  * https://github.com/carlosjln/epic/blob/master/LICENSE
  * 
@@ -11,7 +10,9 @@
  * https://github.com/carlosjln
  */
 var epic = (function() {
-        function epic(){}
+        function epic() {
+            return "Hello world :)"
+        }
         function log(message) {
             if (typeof window.console !== "undefined") {
                 console.log(epic.object.to_array(arguments))
@@ -693,6 +694,73 @@ var epic = (function() {
         return element
     }
 })(epic, window, document, navigator);
+(function(epic, window, document, navigator) {
+    var get_type = epic.type;
+    var get_transport = window.XMLHttpRequest ? function() {
+            return new XMLHttpRequest
+        } : function() {
+            return new ActiveXObject("Microsoft.XMLHTTP")
+        };
+    function ajax(settings) {
+        if ((this instanceof ajax) === false) {
+            return new ajax(settings)
+        }
+        var self = this;
+        var transport = self.transport = get_transport();
+        var typeof_default_property;
+        var value;
+        for (var property in settings) {
+            typeof_default_property = get_type(self[property]);
+            value = settings[property];
+            if (settings.hasOwnProperty(property) && (typeof_default_property === "undefined" || typeof_default_property === get_type(value))) {
+                self[property] = value
+            }
+        }
+        var method = self.method;
+        var context = self.context || self;
+        self.before_request.call(context, self, settings);
+        transport.open(method, self.url, true);
+        transport.onreadystatechange = function() {
+            self.on_ready_state_change.call(self)
+        };
+        if (method === "POST") {
+            transport.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+        }
+        transport.send(self.send)
+    }
+    ajax.prototype = {
+        constructor: ajax, url: "", method: "GET", before_request: function(xhr, settings){}, on_success: function(response){}, on_complete: function(response){}, on_error: function(response){}, on_ready_state_change: function(parameters) {
+                var self = this;
+                var transport = self.transport;
+                var ready_state = transport.readyState;
+                var status;
+                var json;
+                var context = self.context || self;
+                if (ready_state !== 4) {
+                    return null
+                }
+                try {
+                    status = transport.status
+                }
+                catch(e) {
+                    return null
+                }
+                if (status !== 200) {
+                    return null
+                }
+                var response_text = transport.responseText;
+                try {
+                    json = new Function('return (' + response_text + ')')();
+                    self.on_success.call(context, json)
+                }
+                catch(e) {
+                    self.on_error.call(context, e)
+                }
+                self.on_complete.call(context)
+            }
+    };
+    epic.request = ajax
+})(epic, window, document, navigator);
 (function(epic, widnow, document) {
     var is_html = epic.string.is_html;
     var get_epic_uid = epic.uid.get;
@@ -703,6 +771,7 @@ var epic = (function() {
     var for_each = array.each;
     var array_contains = array.contains;
     var to_array = epic.object.to_array;
+    var get_type = epic.type;
     var encode_url = epic.string.encode_url;
     var match_id_tag_class = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/;
     var match_pixel_value = /^(\d*.?\d*)px$/;
@@ -719,6 +788,9 @@ var epic = (function() {
             return style ? style.getPropertyValue(property) || style[property] : undefined
         } : function(element, property) {
             return element.curentStyle[property]
+        };
+    var IGNORE_NODE = {
+            1: false, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: false, 10: false, 11: false, 12: true
         };
     function html(query, context) {
         return new selector(query, context)
@@ -806,15 +878,18 @@ var epic = (function() {
         return null
     }
     function query_selector(query, context) {
-        var context_node_type = context.nodeType;
+        var node_type = context.nodeType;
+        var result = [];
+        if (node_type != 1 && node_type != 9 && node_type != 11) {
+            return result
+        }
         var match = match_id_tag_class.exec(query) || {};
         var element;
         var id = match[1];
         var tag = match[2];
         var class_name = match[3];
-        var result = [];
         if (id) {
-            if (context_node_type === 9) {
+            if (node_type == 9) {
                 result = context.getElementById(id)
             }
             else if (context.ownerDocument && (element = context.ownerDocument.getElementById(id)) && contains(context, element) && element.id === id) {
@@ -1091,9 +1166,11 @@ var epic = (function() {
                     var trim = epic.string.trim;
                     var index = 0;
                     var node;
+                    var node_type;
                     while (j--) {
                         node = child_nodes[index++];
-                        if (node.nodeType === 1 || (node.nodeType === 3 && trim(node.textContent) !== '')) {
+                        node_type = node.nodeType;
+                        if (node_type === 1 || (node_type === 3 && trim(node.textContent) !== '')) {
                             valid_nodes[valid_nodes.length] = node
                         }
                     }
@@ -1151,18 +1228,20 @@ var epic = (function() {
             }, first: function() {
                 return new selector(this.elements[0])
             }, find: function(query) {
-                var context = this.elements;
-                var length = context.length;
+                var elements = this.elements;
+                var length = elements.length;
                 var i = 0;
                 var new_selector = new selector;
-                var elements = new_selector.elements;
-                var result;
+                var new_elements = new_selector.elements;
                 var collection = {};
+                var element;
+                var result;
                 for (; i < length; i++) {
-                    result = query_selector(query, context[i]);
-                    unique(result, elements, collection)
+                    element = elements[i];
+                    result = query_selector(query, element);
+                    unique(result, new_elements, collection)
                 }
-                new_selector.length = elements.length;
+                new_selector.length = new_elements.length;
                 return new_selector
             }, parent: function() {
                 return (this.elements[0] || {}).parentNode
@@ -1269,22 +1348,40 @@ var epic = (function() {
                 return t
             }, attr: function(name, value) {
                 var t = this;
+                return value === undefined ? t.get_attribute(name) : t.set_attribute(name, value)
+            }, remove_attr: function(name) {
+                var t = this;
                 var elements = t.elements;
                 var length = elements.length;
                 var element;
                 var i = 0;
-                if (value === undefined) {
-                    element = elements[0];
-                    return element ? element.getAttribute(name) : undefined
-                }
                 for (; i < length; i++) {
                     element = elements[i];
                     if (element) {
+                        element.removeAttribute(name)
+                    }
+                }
+                return t
+            }, get_attribute: function(name) {
+                var t = this;
+                var element = t.elements[0];
+                return element && typeof(element.getAttribute) == 'function' ? element.getAttribute(name) : undefined
+            }, set_attribute: function(name, value) {
+                var t = this;
+                var elements = t.elements;
+                var length = elements.length;
+                var node_type;
+                var element;
+                var i = 0;
+                for (; i < length; i++) {
+                    element = elements[i];
+                    node_type = element.nodeType;
+                    if (element && (node_type == 1 || node_type == 9 || node_type == 11)) {
                         element.setAttribute(name, value)
                     }
                 }
                 return t
-            }, remove_attr: function(name) {
+            }, remove_attribute: function(name) {
                 var t = this;
                 var elements = t.elements;
                 var length = elements.length;

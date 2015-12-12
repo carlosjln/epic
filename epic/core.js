@@ -1,9 +1,8 @@
 /*!
- * EPIC.JS - v1.0.4
  * Simple & awesome JavaScript library for BROGRAMMERS B-)
  * https://github.com/carlosjln/epic
  * 
- * Copyright 2014
+ * Copyright 2015
  * Released under MIT License
  * https://github.com/carlosjln/epic/blob/master/LICENSE
  * 
@@ -14,6 +13,7 @@
 var epic = ( function() {
 
 	function epic() {
+		return "Hello world :)";
 	}
 
 	// FAIL LIKE A NINJA, SILENTLY :)

@@ -14,6 +14,7 @@
 		<input path="array.js"/>
 		<input path="collection.js"/>
 		<input path="browser.js"/>
+		<input path="ajax.js"/>
 		<input path="html.js"/>
 		<input path="event.js"/>
 		<input path="task_worker.js"/>
@@ -27,6 +28,7 @@
 		<input path="array.js"/>
 		<input path="collection.js"/>
 		<input path="browser.js"/>
+		<input path="ajax.js"/>
 		<input path="html.js"/>
 		<input path="event.js"/>
 		<input path="task_worker.js"/>

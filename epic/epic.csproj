@@ -17,6 +17,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="ajax.js" />
     <Content Include="array.js" />
     <Content Include="bin\epic.js" />
     <Content Include="bin\epic.min.js" />

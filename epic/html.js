@@ -10,6 +10,7 @@
 	var array_contains = array.contains;
 	
 	var to_array = epic.object.to_array;
+	var get_type = epic.type;
 	var encode_url = epic.string.encode_url;
 	
 //	var match_id_selector = /^(?:#([\w-]+))$/i;
@@ -38,6 +39,21 @@
 		function( element, property ) {
 			return element.curentStyle[ property ];
 		};
+
+	var IGNORE_NODE = {
+		1: false,	//ELEMENT_NODE
+		2: true,	//ATTRIBUTE_NODE
+		3: true,	//TEXT_NODE
+		4: true,	//CDATA_SECTION_NODE
+		5: true,	//ENTITY_REFERENCE_NODE
+		6: true,	//ENTITY_NODE
+		7: true,	//PROCESSING_INSTRUCTION_NODE
+		8: true,	//COMMENT_NODE
+		9: false,	//DOCUMENT_NODE
+		10: false,	//DOCUMENT_TYPE_NODE
+		11: false,	//DOCUMENT_FRAGMENT_NODE
+		12: true	//NOTATION_NODE
+	};
 
 	function html( query, context ) {
 		return new selector( query, context );
@@ -154,23 +170,26 @@
 	}
 
 	function query_selector( query, context ) {
-		var context_node_type = context.nodeType;
+		var node_type = context.nodeType;
+		var result = [];
+
+		if( node_type != 1 && node_type != 9 && node_type != 11 ) {
+			return result;
+		}
+
 		var match = match_id_tag_class.exec( query ) || {};
 		var element;
 		
 		var id = match[1];
 		var tag = match[2];
 		var class_name = match[3];
-		
-		var result = [];
-		
+
 		// #ID
 		if( id ) {
 			// CONTEXT IS A DOCUMENT
-			if( context_node_type === 9 ) {
+			if( node_type == 9 ) {
 				result = context.getElementById( id );
-				
-			}else if ( context.ownerDocument && (element = context.ownerDocument.getElementById( id )) && contains( context, element ) && element.id === id ) {
+			} else if ( context.ownerDocument && (element = context.ownerDocument.getElementById( id )) && contains( context, element ) && element.id === id ) {
 				result = element;
 			}
 			
@@ -547,12 +566,14 @@
 				var trim = epic.string.trim;
 				var index = 0;
 				var node;
+				var node_type;
 
 				while( j-- ) {
 					node = child_nodes[ index++ ];
-
+					node_type = node.nodeType;
 					// ENSURE ONLY ELEMENTS OR TEXT NODES WITH CONTENT ARE CONSIDERED ON THE INDEX
-					if( node.nodeType === 1 || ( node.nodeType === 3 && trim( node.textContent ) !== '' ) ) {
+					
+					if( node_type === 1 || ( node_type === 3 && trim( node.textContent ) !== '' ) ) {
 						valid_nodes[ valid_nodes.length ] = node;
 					}
 				}
@@ -639,29 +660,32 @@
 		},
 
 		find: function( query ) {
-			var context = this.elements;
-			var length = context.length;
+			var elements = this.elements;
+			var length = elements.length;
 			var i = 0;
-
+			
 			var new_selector = new selector();
-			var elements = new_selector.elements;
-			var result;
+			var new_elements = new_selector.elements;
 			var collection = {};
-
+			
+			var element;
+			var result;
+			
 			for( ; i < length; i++ ) {
-				result = query_selector( query, context[ i ] );
-				unique( result, elements, collection );
+				element = elements[ i ];
+				result = query_selector( query, element );
+				unique( result, new_elements, collection );
 			}
-
-			new_selector.length = elements.length;
-
+			
+			new_selector.length = new_elements.length;
+			
 			return new_selector;
 		},
-
+		
 		parent: function() {
 			return (this.elements[0] || {}).parentNode;
 		},
-
+		
 		parents: function( query ) {
 			var parents = new selector( query );
 			var elements = parents.elements;
@@ -821,22 +845,53 @@
 			return t;
 		},
 
+		// TODO: Remove, this will be deprecated
 		attr: function( name, value ) {
+			var t = this;
+			return value === undefined ? t.get_attribute( name ) : t.set_attribute( name, value );
+		},
+
+		// TODO: Remove, this will be deprecated
+		remove_attr: function ( name ) {
 			var t = this;
 			var elements = t.elements;
 			var length = elements.length;
 			var element;
 			var i = 0;
 			
-			if( value === undefined ) {
-				element = elements[0];
-				return element ? element.getAttribute(name): undefined;
-			}
-
 			for( ; i < length; i++ ) {
 				element = elements[i];
 
 				if( element ) {
+					element.removeAttribute( name );
+				}
+			}
+
+			return t;
+		},
+
+		get_attribute: function( name ) {
+			var t = this;
+			var element = t.elements[0];
+
+			return element && typeof(element.getAttribute) == 'function' ? element.getAttribute(name): undefined;
+		},
+
+		set_attribute: function( name, value ) {
+			var t = this;
+
+			var elements = t.elements;
+			var length = elements.length;
+			var node_type;
+			var element;
+			var i = 0;
+
+			for( ; i < length; i++ ) {
+				element = elements[i];
+				node_type = element.nodeType;
+				
+				// ONLY SET ATTRIBUTES ON ELEMENT_NODE, DOCUMENT_NODE & DOCUMENT_FRAGMENT_NODE
+				if( element && (node_type == 1 || node_type == 9 || node_type == 11) ) {
 					element.setAttribute( name, value );
 				}
 			}
@@ -844,7 +899,7 @@
 			return t;
 		},
 
-		remove_attr: function ( name ) {
+		remove_attribute: function ( name ) {
 			var t = this;
 			var elements = t.elements;
 			var length = elements.length;

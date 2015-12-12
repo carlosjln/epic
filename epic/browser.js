@@ -122,6 +122,7 @@
 		return anchor.protocol + '//' + anchor.hostname + ( port && port !== 0 ? ':' + port : '' ) + '/' + pathname;
 	}
 
+	// TODO: TO BE REMOVED
 	// ASYNC SCRIPTS/STYLESHEETS LOADING
 	function request( url, type, callback ) {
 		var tag;
