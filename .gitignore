@@ -5,7 +5,11 @@ epic/obj/
 [Dd]ebug/
 x64/
 backup/
+
+# IGNORE FILES
+git-commit.bat
 nuget-release.bat
+tools/post-build-local-release.bat
 
 # mstest test results
 TestResults
@@ -80,6 +84,4 @@ sql
 *.dbmdl
 
 #Exceptions
-!tools/**/*.*
-
-git-commit.bat
+#!tools/**/*.*
